@@ -152,7 +152,7 @@ export const LoginForm = () => {
             </button>
             
             <div className="mt-8">
-              <button className="text-gray-400 hover:text-gray-600 transition-colors flex items-center justify-center gap-1 w-full text-xs">
+              <button className="text-gray-400 hover:text-gray-600 transition-colors flex items-center justify-center gap-1 w-full text-sm">
                 ← Voltar para o site
               </button>
             </div>
