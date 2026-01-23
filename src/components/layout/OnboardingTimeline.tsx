@@ -6,15 +6,15 @@ import { cn } from "@/lib/utils";
 
 const STEPS = [
   { id: "organization", label: "Empresa", path: "/onboarding/organization", icon: Building2 },
-  { id: "representative", label: "Responsável", path: "/onboarding/representative", icon: User },
+  { id: "company", label: "Responsável", path: "/onboarding/company", icon: User },
   { id: "subscription", label: "Plano", path: "/onboarding/subscription", icon: Sparkles },
   { id: "billing", label: "Pagamento", path: "/onboarding/billing", icon: CreditCard },
-  { id: "account", label: "Conta", path: "/onboarding/account", icon: Check },
+  { id: "useraccount", label: "Conta", path: "/onboarding/useraccount", icon: Check },
 ];
 
 export const OnboardingTimeline = () => {
   const pathname = usePathname();
-  const currentStepIndex = STEPS.findIndex((step) => pathname.includes(step.path));
+  const currentStepIndex = STEPS.findIndex((step) => pathname === step.path);
 
   return (
     <div className="w-full pt-12 pb-6 bg-transparent">
@@ -27,26 +27,22 @@ export const OnboardingTimeline = () => {
 
             return (
               <div key={step.id} className="flex items-center flex-1 last:flex-none">
-                {/* Container do Passo */}
-                <div className="flex flex-col items-center relative min-w-[80px]">
+                <div className="flex flex-col items-center relative min-w-[100px]">
+                  {/* Círculo do Passo */}
                   <div
                     className={cn(
                       "w-11 h-11 rounded-full flex items-center justify-center transition-all duration-500 border-2",
+                   
                       isCompleted || isActive
-                        ? "bg-[#10b981] border-[#10b981] text-white shadow-lg shadow-green-100"
+                        ? "bg-[#10b981] border-[#10b981] text-white shadow-lg shadow-green-100/50"
                         : "bg-[#f8fafc] border-gray-100 text-gray-400"
                     )}
                   >
-                    {/* Se estiver completo, mostra Check, se não, o ícone do step */}
-                    {isCompleted ? (
-                      <Check size={18} strokeWidth={3} />
-                    ) : (
-                      <Icon 
-                        size={index === 2 ? 22 : 20} // O ícone de Sparkles (Plano) costuma ser levemente maior
-                        strokeWidth={isActive ? 2.5 : 2} 
-                        className={cn(isActive && "animate-pulse")}
-                      />
-                    )}
+                    <Icon 
+                      size={index === 2 ? 22 : 20} 
+                      strokeWidth={isActive ? 2.5 : 2} 
+                      className={cn(isActive && "animate-pulse")} 
+                    />
                   </div>
 
                   <span
@@ -59,13 +55,12 @@ export const OnboardingTimeline = () => {
                   </span>
                 </div>
 
-                {/* Linha Conectora (não renderiza no último item) */}
                 {index < STEPS.length - 1 && (
                   <div className="flex-1 h-[2px] mx-2 mb-10 bg-gray-100 self-center">
                     <div
                       className={cn(
                         "h-full bg-[#10b981] transition-all duration-700 ease-in-out",
-                        isCompleted ? "w-full" : "w-0"
+                        index < currentStepIndex ? "w-full" : "w-0"
                       )}
                     />
                   </div>

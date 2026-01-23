@@ -1,7 +1,6 @@
 
 "use client";
 
-import React from "react";
 import { ArrowRight, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
@@ -20,7 +19,6 @@ export const NextButton = ({
 }: NextButtonProps) => {
   return (
     <div className="flex justify-between items-center pt-6 border-t border-gray-50 mt-6">
-      {/* Botão de retorno discreto conforme o design do Figma */}
       {showBack ? (
         <Button
           variant="outline"
@@ -34,7 +32,6 @@ export const NextButton = ({
         <div /> 
       )}
 
-      {/* Botão principal de avanço - Identidade TechPlann */}
       <Button
         type="submit"
         disabled={isSubmitting}

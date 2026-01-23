@@ -18,5 +18,4 @@ export const organizationStepOneSchema = z.object({
   estado: z.string().length(2, "UF inválida"),
 });
 
-// Exportando o tipo para uso no Form
 export type OrganizationStepOneData = z.infer<typeof organizationStepOneSchema>;
