@@ -15,7 +15,7 @@ import {
 } from "@/components/ui/select";
 
 // Componentes customizados e Schemas
-import { NextButton } from "./NextButton";
+import { NextButton } from "../../ui/custom/NextButton";
 import {
   organizationStepOneSchema,
   type OrganizationStepOneData,

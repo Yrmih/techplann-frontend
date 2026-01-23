@@ -6,8 +6,11 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { motion } from "framer-motion";
 import { Check, Info } from "lucide-react";
 
-import { NextButton } from "./NextButton";
-import { planSelectionSchema, type PlanSelectionData } from "@/lib/validators/schema";
+import { NextButton } from "../../ui/custom/NextButton";
+import {
+  planSelectionSchema,
+  type PlanSelectionData,
+} from "@/lib/validators/schema";
 import { cn } from "@/lib/utils";
 
 // Definição clara para evitar erro de propriedade inexistente (ts2339)
@@ -31,14 +34,25 @@ const plans: PlanOption[] = [
     id: "professional",
     name: "Professional",
     price: "149,90",
-    features: ["5 planejamentos", "Até 20 usuários", "Suporte prioritário", "Relatórios avançados"],
+    features: [
+      "5 planejamentos",
+      "Até 20 usuários",
+      "Suporte prioritário",
+      "Relatórios avançados",
+    ],
     popular: true,
   },
   {
     id: "enterprise",
     name: "Enterprise",
     price: "349,90",
-    features: ["Planejamentos ilimitados", "Usuários ilimitados", "Suporte 24/7", "API access", "White label"],
+    features: [
+      "Planejamentos ilimitados",
+      "Usuários ilimitados",
+      "Suporte 24/7",
+      "API access",
+      "White label",
+    ],
     popular: false,
   },
 ];
@@ -63,7 +77,9 @@ export const SubscriptionForm = () => {
     <div className="bg-white rounded-2xl border border-gray-100 p-10 shadow-sm max-w-6xl mx-auto font-sans">
       <header className="mb-10">
         <h2 className="text-2xl font-bold text-gray-900">Plano</h2>
-        <p className="text-sm text-gray-500 mt-1">Escolha o plano ideal para sua empresa</p>
+        <p className="text-sm text-gray-500 mt-1">
+          Escolha o plano ideal para sua empresa
+        </p>
       </header>
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
@@ -78,9 +94,9 @@ export const SubscriptionForm = () => {
               className={cn(
                 "relative cursor-pointer rounded-2xl border-2 p-6 transition-all duration-300 flex flex-col",
                 "hover:border-[#10b981] hover:shadow-2xl hover:shadow-green-100/50",
-                selectedPlan === plan.id 
-                  ? "border-[#10b981] bg-emerald-50 shadow-sm" 
-                  : "border-gray-100 bg-white"
+                selectedPlan === plan.id
+                  ? "border-[#10b981] bg-emerald-50 shadow-sm"
+                  : "border-gray-100 bg-white",
               )}
             >
               {plan.popular && (
@@ -90,17 +106,26 @@ export const SubscriptionForm = () => {
               )}
 
               <h3 className="text-lg font-bold text-gray-900">{plan.name}</h3>
-              
+
               <div className="mt-4 flex items-baseline gap-1">
-                <span className="text-3xl font-black text-[#10b981]">R$ {plan.price}</span>
+                <span className="text-3xl font-black text-[#10b981]">
+                  R$ {plan.price}
+                </span>
                 <span className="text-gray-400 text-xs font-medium">/mês</span>
               </div>
 
               {/* Removido o flex-grow para permitir que o card termine onde o conteúdo acaba */}
               <ul className="mt-6 space-y-3">
                 {plan.features.map((feature) => (
-                  <li key={feature} className="flex items-center gap-2 text-sm text-gray-600">
-                    <Check size={16} className="text-[#10b981]" strokeWidth={3} />
+                  <li
+                    key={feature}
+                    className="flex items-center gap-2 text-sm text-gray-600"
+                  >
+                    <Check
+                      size={16}
+                      className="text-[#10b981]"
+                      strokeWidth={3}
+                    />
                     {feature}
                   </li>
                 ))}
@@ -111,7 +136,9 @@ export const SubscriptionForm = () => {
 
         {/* Banner de Garantia fiel à image_f3ec15.png */}
         <div className="bg-gray-50 rounded-xl p-4 flex items-center justify-center text-xs text-gray-500 gap-4 border border-gray-100">
-          <span className="font-bold text-gray-900 underline decoration-[#10b981] underline-offset-4 decoration-2">7 dias grátis</span>
+          <span className="font-bold text-gray-900 underline decoration-[#10b981] underline-offset-4 decoration-2">
+            7 dias grátis
+          </span>
           <span className="text-gray-300">•</span>
           <span>Cancele a qualquer momento</span>
           <span className="text-gray-300">•</span>
@@ -127,9 +154,9 @@ export const SubscriptionForm = () => {
 
         <hr className="border-gray-100 my-8" />
 
-        <NextButton 
-          onBack={() => window.history.back()} 
-          nextLabel="Próximo" 
+        <NextButton
+          onBack={() => window.history.back()}
+          nextLabel="Próximo"
           isSubmitting={isSubmitting}
         />
       </form>
