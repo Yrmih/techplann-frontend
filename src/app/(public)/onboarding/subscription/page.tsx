@@ -8,11 +8,15 @@ export const metadata: Metadata = {
 
 export default function SubscriptionPage() {
   return (
-    <main className="min-h-screen bg-gray-50/50 py-12 px-4 md:py-20">
-      <div className="max-w-7xl mx-auto">
-        {/* Aqui você pode incluir a Timeline se desejar que ela apareça em todos os steps */}
+    
+    <main className="min-h-screen bg-gray-50/50 flex flex-col items-center">
+     
+      <div className="w-full max-w-7xl px-4 py-8">
         <SubscriptionForm />
       </div>
+      <p className="pb-12 text-sm text-gray-400">
+        Já tem uma conta? <a href="/login" className="text-[#10b981] font-bold hover:underline">Fazer login</a>
+      </p>
     </main>
   );
 }

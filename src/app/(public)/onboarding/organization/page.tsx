@@ -8,6 +8,14 @@ export const metadata: Metadata = {
 
 export default function OrganizationPage() {
   return (
-    <OrganizationForm />
+   
+    <main className="min-h-screen bg-gray-50/50 flex flex-col items-center">
+      <div className="w-full max-w-7xl px-4 py-12">
+        <OrganizationForm />
+      </div>
+      <p className="pb-10 text-sm text-gray-400">
+        Já tem uma conta? <a href="/login" className="text-[#10b981] font-bold hover:underline">Fazer login</a>
+      </p>
+    </main>
   );
 }
