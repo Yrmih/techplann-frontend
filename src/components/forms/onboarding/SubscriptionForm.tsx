@@ -1,6 +1,5 @@
 "use client";
 
-import React from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { motion } from "framer-motion";
@@ -13,7 +12,6 @@ import {
 } from "@/lib/validators/schema";
 import { cn } from "@/lib/utils";
 
-// Definição clara para evitar erro de propriedade inexistente (ts2339)
 interface PlanOption {
   id: "starter" | "professional" | "enterprise";
   name: string;
@@ -83,7 +81,6 @@ export const SubscriptionForm = () => {
       </header>
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
-        {/* Ajuste no alinhamento: items-start para permitir alturas diferentes (efeito escadinha) */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-start">
           {plans.map((plan) => (
             <motion.div
@@ -114,7 +111,6 @@ export const SubscriptionForm = () => {
                 <span className="text-gray-400 text-xs font-medium">/mês</span>
               </div>
 
-              {/* Removido o flex-grow para permitir que o card termine onde o conteúdo acaba */}
               <ul className="mt-6 space-y-3">
                 {plan.features.map((feature) => (
                   <li
@@ -134,7 +130,6 @@ export const SubscriptionForm = () => {
           ))}
         </div>
 
-        {/* Banner de Garantia fiel à image_f3ec15.png */}
         <div className="bg-gray-50 rounded-xl p-4 flex items-center justify-center text-xs text-gray-500 gap-4 border border-gray-100">
           <span className="font-bold text-gray-900 underline decoration-[#10b981] underline-offset-4 decoration-2">
             7 dias grátis

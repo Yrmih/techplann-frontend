@@ -8,9 +8,6 @@ export const metadata: Metadata = {
 
 export default function OrganizationPage() {
   return (
-    /** * O componente OrganizationForm será injetado no {children} 
-     * do layout.tsx de onboarding automaticamente pelo Next.js.
-     */
     <OrganizationForm />
   );
 }

@@ -56,7 +56,6 @@ export const CustomSelect = ({
               value={option.value}
               className={cn(
                 "text-sm cursor-pointer py-2.5 rounded-lg transition-colors",
-                /* Estilo idêntico ao Figma: Verde forte no foco e texto branco */
                 "data-[highlighted]:bg-[#10b981] data-[highlighted]:text-white",
                 "focus:bg-[#10b981] focus:text-white"
               )}

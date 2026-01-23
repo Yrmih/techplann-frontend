@@ -4,11 +4,11 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { FieldError } from "react-hook-form";
 
-// Shadcn UI Components
+
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
-// Componentes customizados e Schemas
+
 import { NextButton } from "../../ui/custom/NextButton";
 import {
   OrganizationSchema,
@@ -28,7 +28,7 @@ export const CompanyForm = () => {
     console.log("Dados do Responsável (Step 2):", data);
   };
 
-  // Estilo de input consistente com o foco verde esmeralda
+  
   const inputStyles = (errorField: FieldError | undefined) =>
     `
     bg-white border-gray-200 transition-all text-sm

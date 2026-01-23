@@ -7,7 +7,7 @@ export const billingSchema = z.object({
   cardName: z.string().optional(),
   expiry: z.string().optional(),
   cvv: z.string().optional(),
-  // Dados Bancários (Opcionais conforme image_b1348a)
+  // Dados Bancários (Opcionais)
   bankName: z.string().optional(),
   agency: z.string().optional(),
   accountNumber: z.string().optional(),
