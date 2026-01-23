@@ -10,7 +10,40 @@ import { NextButton } from "./NextButton";
 import { planSelectionSchema, type PlanSelectionData } from "@/lib/validators/schema";
 import { cn } from "@/lib/utils";
 
-export const PlanForm = () => {
+// Definição clara para evitar erro de propriedade inexistente (ts2339)
+interface PlanOption {
+  id: "starter" | "professional" | "enterprise";
+  name: string;
+  price: string;
+  features: string[];
+  popular?: boolean;
+}
+
+const plans: PlanOption[] = [
+  {
+    id: "starter",
+    name: "Starter",
+    price: "49,90",
+    features: ["1 planejamento", "Até 5 usuários", "Suporte por email"],
+    popular: false,
+  },
+  {
+    id: "professional",
+    name: "Professional",
+    price: "149,90",
+    features: ["5 planejamentos", "Até 20 usuários", "Suporte prioritário", "Relatórios avançados"],
+    popular: true,
+  },
+  {
+    id: "enterprise",
+    name: "Enterprise",
+    price: "349,90",
+    features: ["Planejamentos ilimitados", "Usuários ilimitados", "Suporte 24/7", "API access", "White label"],
+    popular: false,
+  },
+];
+
+export const SubscriptionForm = () => {
   const {
     handleSubmit,
     setValue,
@@ -23,96 +56,78 @@ export const PlanForm = () => {
   const selectedPlan = watch("plan");
 
   const onSubmit = (data: PlanSelectionData) => {
-    console.log("Plano Finalizado:", data);
+    console.log("Plano Selecionado:", data);
   };
 
   return (
-    <div className="bg-white rounded-2xl border border-gray-100 p-10 shadow-sm max-w-5xl mx-auto font-sans">
+    <div className="bg-white rounded-2xl border border-gray-100 p-10 shadow-sm max-w-6xl mx-auto font-sans">
       <header className="mb-10">
-        <h2 className="text-2xl font-bold text-gray-900">Escolha seu plano</h2>
-        <p className="text-sm text-gray-500 mt-1">Selecione a assinatura que melhor atende sua organização</p>
+        <h2 className="text-2xl font-bold text-gray-900">Plano</h2>
+        <p className="text-sm text-gray-500 mt-1">Escolha o plano ideal para sua empresa</p>
       </header>
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-          
-          {/* Card: Plano Mensal */}
-          <motion.div
-            whileHover={{ scale: 1.03, translateY: -5 }}
-            whileTap={{ scale: 0.98 }}
-            onClick={() => setValue("plan", "monthly")}
-            className={cn(
-              "group relative cursor-pointer rounded-2xl border-2 p-8 transition-all duration-300",
-              "hover:border-[#10b981] hover:shadow-[0_20px_50px_rgba(16,185,129,0.1)]",
-              selectedPlan === "monthly" 
-                ? "border-[#10b981] bg-emerald-50/40 shadow-md" 
-                : "border-gray-100 bg-white"
-            )}
-          >
-            <div className={cn(
-              "absolute top-5 right-5 h-6 w-6 rounded-full border-2 flex items-center justify-center transition-all",
-              selectedPlan === "monthly" ? "bg-[#10b981] border-[#10b981]" : "border-gray-200"
-            )}>
-              {selectedPlan === "monthly" && <Check size={14} className="text-white" strokeWidth={3} />}
-            </div>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {plans.map((plan) => (
+            <motion.div
+              key={plan.id}
+              whileHover={{ scale: 1.04, translateY: -8 }}
+              whileTap={{ scale: 0.98 }}
+              onClick={() => setValue("plan", plan.id)}
+              className={cn(
+                "relative cursor-pointer rounded-2xl border-2 p-6 transition-all duration-300 flex flex-col",
+                "hover:border-[#10b981] hover:shadow-2xl hover:shadow-green-100/50",
+                selectedPlan === plan.id 
+                  ? "border-[#10b981] bg-emerald-50 shadow-sm" // Corrigido para verde translúcido visível
+                  : "border-gray-100 bg-white"
+              )}
+            >
+              {plan.popular && (
+                <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-[#10b981] text-white text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-wider z-10">
+                  Mais Popular
+                </div>
+              )}
 
-            <h3 className="text-lg font-bold text-gray-900 group-hover:text-[#10b981] transition-colors">Mensal</h3>
-            <div className="mt-4 flex items-baseline gap-1">
-              <span className="text-4xl font-black text-gray-900">R$ 99</span>
-              <span className="text-gray-400 text-sm font-medium">/mês</span>
-            </div>
-            <p className="mt-6 text-sm text-gray-500 leading-relaxed">
-              Pagamento recorrente mês a mês. Ideal para projetos de curto prazo e flexibilidade total.
-            </p>
-          </motion.div>
+              <h3 className="text-lg font-bold text-gray-900">{plan.name}</h3>
+              
+              <div className="mt-4 flex items-baseline gap-1">
+                <span className="text-3xl font-black text-[#10b981]">R$ {plan.price}</span>
+                <span className="text-gray-400 text-xs font-medium">/mês</span>
+              </div>
 
-          {/* Card: Plano Anual */}
-          <motion.div
-            whileHover={{ scale: 1.03, translateY: -5 }}
-            whileTap={{ scale: 0.98 }}
-            onClick={() => setValue("plan", "yearly")}
-            className={cn(
-              "group relative cursor-pointer rounded-2xl border-2 p-8 transition-all duration-300",
-              "hover:border-[#10b981] hover:shadow-[0_20px_50px_rgba(16,185,129,0.1)]",
-              selectedPlan === "yearly" 
-                ? "border-[#10b981] bg-emerald-50/40 shadow-md" 
-                : "border-gray-100 bg-white"
-            )}
-          >
-            <div className="absolute -top-3 left-8 bg-[#10b981] text-white text-[10px] font-black px-3 py-1 rounded-full uppercase tracking-tighter">
-              Economize 20%
-            </div>
-            
-            <div className={cn(
-              "absolute top-5 right-5 h-6 w-6 rounded-full border-2 flex items-center justify-center transition-all",
-              selectedPlan === "yearly" ? "bg-[#10b981] border-[#10b981]" : "border-gray-200"
-            )}>
-              {selectedPlan === "yearly" && <Check size={14} className="text-white" strokeWidth={3} />}
-            </div>
+              <ul className="mt-6 space-y-3 flex-grow">
+                {plan.features.map((feature) => (
+                  <li key={feature} className="flex items-center gap-2 text-sm text-gray-600">
+                    <Check size={16} className="text-[#10b981]" strokeWidth={3} />
+                    {feature}
+                  </li>
+                ))}
+              </ul>
+            </motion.div>
+          ))}
+        </div>
 
-            <h3 className="text-lg font-bold text-gray-900 group-hover:text-[#10b981] transition-colors">Anual</h3>
-            <div className="mt-4 flex items-baseline gap-1">
-              <span className="text-4xl font-black text-gray-900">R$ 79</span>
-              <span className="text-gray-400 text-sm font-medium">/mês</span>
-            </div>
-            <p className="mt-6 text-sm text-gray-500 leading-relaxed">
-              Pagamento único anual. Acesso completo a todas as ferramentas de análise SWOT e BSC.
-            </p>
-          </motion.div>
+        {/* Banner de Garantia fiel à image_f3ec15.png */}
+        <div className="bg-gray-50 rounded-xl p-4 flex items-center justify-center text-xs text-gray-500 gap-4 border border-gray-100">
+          <span className="font-bold text-gray-900 underline decoration-[#10b981] underline-offset-4 decoration-2">7 dias grátis</span>
+          <span className="text-gray-300">•</span>
+          <span>Cancele a qualquer momento</span>
+          <span className="text-gray-300">•</span>
+          <span>Debitado via cartão de crédito</span>
         </div>
 
         {errors.plan && (
-          <div className="flex items-center justify-center gap-2 text-red-500 bg-red-50 p-3 rounded-lg animate-bounce">
-            <Info size={16} />
-            <p className="text-xs font-bold uppercase tracking-wide">{errors.plan.message}</p>
+          <div className="flex items-center justify-center gap-2 text-red-500 font-bold text-[10px] uppercase tracking-widest bg-red-50 py-2 rounded-lg">
+            <Info size={14} />
+            {errors.plan.message}
           </div>
         )}
 
-        <hr className="border-gray-100 my-10" />
+        <hr className="border-gray-100 my-8" />
 
         <NextButton 
           onBack={() => window.history.back()} 
-          nextLabel="Finalizar Registro" 
+          nextLabel="Próximo" 
           isSubmitting={isSubmitting}
         />
       </form>
