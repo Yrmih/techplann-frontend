@@ -67,7 +67,8 @@ export const SubscriptionForm = () => {
       </header>
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        {/* Ajuste no alinhamento: items-start para permitir alturas diferentes (efeito escadinha) */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-start">
           {plans.map((plan) => (
             <motion.div
               key={plan.id}
@@ -78,7 +79,7 @@ export const SubscriptionForm = () => {
                 "relative cursor-pointer rounded-2xl border-2 p-6 transition-all duration-300 flex flex-col",
                 "hover:border-[#10b981] hover:shadow-2xl hover:shadow-green-100/50",
                 selectedPlan === plan.id 
-                  ? "border-[#10b981] bg-emerald-50 shadow-sm" // Corrigido para verde translúcido visível
+                  ? "border-[#10b981] bg-emerald-50 shadow-sm" 
                   : "border-gray-100 bg-white"
               )}
             >
@@ -95,7 +96,8 @@ export const SubscriptionForm = () => {
                 <span className="text-gray-400 text-xs font-medium">/mês</span>
               </div>
 
-              <ul className="mt-6 space-y-3 flex-grow">
+              {/* Removido o flex-grow para permitir que o card termine onde o conteúdo acaba */}
+              <ul className="mt-6 space-y-3">
                 {plan.features.map((feature) => (
                   <li key={feature} className="flex items-center gap-2 text-sm text-gray-600">
                     <Check size={16} className="text-[#10b981]" strokeWidth={3} />
