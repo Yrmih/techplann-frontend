@@ -1,6 +1,5 @@
 "use client";
 
-import React from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { FieldError } from "react-hook-form";
@@ -12,17 +11,17 @@ import { Label } from "@/components/ui/label";
 // Componentes customizados e Schemas
 import { NextButton } from "../../ui/custom/NextButton";
 import {
-  representativeSchema,
+  OrganizationSchema,
   type RepresentativeData,
 } from "@/lib/validators/schema";
 
-export const AccountForm = () => {
+export const CompanyForm = () => {
   const {
     register,
     handleSubmit,
     formState: { errors, isSubmitting },
   } = useForm<RepresentativeData>({
-    resolver: zodResolver(representativeSchema),
+    resolver: zodResolver(OrganizationSchema),
   });
 
   const onSubmit = (data: RepresentativeData) => {
@@ -46,7 +45,7 @@ export const AccountForm = () => {
   return (
     <div className="bg-white rounded-2xl border border-gray-100 p-10 shadow-sm max-w-5xl mx-auto font-sans">
       <header className="mb-8">
-        <h2 className="text-2xl font-bold text-gray-900">Responsável</h2>
+        <h2 className="text-2xl font-bold text-gray-900">Empresa</h2>
         <p className="text-sm text-gray-500 mt-1">
           Dados do responsável legal da empresa
         </p>

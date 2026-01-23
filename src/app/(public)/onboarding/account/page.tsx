@@ -1,4 +1,4 @@
-import { AccountForm } from "@/components/forms/onboarding/AccountForm";
+import { CompanyForm } from "@/components/forms/onboarding/CompanyForm";
 import { Metadata } from "next";
 
 
@@ -9,7 +9,7 @@ export const metadata: Metadata = {
 
 export default function AccountFormPage () {
   return (
-    <AccountForm/>
+    <CompanyForm/>
   );
 
 }
