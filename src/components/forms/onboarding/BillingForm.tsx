@@ -1,15 +1,13 @@
 "use client";
 
-import React from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { CreditCard, FileText, CheckCircle2, Info } from "lucide-react";
 import { FieldError } from "react-hook-form";
 
-// Shadcn UI & Custom Components
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { CustomSelect } from "@/components/ui/custom/CustomSelect"; // O wrapper que criamos
+import { CustomSelect } from "@/components/ui/custom/CustomSelect";
 import { NextButton } from "../../ui/custom/NextButton";
 import { billingSchema, type BillingData } from "@/lib/validators/schema";
 import { cn } from "@/lib/utils";
@@ -46,7 +44,7 @@ export const BillingForm = () => {
     console.log("Dados de Pagamento:", data);
 
   return (
-    /* Reduzi a margem superior (mt-4) para o card colar mais na timeline conforme o Figma */
+    
     <div className="bg-white rounded-2xl border border-gray-100 p-10 shadow-sm max-w-5xl mx-auto font-sans mt-4">
       <header className="mb-8">
         <h2 className="text-2xl font-bold text-gray-900">Pagamento</h2>
@@ -56,7 +54,6 @@ export const BillingForm = () => {
       </header>
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
-        {/* Seleção do Método: Estilo idêntico ao image_b133f3.png */}
         <div className="space-y-4">
           <Label className="text-[11px] font-black uppercase tracking-widest text-gray-400">
             Método de Pagamento
@@ -126,7 +123,7 @@ export const BillingForm = () => {
 
         <hr className="border-gray-50" />
 
-        {/* Conteúdo Dinâmico */}
+        
         {paymentMethod === "credit_card" ? (
           <div className="space-y-6 animate-in fade-in slide-in-from-top-4 duration-500">
             <h3 className="text-sm font-bold text-gray-900 tracking-tight">
@@ -222,16 +219,16 @@ export const BillingForm = () => {
                 />
               </div>
 
-              {/* Uso do CustomSelect Reutilizável com Estilo Figma */}
               <CustomSelect
                 label="Tipo de Conta"
                 placeholder="Selecione o tipo"
                 value={accountType}
-                onValueChange={(v) => setValue("accountType", v as any)}
+                onValueChange={(v) => setValue("accountType", v as "corrente")}
                 options={[
                   { value: "corrente", label: "Conta Corrente" },
                   { value: "poupanca", label: "Conta Poupança" },
                 ]}
+                 error={!!errors.accountType}
               />
             </div>
             <div className="bg-emerald-50 border border-emerald-100 rounded-xl p-4 flex items-center gap-3">

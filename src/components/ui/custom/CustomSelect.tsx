@@ -39,7 +39,7 @@ export const CustomSelect = ({
       <Select value={value} onValueChange={onValueChange}>
         <SelectTrigger
           className={cn(
-            "bg-white border-gray-200 transition-all text-sm h-11 w-full font-normal text-gray-500",
+            "bg-white border-gray-200 transition-all text-sm h-11 w-full font-normal text-gray-700",
             "hover:border-[#10b981]",
             "focus:ring-1 focus:ring-[#10b981] focus:border-[#10b981] focus:ring-offset-0",
             "outline-none",
@@ -48,12 +48,18 @@ export const CustomSelect = ({
         >
           <SelectValue placeholder={placeholder} />
         </SelectTrigger>
-        <SelectContent className="rounded-xl border-gray-100 shadow-xl animate-in fade-in zoom-in-95">
+        
+        <SelectContent className="rounded-xl border-gray-100 shadow-2xl p-1 animate-in fade-in zoom-in-95">
           {options.map((option) => (
             <SelectItem 
               key={option.value} 
               value={option.value}
-              className="text-sm focus:bg-emerald-50 focus:text-emerald-900 cursor-pointer py-2.5"
+              className={cn(
+                "text-sm cursor-pointer py-2.5 rounded-lg transition-colors",
+                /* Estilo idêntico ao Figma: Verde forte no foco e texto branco */
+                "data-[highlighted]:bg-[#10b981] data-[highlighted]:text-white",
+                "focus:bg-[#10b981] focus:text-white"
+              )}
             >
               {option.label}
             </SelectItem>
