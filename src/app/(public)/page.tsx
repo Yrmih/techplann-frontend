@@ -1,9 +1,30 @@
+import { Hero } from "@/components/landing/Hero";
+import { Features } from "@/components/landing/Features";
+import { Pricing } from "@/components/landing/Pricing";
+import { Testimonials } from "@/components/landing/Testimonials";
+import { CTA } from "@/components/landing/CTA";
+import { FooterLanding } from "@/components/landing/FooterLanding";
 
 export default function Home() {
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-gray-100">
-      <h1 className="text-4xl font-bold text-blue-600 mb-4">Hello, Dev!</h1>
-      <p className="text-gray-700">aqui será a Landing page</p>
-    </div>
+    <main className="flex flex-col w-full min-h-screen">
+     
+      <Hero /> 
+
+      
+      <Features /> 
+
+     
+      <Pricing /> 
+
+     
+      <Testimonials /> 
+
+     
+      <CTA /> 
+
+      
+      <FooterLanding />
+    </main>
   );
 }
