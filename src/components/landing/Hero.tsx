@@ -7,12 +7,11 @@ import { MoveRight, PlayCircle, CheckCircle2 } from "lucide-react";
 export const Hero = () => {
   return (
     <section className="relative w-full pt-20 pb-20 overflow-hidden bg-white">
-      {/* Luz de fundo suave */}
+      
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-[700px] bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-emerald-50/60 via-transparent to-transparent -z-10" />
 
       <div className="max-w-7xl mx-auto px-6 flex flex-col items-center text-center">
         
-        {/* Badge Animada */}
         <motion.div 
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -22,7 +21,6 @@ export const Hero = () => {
           <span className="text-xs font-bold text-[#10b981] uppercase tracking-wider">Nova versão 2.0 disponível</span>
         </motion.div>
 
-        {/* Título com Destaque Verde */}
         <motion.h1 
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
@@ -34,13 +32,11 @@ export const Hero = () => {
           </span>
         </motion.h1>
 
-        {/* Texto de Apoio */}
         <p className="text-lg text-gray-500 max-w-2xl mb-10 leading-relaxed">
           Unifique SWOT, Canvas, BSC e gestão de projetos em uma única plataforma. 
           Tome decisões estratégicas com dados visuais e colaboração em tempo real.
         </p>
 
-        {/* Botoes de Ação com Hover */}
         <div className="flex flex-col sm:flex-row items-center gap-4 mb-12">
           <Link 
             href="/onboarding/organization"
@@ -56,7 +52,6 @@ export const Hero = () => {
           </button>
         </div>
 
-        {/* Prova Social Rápida com Lucide */}
         <div className="flex flex-wrap justify-center gap-6 mb-20 text-sm text-gray-400 font-medium">
           <div className="flex items-center gap-2">
             <CheckCircle2 size={16} className="text-[#10b981]" /> 7 dias grátis
@@ -69,7 +64,6 @@ export const Hero = () => {
           </div>
         </div>
 
-        {/* Dashboard "Vivo" Animado */}
         <motion.div 
           initial={{ opacity: 0, y: 40 }}
           animate={{ opacity: 1, y: 0 }}
@@ -79,7 +73,6 @@ export const Hero = () => {
           <div className="absolute -inset-4 bg-emerald-400/20 rounded-[3rem] blur-3xl animate-pulse" />
           
           <div className="relative bg-white border-[12px] border-gray-900/5 rounded-[2.5rem] shadow-2xl overflow-hidden shadow-emerald-900/10">
-            {/* O conteúdo simulado do dashboard aqui gera a experiência visual de movimento */}
             <div className="bg-[#f8fafc] w-full aspect-[16/9] flex">
               <div className="w-[15%] bg-[#0f172a] h-full p-4 flex flex-col gap-4 opacity-80">
                 <div className="w-8 h-8 bg-[#10b981] rounded-lg opacity-50" />

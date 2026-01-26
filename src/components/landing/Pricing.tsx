@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { motion } from "framer-motion"; // Removido AnimatePresence
+import { motion } from "framer-motion"; 
 import { Check, ChevronRight } from "lucide-react";
 import Link from "next/link";
 
@@ -42,14 +42,12 @@ export const Pricing = () => {
     <section id="planos" className="py-24 bg-white relative overflow-hidden">
       <div className="max-w-7xl mx-auto px-6">
         
-        {/* Cabeçalho */}
         <div className="text-center mb-16">
           <span className="px-3 py-1 rounded-full bg-gray-100 text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-4 inline-block">Planos</span>
           <h2 className="text-4xl font-extrabold text-gray-900 mb-4">Escolha o plano ideal para você</h2>
           <p className="text-gray-500 max-w-2xl mx-auto">Comece grátis e escale conforme sua empresa cresce.</p>
         </div>
 
-        {/* Toggle com Hover no -20% */}
         <div className="flex justify-center mb-12">
           <div className="bg-gray-50 p-1.5 rounded-2xl border border-gray-100 flex items-center gap-1">
             <button 
@@ -73,7 +71,6 @@ export const Pricing = () => {
           </div>
         </div>
 
-        {/* Cards de Planos com efeito de escala */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 items-stretch">
           {pricingPlans.map((plan) => (
             <motion.div
@@ -105,7 +102,6 @@ export const Pricing = () => {
                 </div>
               </div>
 
-              {/* Redirecionamento para Step 1 - Company */}
               <Link 
                 href="/onboarding/company"
                 className={`w-full py-4 rounded-xl font-bold text-sm flex items-center justify-center gap-2 transition-all mb-8 ${plan.popular ? "bg-[#10b981] text-white hover:bg-[#0da673]" : "bg-gray-50 text-gray-900 hover:bg-gray-100"}`}

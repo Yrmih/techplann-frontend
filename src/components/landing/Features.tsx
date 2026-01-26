@@ -54,7 +54,6 @@ export const Features = () => {
     <section id="funcionalidades" className="py-24 bg-white">
       <div className="max-w-7xl mx-auto px-6 text-center">
         
-        {/* Badge e Título conforme image_bc07f9 */}
         <div className="flex flex-col items-center mb-16">
           <span className="px-3 py-1 rounded-full bg-gray-100 text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-4">
             Funcionalidades
@@ -67,7 +66,6 @@ export const Features = () => {
           </p>
         </div>
 
-        {/* Grid de Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {features.map((feature, index) => (
             <motion.div
@@ -79,7 +77,6 @@ export const Features = () => {
               whileHover={{ y: -5 }}
               className="p-8 bg-white border border-gray-100 rounded-2xl text-left hover:shadow-xl hover:shadow-emerald-900/5 transition-all group"
             >
-              {/* Ícone com fundo suave */}
               <div className="w-12 h-12 rounded-xl bg-emerald-50 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
                 {feature.icon}
               </div>
