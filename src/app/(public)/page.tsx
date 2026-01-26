@@ -1,3 +1,4 @@
+import { Header } from "@/components/layout/Header";
 import { Hero } from "@/components/landing/Hero";
 import { Features } from "@/components/landing/Features";
 import { Pricing } from "@/components/landing/Pricing";
@@ -8,21 +9,16 @@ import { FooterLanding } from "@/components/landing/FooterLanding";
 export default function Home() {
   return (
     <main className="flex flex-col w-full min-h-screen">
-     
-      <Hero /> 
+      
+      <Header /> 
 
       
-      <Features /> 
-
-     
-      <Pricing /> 
-
-     
+      <Hero />         
+      <Features />     
+      <Pricing />     
       <Testimonials /> 
-
-     
       <CTA /> 
-
+      
       
       <FooterLanding />
     </main>
