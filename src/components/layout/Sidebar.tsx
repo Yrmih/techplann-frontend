@@ -24,7 +24,6 @@ export const Sidebar = () => {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const pathname = usePathname();
 
-  // Itens de menu com URLs em inglês conforme sua estrutura de pastas
   const menuItems = [
     { name: "Home", icon: <Home size={20} />, href: "/dashboard" },
     { name: "Cadastros", icon: <Users size={20} />, href: "/dashboard/registrations" },
@@ -42,7 +41,6 @@ export const Sidebar = () => {
       animate={{ width: isCollapsed ? 80 : 260 }}
       className="h-screen bg-[#050b18] text-slate-400 flex flex-col sticky top-0 z-[60] border-r border-slate-800/50 transition-all duration-300"
     >
-      {/* HEADER: Logo e Botão de Fechar no Topo */}
       <div className="p-6 flex items-center justify-between">
         <Link href="/dashboard" className="flex items-center gap-3">
           <div className="min-w-[44px] h-11 bg-[#10b981] rounded-xl flex items-center justify-center text-white">
@@ -63,7 +61,6 @@ export const Sidebar = () => {
         )}
       </div>
 
-      {/* NAVEGAÇÃO PRINCIPAL */}
       <nav className="flex-1 px-4 mt-4 space-y-2 overflow-y-auto">
         {menuItems.map((item) => {
           const isActive = pathname === item.href;
@@ -82,10 +79,8 @@ export const Sidebar = () => {
         })}
       </nav>
 
-      {/* FOOTER: Toggle de abrir no rodapé, Configurações e Sair */}
       <div className="p-4 border-t border-slate-800/50 flex flex-col items-center gap-2">
         
-        {/* Seta para baixo/abrir que só aparece quando recolhido */}
         {isCollapsed && (
           <button 
             onClick={() => setIsCollapsed(false)}
