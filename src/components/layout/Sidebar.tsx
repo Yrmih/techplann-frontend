@@ -19,12 +19,12 @@ import {
   Settings, 
   LogOut 
 } from "lucide-react";
-import { TargetLogo } from "../ui/svg/TargetLogo";
 
 export const Sidebar = () => {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const pathname = usePathname();
 
+  // Itens de menu com URLs em inglês conforme sua estrutura de pastas
   const menuItems = [
     { name: "Home", icon: <Home size={20} />, href: "/dashboard" },
     { name: "Cadastros", icon: <Users size={20} />, href: "/dashboard/registrations" },
@@ -40,58 +40,70 @@ export const Sidebar = () => {
   return (
     <motion.aside
       animate={{ width: isCollapsed ? 80 : 260 }}
-      className="h-screen bg-[#0f172a] text-slate-400 flex flex-col sticky top-0 z-[60] border-r border-slate-800 transition-all duration-300"
+      className="h-screen bg-[#050b18] text-slate-400 flex flex-col sticky top-0 z-[60] border-r border-slate-800/50 transition-all duration-300"
     >
-
-      <div className="p-6 flex items-center justify-between relative">
+      {/* HEADER: Logo e Botão de Fechar no Topo */}
+      <div className="p-6 flex items-center justify-between">
         <Link href="/dashboard" className="flex items-center gap-3">
-          <div className="min-w-[40px] h-10 bg-[#10b981] rounded-[10px] flex items-center justify-center text-white shadow-lg shadow-emerald-900/20">
-            <TargetLogo size={22} />
+          <div className="min-w-[44px] h-11 bg-[#10b981] rounded-xl flex items-center justify-center text-white">
+            <Zap size={24} fill="currentColor" />
           </div>
           {!isCollapsed && (
             <span className="font-bold text-xl text-white tracking-tight">TechPlann</span>
           )}
         </Link>
 
-        <button 
-          onClick={() => setIsCollapsed(!isCollapsed)}
-          className="absolute -right-3 top-8 w-6 h-6 bg-[#1e293b] border border-slate-700 rounded-md flex items-center justify-center text-slate-400 hover:text-white transition-colors z-10"
-        >
-          {isCollapsed ? <ChevronRight size={14} /> : <ChevronLeft size={14} />}
-        </button>
+        {!isCollapsed && (
+          <button 
+            onClick={() => setIsCollapsed(true)}
+            className="w-8 h-8 bg-slate-800/50 rounded-lg flex items-center justify-center text-slate-400 hover:text-white transition-colors"
+          >
+            <ChevronLeft size={18} />
+          </button>
+        )}
       </div>
 
-      <nav className="flex-1 px-4 mt-4 space-y-1 overflow-y-auto overflow-x-hidden">
+      {/* NAVEGAÇÃO PRINCIPAL */}
+      <nav className="flex-1 px-4 mt-4 space-y-2 overflow-y-auto">
         {menuItems.map((item) => {
           const isActive = pathname === item.href;
           return (
             <Link key={item.name} href={item.href}>
               <div className={`flex items-center gap-3 px-3 py-3 rounded-xl transition-all relative group ${
-                isActive ? "text-white bg-[#10b981]" : "hover:bg-slate-800/50 hover:text-slate-200"
+                isActive ? "text-white bg-[#10b981]" : "hover:bg-slate-800/30 hover:text-slate-200"
               }`}>
                 <div className={`${isActive ? "text-white" : "text-slate-400 group-hover:text-[#10b981]"}`}>
                   {item.icon}
                 </div>
                 {!isCollapsed && <span className="text-sm font-medium">{item.name}</span>}
-                
-                
-                {isCollapsed && (
-                  <div className="absolute left-16 bg-[#1e293b] text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 whitespace-nowrap z-50">
-                    {item.name}
-                  </div>
-                )}
               </div>
             </Link>
           );
         })}
       </nav>
 
-      <div className="p-4 border-t border-slate-800 space-y-1">
-        <Link href="/dashboard/settings" className="flex items-center gap-3 px-3 py-3 rounded-xl text-slate-400 hover:bg-slate-800/50 hover:text-white">
+      {/* FOOTER: Toggle de abrir no rodapé, Configurações e Sair */}
+      <div className="p-4 border-t border-slate-800/50 flex flex-col items-center gap-2">
+        
+        {/* Seta para baixo/abrir que só aparece quando recolhido */}
+        {isCollapsed && (
+          <button 
+            onClick={() => setIsCollapsed(false)}
+            className="w-full flex items-center justify-center py-3 text-slate-500 hover:text-white mb-2"
+          >
+            <ChevronRight size={20} />
+          </button>
+        )}
+
+        <Link 
+          href="/dashboard/settings" 
+          className={`w-full flex items-center gap-3 px-3 py-3 rounded-xl text-slate-400 hover:bg-slate-800/30 hover:text-white ${isCollapsed ? 'justify-center' : ''}`}
+        >
           <Settings size={20} />
           {!isCollapsed && <span className="text-sm font-medium">Configurações</span>}
         </Link>
-        <button className="w-full flex items-center gap-3 px-3 py-3 rounded-xl text-slate-400 hover:bg-red-500/10 hover:text-red-400">
+
+        <button className={`w-full flex items-center gap-3 px-3 py-3 rounded-xl text-slate-400 hover:bg-red-500/10 hover:text-red-400 ${isCollapsed ? 'justify-center' : ''}`}>
           <LogOut size={20} />
           {!isCollapsed && <span className="text-sm font-medium">Sair</span>}
         </button>
