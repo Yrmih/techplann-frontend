@@ -3,6 +3,7 @@
 import React from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useRouter } from "next/navigation";
 import { Eye, EyeOff, ArrowRight, Check } from "lucide-react";
 
 import { authLoginSchema } from "@/lib/validators/schema"; 
@@ -11,6 +12,7 @@ import { TargetLogo } from "@/components/ui/svg/TargetLogo";
 
 export const LoginForm = () => {
   const [showPassword, setShowPassword] = React.useState(false);
+  const router = useRouter();
 
   const {
     register,
@@ -21,12 +23,13 @@ export const LoginForm = () => {
   });
 
   const onSubmit = (data: AuthLoginCredentials) => {
-    console.log("Dados do Login (Credentials):", data);
+    console.log("Tentativa de login com:", data);
+    router.push("/dashboard");
   };
 
   return (
     <div className="flex min-h-screen w-full flex-col md:flex-row font-sans">
-      {/* Lado Esquerdo - Visual e Branding (Tema Dark) */}
+     
       <div className="hidden flex-1 flex-col justify-center bg-[#02141a] p-12 text-white md:flex">
         <div className="mb-8 flex items-center gap-3">
           <TargetLogo size={42} className="text-[#10b981]" />
@@ -62,7 +65,7 @@ export const LoginForm = () => {
         </div>
       </div>
 
-      {/* Lado Direito - Formulário de Entrada (Tema Light) */}
+     
       <div className="flex flex-1 items-center justify-center bg-white p-8">
         <div className="w-full max-w-md">
           <header className="mb-8">
@@ -71,7 +74,7 @@ export const LoginForm = () => {
           </header>
 
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-            {/* Campo de Email */}
+           
             <div className="space-y-2">
               <label className="text-sm font-medium text-gray-700">Email</label>
               <input
@@ -87,7 +90,7 @@ export const LoginForm = () => {
               )}
             </div>
 
-            {/* Campo de Senha */}
+            
             <div className="space-y-2">
               <label className="text-sm font-medium text-gray-700">Senha</label>
               <div className="relative">
@@ -112,7 +115,7 @@ export const LoginForm = () => {
               )}
             </div>
 
-            {/* Opções de Sessão - Alinhamento conforme Figma */}
+           
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <div className="relative flex items-center">
@@ -121,7 +124,7 @@ export const LoginForm = () => {
                     id="remember" 
                     className="peer h-5 w-5 cursor-pointer appearance-none rounded-full border border-gray-300 bg-white transition-all checked:border-[#10b981] checked:bg-[#10b981] focus:outline-none focus:ring-1 focus:ring-[#10b981] focus:ring-offset-1" 
                   />
-                  {/* Ícone de Check customizado que aparece apenas quando selecionado */}
+                 
                   <Check className="pointer-events-none absolute left-1/2 top-1/2 h-3.5 w-3.5 -translate-x-1/2 -translate-y-1/2 text-white opacity-0 transition-opacity peer-checked:opacity-100" />
                 </div>
                 <label htmlFor="remember" className="text-sm text-gray-500 cursor-pointer select-none">
@@ -129,13 +132,13 @@ export const LoginForm = () => {
                 </label>
               </div>
 
-              {/* Recuperar Senha reposicionado para a mesma linha do checkbox */}
+              
               <button type="button" className="text-sm text-[#10b981] hover:underline font-medium">
                 Recuperar senha
               </button>
             </div>
 
-            {/* Botão de Submissão */}
+           
             <button
               type="submit"
               className="flex w-full items-center justify-center gap-2 rounded-lg bg-[#10b981] p-3 font-semibold text-white transition-all hover:opacity-90 active:scale-[0.98]"
