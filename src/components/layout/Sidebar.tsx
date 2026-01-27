@@ -21,7 +21,10 @@ export const Sidebar = () => {
 
 
   return(
-    <aside>
+    <aside
+      style={{width: isCollapsed ? "80px" : "260px"}}
+      className="transition-all duration-300"
+    >
       <div className="flex items-center justify-between p-4">
         <div className="flex items-center gap-2">Logo</div>
         {isCollapsed && <span className="font-bold">Meu App</span>}
@@ -40,6 +43,10 @@ export const Sidebar = () => {
       </a>
       ))}
     </nav>
+
+    <div className="mt-auto p-4 border-t border-gray-700">
+      <button className="block w-full p-2 rounded hover:bg-red-700">Sair</button>
+    </div>
 
 
     </aside>
