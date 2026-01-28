@@ -94,7 +94,7 @@ export const PartnerFormModal = () => {
               </label>
               <input
                 {...register("nome")}
-                placeholder="Ex: ACME LTDA"
+                placeholder="Ex: DISTRIBUIDORA LTDA"
                 className={`w-full p-3 bg-gray-50 border ${errors.nome ? 'border-red-500 focus:border-red-500' : 'border-gray-100 focus:border-[#10b981]'} rounded-xl outline-none transition-all`}
               />
               {errors.nome && <span className="text-[10px] text-red-500 font-bold">{errors.nome.message}</span>}
