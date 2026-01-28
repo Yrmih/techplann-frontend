@@ -1,6 +1,6 @@
 "use client";
 
-import * as React from "react";
+
 import { 
   Printer, 
   Plus, 
@@ -12,6 +12,7 @@ import {
   ChevronRight
 } from "lucide-react";
 import { motion } from "framer-motion";
+import { PartnerFormModal } from "./PartnerFormModal";
 
 // Simulando a estrutura do shadcn DataTable
 export default function PartnersTable() {
@@ -23,7 +24,7 @@ export default function PartnersTable() {
     { id: "5", name: "DL DISTRIBUIDORA", status: "Ativo" },
     { id: "6", name: "OLINDA DISTRIBUIDORA", status: "Inativo" },
     { id: "7", name: "TECHSYS BRASIL", status: "Ativo" },
-    { id: "8", name: "Techsys Brasil", status: "Ativo" },
+    { id: "8", name: "SETE COMPANY", status: "Ativo" },
   ];
 
   return (
@@ -32,7 +33,7 @@ export default function PartnersTable() {
       animate={{ opacity: 1, y: 0 }}
       className="space-y-6"
     >
-      {/* Cabeçalho Superior */}
+     
       <div className="flex justify-between items-start">
         <div>
           <h1 className="text-3xl font-black text-gray-900 tracking-tight">Parceiros</h1>
@@ -42,16 +43,14 @@ export default function PartnersTable() {
           <button className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 rounded-lg text-sm font-bold text-gray-700 hover:bg-gray-50 shadow-sm transition-all">
             <Printer size={18} /> Imprimir
           </button>
-          <button className="flex items-center gap-2 px-4 py-2 bg-[#10b981] text-white rounded-lg text-sm font-bold hover:bg-[#0da673] shadow-sm shadow-emerald-100 transition-all">
-            <Plus size={18} /> Novo Parceiro
-          </button>
+          < PartnerFormModal/>
         </div>
       </div>
 
-      {/* Tabela de Dados (Conceito DataTable shadcn) */}
+     
       <div className="bg-white border border-gray-100 rounded-2xl shadow-sm overflow-hidden">
         
-        {/* Filtros e Busca */}
+       
         <div className="p-6 border-b border-gray-50 flex justify-between items-center bg-white">
           <h2 className="font-bold text-gray-900">Lista de Parceiros</h2>
           <div className="relative w-80">
@@ -64,7 +63,7 @@ export default function PartnersTable() {
           </div>
         </div>
 
-        {/* Tabela */}
+        
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">
             <thead>
@@ -103,7 +102,7 @@ export default function PartnersTable() {
           </table>
         </div>
 
-        {/* Paginação Estilo DataTable */}
+        
         <div className="p-6 border-t border-gray-50 flex items-center justify-between bg-gray-50/20">
           <span className="text-xs text-gray-400 font-medium">
             Mostrando <strong>8</strong> de <strong>42</strong> parceiros
