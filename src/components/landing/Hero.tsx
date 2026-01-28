@@ -40,13 +40,11 @@ export const Hero = () => {
           </span>
         </motion.h1>
 
-        
         <p className="text-lg text-gray-500 max-w-2xl mb-10 leading-relaxed">
           Unifique SWOT, Canvas, BSC e gestão de projetos em uma única plataforma. 
           Tome decisões estratégicas com dados visuais e colaboração em tempo real.
         </p>
 
-       
         <div className="flex flex-col sm:flex-row items-center gap-4 mb-12">
           <Link 
             href="/onboarding/organization"
@@ -74,21 +72,19 @@ export const Hero = () => {
           </div>
         </div>
 
-        
         <motion.div 
           initial={{ opacity: 0, y: 40 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.5, duration: 0.8 }}
           className="relative w-full max-w-5xl perspective-1000"
         >
+         
           <div className="absolute -inset-4 bg-emerald-400/20 rounded-[3rem] blur-3xl animate-pulse" />
           
           <div className="relative bg-white border-[12px] border-gray-900/5 rounded-[2.5rem] shadow-2xl overflow-hidden shadow-emerald-900/10">
             <div className="bg-[#f8fafc] w-full aspect-[16/9] flex">
               
-              
               <div className="w-[18%] bg-[#0f172a] h-full p-4 flex flex-col gap-2 opacity-95">
-                
                 <div className="w-9 h-9 bg-[#10b981] rounded-[10px] flex items-center justify-center text-white mb-4">
                   <TargetLogo size={20} />
                 </div>
@@ -112,7 +108,7 @@ export const Hero = () => {
                 ))}
               </div>
 
-             
+              
               <div className="flex-1 p-8 text-left flex flex-col gap-6 overflow-hidden">
                 
                 <div className="grid grid-cols-4 gap-4">
@@ -135,9 +131,7 @@ export const Hero = () => {
                   ))}
                 </div>
 
-              
                 <div className="flex gap-4 flex-1 h-full min-h-0">
-                  
                   
                   <div className="flex-[2] bg-white p-6 rounded-2xl border border-gray-100 flex items-end gap-2.5 justify-between relative overflow-hidden">
                     <div className="absolute top-4 left-6 w-24 h-2 bg-gray-50 rounded" />
@@ -157,22 +151,39 @@ export const Hero = () => {
                     ))}
                   </div>
 
-                  
+                 
                   <div className="flex-1 bg-white p-6 rounded-2xl border border-gray-100 flex flex-col items-center justify-center relative">
                     <div className="absolute top-4 left-6 w-16 h-2 bg-gray-50 rounded" />
                     <div className="relative flex items-center justify-center">
                       <svg className="w-32 h-32 transform -rotate-90">
+                      
                         <circle cx="64" cy="64" r="50" stroke="#f1f5f9" strokeWidth="10" fill="transparent" />
+                        
+        
                         <motion.circle 
                           cx="64" cy="64" r="50" stroke="#10b981" strokeWidth="10" fill="transparent"
                           strokeDasharray="314.15"
                           initial={{ strokeDashoffset: 314.15 }}
                           animate={{ strokeDashoffset: 314.15 * (1 - 0.85) }}
-                          transition={{ duration: 2, delay: 1.5, ease: "easeOut" }}
+                          transition={{ 
+                            duration: 2, 
+                            delay: 1.5, 
+                            ease: "easeInOut",
+                            repeat: Infinity,
+                            repeatType: "loop",
+                            repeatDelay: 4 
+                          }}
                           strokeLinecap="round"
                         />
                       </svg>
-                      <span className="absolute text-2xl font-black text-gray-900 tracking-tight">85%</span>
+                     
+                      <motion.span 
+                        animate={{ opacity: [1, 0.6, 1] }}
+                        transition={{ duration: 2, repeat: Infinity, repeatDelay: 4 }}
+                        className="absolute text-2xl font-black text-gray-900 tracking-tight"
+                      >
+                        85%
+                      </motion.span>
                     </div>
                   </div>
 

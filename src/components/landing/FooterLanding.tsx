@@ -38,7 +38,7 @@ export const FooterLanding = () => {
           </nav>
 
           <div className="text-sm text-gray-400">
-            © 2024 TechPlann. Todos os direitos reservados.
+            © 2026 TechPlann. Todos os direitos reservados.
           </div>
           
         </div>
