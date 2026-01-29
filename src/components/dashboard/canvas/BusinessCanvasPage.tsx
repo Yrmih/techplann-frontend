@@ -13,11 +13,13 @@ import {
   Share2, 
   DollarSign, 
   Wallet,
-  LucideIcon 
+  LucideIcon,
+  Pencil,
+  Trash2
 } from "lucide-react";
 import { CanvasItemModal } from "./CanvasItemModal";
 
-
+// Interface para as propriedades do bloco
 interface CanvasBlockProps {
   title: string;
   icon: LucideIcon;
@@ -26,6 +28,7 @@ interface CanvasBlockProps {
   rowSpan?: string;
   onAdd: (title: string, color: string) => void;
 }
+
 
 const CanvasBlock = ({ 
   title, 
@@ -54,9 +57,19 @@ const CanvasBlock = ({
       {items.map((item, i) => (
         <div 
           key={i} 
-          className="bg-gray-50/50 p-2 rounded-lg text-[11px] font-medium text-gray-500 border border-gray-100 text-left"
+          className="group relative bg-gray-50/50 p-2.5 rounded-lg text-[11px] font-medium text-gray-500 border border-gray-100 transition-all hover:bg-gray-100/80 flex items-center justify-between"
         >
-          {item}
+          <span className="flex-1 pr-14">{item}</span>
+          
+          {/* Botões que aparecem apenas no Hover */}
+          <div className="absolute right-2 flex items-center gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+            <button className="p-1 text-gray-400 hover:text-[#10b981] transition-colors">
+              <Pencil size={12} />
+            </button>
+            <button className="p-1 text-gray-400 hover:text-red-500 transition-colors">
+              <Trash2 size={12} />
+            </button>
+          </div>
         </div>
       ))}
     </div>
@@ -64,7 +77,6 @@ const CanvasBlock = ({
 );
 
 export const BusinessCanvasPage = () => {
-  
   const [modalConfig, setModalConfig] = useState<{ 
     open: boolean; 
     title: string; 
@@ -80,11 +92,12 @@ export const BusinessCanvasPage = () => {
 
   return (
     <div className="space-y-6 p-8 max-w-[1800px] mx-auto">
+      
       <div className="flex justify-between items-start mb-4">
         <div className="text-left">
           <h1 className="text-2xl font-black text-gray-900 tracking-tight">Business Model Canvas</h1>
           <p className="text-xs text-gray-500 font-medium text-left">
-            Planejamento: <span className="uppercase text-gray-900">Planejamento Estratégico</span>
+            Planejamento: <span className="uppercase text-gray-900 font-bold">Planejamento Estratégico</span>
           </p>
         </div>
         <button className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 rounded-xl text-xs font-bold text-gray-600 hover:bg-gray-50 transition-all shadow-sm">
@@ -92,53 +105,59 @@ export const BusinessCanvasPage = () => {
         </button>
       </div>
 
+      
       <div className="grid grid-cols-5 gap-4 h-[750px]">
+        
         <CanvasBlock 
           title="Parcerias Principais" icon={Briefcase} color="bg-[#3b82f6]" 
           onAdd={handleOpenModal} items={["Fornecedores estratégicos", "Parceiros tecnológicos"]} 
         />
         
+        
         <div className="col-span-1 grid grid-rows-2 gap-4">
           <CanvasBlock 
             title="Atividades Principais" icon={Zap} color="bg-[#3b82f6]" 
-            onAdd={handleOpenModal} items={["Desenvolvimento de software"]} rowSpan="row-span-1" 
+            onAdd={handleOpenModal} items={["Desenvolvimento de software", "Consultoria estratégica"]} rowSpan="row-span-1" 
           />
           <CanvasBlock 
             title="Recursos Principais" icon={Briefcase} color="bg-[#3b82f6]" 
-            onAdd={handleOpenModal} items={["Equipe especializada"]} rowSpan="row-span-1" 
+            onAdd={handleOpenModal} items={["Equipe especializada", "Infraestrutura cloud"]} rowSpan="row-span-1" 
           />
         </div>
 
+        
         <CanvasBlock 
           title="Proposta de Valor" icon={Heart} color="bg-[#f43f5e]" 
-          onAdd={handleOpenModal} items={["Soluções inovadoras para planejamento"]} 
-        />
-
-        <div className="col-span-1 grid grid-rows-2 gap-4">
-          <CanvasBlock 
-            title="Relacionamento com Clientes" icon={UserCheck} color="bg-[#10b981]" 
-            onAdd={handleOpenModal} items={["Suporte dedicado 24/7"]} rowSpan="row-span-1" 
-          />
-          <CanvasBlock 
-            title="Canais" icon={Share2} color="bg-[#10b981]" 
-            onAdd={handleOpenModal} items={["Plataforma web"]} rowSpan="row-span-1" 
-          />
-        </div>
-
-        <CanvasBlock 
-          title="Segmento de Clientes" icon={Users} color="bg-[#10b981]" 
-          onAdd={handleOpenModal} items={["Empresas de médio e grande porte"]} 
+          onAdd={handleOpenModal} items={["Soluções inovadoras para planejamento estratégico"]} 
         />
 
         
+        <div className="col-span-1 grid grid-rows-2 gap-4">
+          <CanvasBlock 
+            title="Relacionamento com Clientes" icon={UserCheck} color="bg-[#10b981]" 
+            onAdd={handleOpenModal} items={["Suporte dedicado 24/7", "Consultoria personalizada"]} rowSpan="row-span-1" 
+          />
+          <CanvasBlock 
+            title="Canais" icon={Share2} color="bg-[#10b981]" 
+            onAdd={handleOpenModal} items={["Plataforma web", "Redes sociais"]} rowSpan="row-span-1" 
+          />
+        </div>
+
+        
+        <CanvasBlock 
+          title="Segmento de Clientes" icon={Users} color="bg-[#10b981]" 
+          onAdd={handleOpenModal} items={["Empresas de médio e grande porte", "Startups em crescimento"]} 
+        />
+
+       
         <div className="col-span-5 grid grid-cols-2 gap-4 h-40">
           <CanvasBlock 
             title="Estrutura de Custos" icon={Wallet} color="bg-[#f59e0b]" 
-            onAdd={handleOpenModal} items={["Infraestrutura tecnológica"]} rowSpan="row-span-1" 
+            onAdd={handleOpenModal} items={["Infraestrutura tecnológica", "Equipe de desenvolvimento"]} rowSpan="row-span-1" 
           />
           <CanvasBlock 
             title="Fontes de Receitas" icon={DollarSign} color="bg-[#f59e0b]" 
-            onAdd={handleOpenModal} items={["Licenças de software"]} rowSpan="row-span-1" 
+            onAdd={handleOpenModal} items={["Licenças de software", "Serviços de consultoria"]} rowSpan="row-span-1" 
           />
         </div>
       </div>
