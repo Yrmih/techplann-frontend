@@ -1,12 +1,11 @@
 "use client";
 
-import React, { useState } from "react";
+import { useState } from "react";
 import { motion } from "framer-motion";
 import { Plus, Printer, Users, TrendingUp, AlertCircle, Lightbulb, ShieldAlert, LucideIcon } from "lucide-react";
 import { Radar, RadarChart, PolarGrid, PolarAngleAxis, ResponsiveContainer } from "recharts";
 import { SwotItemModal } from "./SwotItemModal";
 
-// 1. Dados para o gráfico e indicadores
 const mockRadarData = [
   { subject: 'Forças', A: 57, fullMark: 100 },
   { subject: 'Fraquezas', A: 37, fullMark: 100 },
@@ -14,7 +13,6 @@ const mockRadarData = [
   { subject: 'Ameaças', A: 32, fullMark: 100 },
 ];
 
-// 2. Interfaces para eliminar o 'any'
 interface SwotItem {
   label: string;
   value: number;
@@ -26,10 +24,12 @@ interface SwotCardProps {
   icon: LucideIcon;
   items: SwotItem[];
   total: number;
-  onAdd: (tipo: string) => void;
+  onAdd: (tipo: SwotType) => void;
 }
 
-// 3. Sub-componente extraído para evitar erros de renderização
+
+type SwotType = "Força" | "Fraqueza" | "Oportunidade" | "Ameaça";
+
 const SwotCard = ({ title, color, icon: Icon, items, total, onAdd }: SwotCardProps) => (
   <motion.div 
     whileHover={{ scale: 1.02 }}
@@ -40,7 +40,7 @@ const SwotCard = ({ title, color, icon: Icon, items, total, onAdd }: SwotCardPro
         <Icon size={16} /> {title}
       </div>
       <button 
-        onClick={() => onAdd(title.slice(0, -1))}
+        onClick={() => onAdd(title.slice(0, -1) as SwotType)} // Cast seguro para o Type definido
         className="bg-white/20 hover:bg-white/40 p-1.5 rounded-lg transition-all"
       >
         <Plus size={18} />
@@ -62,7 +62,8 @@ const SwotCard = ({ title, color, icon: Icon, items, total, onAdd }: SwotCardPro
 );
 
 export const SwotAnalysisPage = () => {
-  const [modalType, setModalType] = useState<string | null>(null);
+  
+  const [modalType, setModalType] = useState<SwotType | null>(null);
 
   return (
     <div className="space-y-8 p-8 max-w-[1600px] mx-auto">
@@ -127,11 +128,14 @@ export const SwotAnalysisPage = () => {
         </div>
       </div>
 
-      <SwotItemModal 
-        isOpen={!!modalType} 
-        onClose={() => setModalType(null)} 
-        tipo={modalType as any} 
-      />
+      
+      {modalType && (
+        <SwotItemModal 
+          isOpen={!!modalType} 
+          onClose={() => setModalType(null)} 
+          tipo={modalType} 
+        />
+      )}
     </div>
   );
 };
