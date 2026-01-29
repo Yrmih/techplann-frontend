@@ -1,10 +1,21 @@
 "use client";
 
-import { useState } from "react";
+import React, { useState } from "react";
 import { motion } from "framer-motion";
-import { Plus, Printer, Users, TrendingUp, AlertCircle, Lightbulb, ShieldAlert, LucideIcon } from "lucide-react";
-import { Radar, RadarChart, PolarGrid, PolarAngleAxis, ResponsiveContainer } from "recharts";
+import { 
+  Plus, 
+  Printer, 
+  Users, 
+  TrendingUp, 
+  AlertCircle, 
+  Lightbulb, 
+  ShieldAlert, 
+  LucideIcon 
+} from "lucide-react";
+
 import { SwotItemModal } from "./SwotItemModal";
+import { SwotRadarChart } from "./SwotRadarChart";
+
 
 const mockRadarData = [
   { subject: 'Forças', A: 57, fullMark: 100 },
@@ -12,6 +23,9 @@ const mockRadarData = [
   { subject: 'Oportunidades', A: 55, fullMark: 100 },
   { subject: 'Ameaças', A: 32, fullMark: 100 },
 ];
+
+
+type SwotType = "Força" | "Fraqueza" | "Oportunidade" | "Ameaça";
 
 interface SwotItem {
   label: string;
@@ -28,11 +42,9 @@ interface SwotCardProps {
 }
 
 
-type SwotType = "Força" | "Fraqueza" | "Oportunidade" | "Ameaça";
-
 const SwotCard = ({ title, color, icon: Icon, items, total, onAdd }: SwotCardProps) => (
   <motion.div 
-    whileHover={{ scale: 1.02 }}
+    whileHover={{ scale: 1.02 }} 
     className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden flex flex-col h-full"
   >
     <div className={`p-4 ${color} text-white flex items-center justify-between`}>
@@ -40,13 +52,13 @@ const SwotCard = ({ title, color, icon: Icon, items, total, onAdd }: SwotCardPro
         <Icon size={16} /> {title}
       </div>
       <button 
-        onClick={() => onAdd(title.slice(0, -1) as SwotType)} // Cast seguro para o Type definido
+        onClick={() => onAdd(title.slice(0, -1) as SwotType)}
         className="bg-white/20 hover:bg-white/40 p-1.5 rounded-lg transition-all"
       >
         <Plus size={18} />
       </button>
     </div>
-    <div className="flex-1 p-4 space-y-3">
+    <div className="flex-1 p-4 space-y-3 text-left">
       {items.map((item, i) => (
         <div key={i} className="flex items-center justify-between text-sm py-2 border-b border-gray-50 last:border-0">
           <span className="text-gray-600 font-medium">{item.label}</span>
@@ -62,22 +74,29 @@ const SwotCard = ({ title, color, icon: Icon, items, total, onAdd }: SwotCardPro
 );
 
 export const SwotAnalysisPage = () => {
-  
   const [modalType, setModalType] = useState<SwotType | null>(null);
 
   return (
     <div className="space-y-8 p-8 max-w-[1600px] mx-auto">
+      
       <div className="flex justify-between items-start">
         <div className="text-left">
           <h1 className="text-3xl font-black text-gray-900 tracking-tight">Análise SWOT</h1>
-          <p className="text-gray-500 font-medium text-sm text-left">Planejamento: <span className="text-gray-900">PLANEJAMENTO ESTRATÉGICO</span></p>
+          <p className="text-gray-500 font-medium text-sm text-left">
+            Planejamento: <span className="text-gray-900 uppercase">Planejamento Estratégico</span>
+          </p>
         </div>
         <div className="flex gap-3">
-          <button className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 rounded-xl text-xs font-bold text-gray-600 hover:bg-gray-50 transition-all"><Users size={16}/> Departamentos</button>
-          <button className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 rounded-xl text-xs font-bold text-gray-600 hover:bg-gray-50 transition-all"><Printer size={16}/> Imprimir</button>
+          <button className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 rounded-xl text-xs font-bold text-gray-600 hover:bg-gray-50 transition-all">
+            <Users size={16}/> Departamentos
+          </button>
+          <button className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 rounded-xl text-xs font-bold text-gray-600 hover:bg-gray-50 transition-all">
+            <Printer size={16}/> Imprimir
+          </button>
         </div>
       </div>
 
+      
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <SwotCard 
           title="FORÇAS" color="bg-[#10b981]" icon={TrendingUp} total={57} 
@@ -101,30 +120,30 @@ export const SwotAnalysisPage = () => {
         />
       </div>
 
+      
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 pt-4">
+       
         <div className="bg-white p-8 rounded-3xl border border-gray-100 shadow-sm space-y-6 text-left">
           <h3 className="font-bold text-gray-900 text-left">Pontuação SWOT</h3>
           {mockRadarData.map((d, i) => (
             <div key={i} className="space-y-2">
-              <div className="flex justify-between text-[10px] font-black"><span className="text-gray-400 uppercase tracking-widest">{d.subject}</span><span className="text-gray-900">{d.A}</span></div>
+              <div className="flex justify-between text-[10px] font-black">
+                <span className="text-gray-400 uppercase tracking-widest">{d.subject}</span>
+                <span className="text-gray-900">{d.A}</span>
+              </div>
               <div className="w-full bg-gray-100 h-2 rounded-full overflow-hidden">
-                <div className="h-full bg-[#10b981]" style={{ width: `${d.A}%` }}></div>
+                <div 
+                  className="h-full bg-[#10b981] transition-all duration-500" 
+                  style={{ width: `${d.A}%` }}
+                ></div>
               </div>
             </div>
           ))}
         </div>
 
-        <div className="lg:col-span-2 bg-white p-8 rounded-3xl border border-gray-100 shadow-sm text-left">
-          <h3 className="font-bold text-gray-900 mb-4 text-left">Análise Radar SWOT</h3>
-          <div className="h-[300px] w-full">
-            <ResponsiveContainer width="100%" height="100%">
-              <RadarChart data={mockRadarData}>
-                <PolarGrid stroke="#f1f5f9" />
-                <PolarAngleAxis dataKey="subject" tick={{ fill: '#94a3b8', fontSize: 10, fontWeight: 700 }} />
-                <Radar name="Pontuação" dataKey="A" stroke="#10b981" fill="#10b981" fillOpacity={0.4} />
-              </RadarChart>
-            </ResponsiveContainer>
-          </div>
+        
+        <div className="lg:col-span-2">
+          <SwotRadarChart data={mockRadarData} />
         </div>
       </div>
 
