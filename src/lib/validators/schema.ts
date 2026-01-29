@@ -6,3 +6,4 @@ export * from "./billing.schema";
 export * from "./user-account.schema";
 
 export * from "./swot.schema";
+export * from "./canvas.schema";
