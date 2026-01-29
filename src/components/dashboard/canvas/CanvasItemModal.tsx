@@ -1,6 +1,5 @@
 "use client";
 
-import React from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { X } from "lucide-react";
@@ -12,15 +11,18 @@ interface CanvasItemModalProps {
   onClose: () => void;
   title: string;
   color: string;
+  defaultText?: string; 
 }
 
-export const CanvasItemModal = ({ isOpen, onClose, title, color }: CanvasItemModalProps) => {
+export const CanvasItemModal = ({ isOpen, onClose, title, color, defaultText }: CanvasItemModalProps) => {
   const { register, handleSubmit, reset, formState: { errors } } = useForm<CanvasItemValues>({
     resolver: zodResolver(canvasItemSchema),
+  
+    values: { descricao: defaultText || "" } 
   });
 
   const onSubmit = (data: CanvasItemValues) => {
-    console.log(`Salvando em ${title}:`, data);
+    console.log(`Operação em ${title}:`, data);
     reset();
     onClose();
   };
@@ -28,15 +30,16 @@ export const CanvasItemModal = ({ isOpen, onClose, title, color }: CanvasItemMod
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-[450px] p-0 overflow-hidden border-none rounded-2xl bg-white shadow-2xl">
-        
         <DialogHeader className={`p-4 ${color} text-white flex flex-row items-center justify-between`}>
-          <DialogTitle className="text-sm font-black uppercase tracking-widest">{title}</DialogTitle>
+          <DialogTitle className="text-sm font-black uppercase tracking-widest">
+            {defaultText ? `Editar ${title}` : `Adicionar ${title}`}
+          </DialogTitle>
           <button onClick={onClose} className="hover:opacity-70 transition-opacity"><X size={18} /></button>
         </DialogHeader>
 
         <form onSubmit={handleSubmit(onSubmit)} className="p-8 space-y-6">
-          <div className="space-y-2">
-            <label className="text-xs font-bold text-gray-700 uppercase tracking-tighter">{title}</label>
+          <div className="space-y-2 text-left">
+            <label className="text-xs font-bold text-gray-700 uppercase tracking-tighter">Descrição</label>
             <textarea 
               {...register("descricao")}
               placeholder="Descreva o item..."
