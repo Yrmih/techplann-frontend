@@ -41,7 +41,7 @@ export default function NewCompanyForm() {
     }
   };
 
-  // Estilo padrão para todos os inputs garantindo fundo branco
+ 
   const inputStyles = "w-full h-12 px-4 bg-white border border-gray-200 rounded-xl text-sm outline-none focus:border-[#10b981] transition-all";
 
   return (
@@ -51,7 +51,7 @@ export default function NewCompanyForm() {
         animate={{ opacity: 1, y: 0 }}
         className="w-full max-w-[1300px] bg-white rounded-[15px] shadow-sm border border-gray-200 overflow-hidden"
       >
-        {/* Header Verde - Identidade TechPlann */}
+       
         <header className="bg-[#10b981] h-14 flex justify-between items-center px-6">
           <h1 className="text-white font-bold text-xs uppercase tracking-[0.5px]">
             Novo Registro de Empresa
@@ -63,7 +63,7 @@ export default function NewCompanyForm() {
 
         <form onSubmit={handleSubmit(onSubmit)} className="p-10 space-y-8">
           
-          {/* Dados Jurídicos */}
+         
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-left">
             <Field label="Razão Social" error={errors.razaoSocial}>
               <input {...register("razaoSocial")} placeholder="Razão Social" className={inputStyles} />
@@ -76,7 +76,7 @@ export default function NewCompanyForm() {
             </Field>
           </div>
 
-          {/* Endereço - Alinhamento Horizontal Fiel */}
+          
           <div className="grid grid-cols-1 md:grid-cols-12 gap-6 text-left">
             <div className="md:col-span-6">
               <Field label="Endereço" error={errors.endereco}>
@@ -98,7 +98,7 @@ export default function NewCompanyForm() {
             </div>
           </div>
 
-          {/* Localização */}
+         
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-left">
             <Field label="Bairro" error={errors.bairro}>
               <input {...register("bairro")} className={inputStyles} />
@@ -111,7 +111,7 @@ export default function NewCompanyForm() {
             </Field>
           </div>
 
-          {/* Responsável e Contato */}
+         
           <div className="grid grid-cols-1 md:grid-cols-4 gap-6 text-left">
             <Controller
               name="uf"
@@ -133,7 +133,7 @@ export default function NewCompanyForm() {
             </Field>
           </div>
 
-          {/* Situação e Pagamento */}
+         
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 text-left">
             <Controller
               name="situacao"
@@ -160,7 +160,7 @@ export default function NewCompanyForm() {
             />
           </div>
 
-          {/* Ações Centralizadas */}
+         
           <div className="flex items-center justify-center gap-4 pt-6 border-t border-gray-50">
             <LoadingButton 
               type="submit" 
