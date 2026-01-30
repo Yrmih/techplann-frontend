@@ -1,194 +1,145 @@
 "use client";
 
 import React from "react";
-import { useForm, SubmitHandler, Controller } from "react-hook-form";
+import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Plus, CheckCircle2, Building2, Phone, Mail, Fingerprint } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 
 import { partnerSchema, PartnerFormValues } from "@/lib/validators/partner.schema";
 import { CustomSelect } from "@/components/ui/custom/CustomSelect";
-import { Switch } from "@/components/ui/switch"; 
+import { LoadingButton } from "@/components/ui/custom/LoadingButton";
 
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-  DialogFooter,
-} from "@/components/ui/dialog";
+interface PartnerFormProps {
+  onCancel: () => void;
+}
 
-export const PartnerFormModal = () => {
-  const [open, setOpen] = React.useState(false);
+export const PartnerForm = ({ onCancel }: PartnerFormProps) => {
+  const [isSubmitting, setIsSubmitting] = React.useState(false);
 
   const {
     register,
     handleSubmit,
     control,
-    reset,
     formState: { errors },
   } = useForm<PartnerFormValues>({
     resolver: zodResolver(partnerSchema),
-    defaultValues: { 
-      nome: "", 
-      documento: "", 
-      email: "", 
-      telefone: "",
-      categoria: "",
-      influencia: "",
-      status: true
-    }
+    defaultValues: {
+      status: "Ativo", 
+    },
   });
 
-  const onSubmit: SubmitHandler<PartnerFormValues> = (data) => {
-    console.log("Dados Estratégicos:", data);
-    setOpen(false); 
-    reset(); 
+  const onSubmit = async (data: PartnerFormValues) => {
+    setIsSubmitting(true);
+    console.log("Cadastrando Parceiro:", data);
+    await new Promise((resolve) => setTimeout(resolve, 1500));
+    setIsSubmitting(false);
+    onCancel();
   };
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        <button className="flex items-center gap-2 px-4 py-2 bg-[#10b981] text-white rounded-lg text-sm font-bold hover:bg-[#0da673] shadow-sm shadow-emerald-100 transition-all active:scale-95">
-          <Plus size={18} /> Novo Parceiro
+    <div className="w-full bg-white rounded-3xl p-8 shadow-sm border border-gray-100">
+      
+      <header className="mb-8 flex items-center gap-4">
+        <button 
+          onClick={onCancel}
+          className="p-2 hover:bg-gray-50 rounded-full transition-colors text-gray-400"
+        >
+          <ArrowLeft size={20} />
         </button>
-      </DialogTrigger>
+        <div className="text-left">
+          <h2 className="text-xl font-black text-gray-900 tracking-tight">Novo Parceiro</h2>
+          <p className="text-sm text-gray-500 font-medium">Preencha as informações abaixo</p>
+        </div>
+      </header>
 
-      <DialogContent className="sm:max-w-[650px] rounded-2xl border-none shadow-2xl p-0 overflow-hidden bg-white">
-        <DialogHeader className="p-8 bg-gray-50/50 border-b border-gray-100 flex flex-row items-center justify-between">
-          <div className="space-y-1">
-            <DialogTitle className="text-2xl font-black text-gray-900 tracking-tight">
-              Cadastrar Parceiro
-            </DialogTitle>
-            <p className="text-sm text-gray-500 font-medium">Defina os dados e o nível estratégico da nova organização.</p>
-          </div>
-          
-         
-          <div className="flex flex-col items-end gap-2 pr-4">
-            <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Situação</span>
-            <Controller
-              name="status"
-              control={control}
-              render={({ field }) => (
-                <div className="flex items-center gap-2">
-                  <span className={`text-xs font-bold ${field.value ? 'text-[#10b981]' : 'text-gray-400'}`}>
-                    {field.value ? 'ATIVO' : 'INATIVO'}
-                  </span>
-                  <Switch 
-                    checked={field.value} 
-                    onCheckedChange={field.onChange}
-                    className="data-[state=checked]:bg-[#10b981]"
-                  />
-                </div>
-              )}
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-6 max-w-xl text-left">
+       
+        <div className="space-y-1.5">
+          <label className="text-xs font-bold text-gray-700">
+            Nome <span className="text-red-500">*</span>
+          </label>
+          <input
+            {...register("nome")}
+            placeholder="Nome do parceiro"
+            className={`w-full p-3.5 bg-white border ${errors.nome ? 'border-red-500' : 'border-gray-200'} rounded-xl outline-none focus:border-[#10b981] transition-all text-sm`}
+          />
+          {errors.nome && <span className="text-[10px] text-red-500 font-bold">{errors.nome.message}</span>}
+        </div>
+
+        <Controller
+          name="categoria"
+          control={control}
+          render={({ field }) => (
+            <CustomSelect
+              label="Tipo"
+              placeholder="Selecione o tipo..."
+              value={field.value}
+              onValueChange={field.onChange}
+              error={!!errors.categoria}
+              options={[
+                { value: "Fornecedor", label: "Fornecedor" },
+                { value: "Distribuidor", label: "Distribuidor" },
+                { value: "Representante", label: "Representante" },
+                { value: "Revendedor", label: "Revendedor" },
+                { value: "Outro", label: "Outro" },
+              ]}
             />
-          </div>
-        </DialogHeader>
+          )}
+        />
 
-        <form onSubmit={handleSubmit(onSubmit)} className="p-8 space-y-6">
-          <div className="grid grid-cols-2 gap-6">
-            {/* Razão Social */}
-            <div className="col-span-2 space-y-1.5">
-              <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest flex items-center gap-1.5">
-                <Building2 size={12} /> Razão Social / Nome
-              </label>
-              <input
-                {...register("nome")}
-                placeholder="Ex: DISTRIBUIDORA LTDA"
-                className={`w-full p-3 bg-gray-50 border ${errors.nome ? 'border-red-500 focus:border-red-500' : 'border-gray-100 focus:border-[#10b981]'} rounded-xl outline-none transition-all`}
-              />
-              {errors.nome && <span className="text-[10px] text-red-500 font-bold">{errors.nome.message}</span>}
-            </div>
+        {/* E-mail */}
+        <div className="space-y-1.5">
+          <label className="text-xs font-bold text-gray-700">Email</label>
+          <input
+            {...register("email")}
+            type="email"
+            placeholder="email@exemplo.com"
+            className="w-full p-3.5 bg-white border border-gray-200 rounded-xl outline-none focus:border-[#10b981] transition-all text-sm"
+          />
+        </div>
 
-            
-            <div className="space-y-1.5">
-              <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest flex items-center gap-1.5">
-                <Fingerprint size={12} /> CPF / CNPJ
-              </label>
-              <input
-                {...register("documento")}
-                placeholder="00.000.000/0001-00"
-                className={`w-full p-3 bg-gray-50 border ${errors.documento ? 'border-red-500' : 'border-gray-100'} rounded-xl outline-none focus:border-[#10b981] transition-all`}
-              />
-            </div>
+        <div className="space-y-1.5">
+          <label className="text-xs font-bold text-gray-700">Telefone</label>
+          <input
+            {...register("telefone")}
+            placeholder="(00) 00000-0000"
+            className="w-full p-3.5 bg-white border border-gray-200 rounded-xl outline-none focus:border-[#10b981] transition-all text-sm"
+          />
+        </div>
 
-            
-            <div className="space-y-1.5">
-              <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest flex items-center gap-1.5">
-                <Phone size={12} /> Telefone
-              </label>
-              <input
-                {...register("telefone")}
-                placeholder="(00) 00000-0000"
-                className={`w-full p-3 bg-gray-50 border ${errors.telefone ? 'border-red-500' : 'border-gray-100'} rounded-xl outline-none focus:border-[#10b981] transition-all`}
-              />
-            </div>
-
-            
-            <Controller
-              name="categoria"
-              control={control}
-              render={({ field }) => (
-                <CustomSelect
-                  label="Categoria do Parceiro"
-                  placeholder="Selecione o tipo..."
-                  value={field.value}
-                  onValueChange={field.onChange}
-                  error={!!errors.categoria}
-                  options={[
-                    { value: "fornecedor", label: "Fornecedor" },
-                    { value: "cliente", label: "Cliente Estratégico" },
-                    { value: "socio", label: "Sócio" },
-                    { value: "governo", label: "Governo / Órgão Público" },
-                  ]}
-                />
-              )}
+        <Controller
+          name="status"
+          control={control}
+          render={({ field }) => (
+            <CustomSelect
+              label="Status"
+              value={field.value}
+              onValueChange={field.onChange}
+              options={[
+                { value: "Ativo", label: "Ativo" },
+                { value: "Inativo", label: "Inativo" },
+              ]}
             />
+          )}
+        />
 
-           
-            <Controller
-              name="influencia"
-              control={control}
-              render={({ field }) => (
-                <CustomSelect
-                  label="Nível de Influência"
-                  placeholder="Selecione o impacto..."
-                  value={field.value}
-                  onValueChange={field.onChange}
-                  error={!!errors.influencia}
-                  options={[
-                    { value: "baixa", label: "Baixa (Operacional)" },
-                    { value: "media", label: "Média (Tática)" },
-                    { value: "alta", label: "Alta (Crítica/Estratégica)" },
-                  ]}
-                />
-              )}
-            />
-
-            
-            <div className="col-span-2 space-y-1.5">
-              <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest flex items-center gap-1.5">
-                <Mail size={12} /> E-mail de Contato
-              </label>
-              <input
-                {...register("email")}
-                type="email"
-                placeholder="contato@empresa.com"
-                className={`w-full p-3 bg-gray-50 border ${errors.email ? 'border-red-500' : 'border-gray-100'} rounded-xl outline-none focus:border-[#10b981] transition-all`}
-              />
-            </div>
-          </div>
-
-          <DialogFooter className="pt-6 border-t border-gray-50 mt-4">
-            <button
-              type="submit"
-              className="w-full py-4 bg-[#10b981] text-white rounded-xl font-bold hover:bg-[#0da673] shadow-lg shadow-emerald-100 transition-all flex items-center justify-center gap-2 active:scale-95"
-            >
-              <CheckCircle2 size={18} /> Finalizar Cadastro Estratégico
-            </button>
-          </DialogFooter>
-        </form>
-      </DialogContent>
-    </Dialog>
+        <div className="flex items-center gap-3 pt-4">
+          <button
+            type="button"
+            onClick={onCancel}
+            className="px-6 py-3 border border-gray-200 text-gray-600 rounded-xl text-sm font-bold hover:bg-gray-50 transition-all"
+          >
+            Cancelar
+          </button>
+          <LoadingButton
+            type="submit"
+            isLoading={isSubmitting}
+            className="px-8 py-3 bg-[#10b981] text-white rounded-xl text-sm font-bold hover:bg-[#0da673] transition-all shadow-sm"
+          >
+            Cadastrar
+          </LoadingButton>
+        </div>
+      </form>
+    </div>
   );
 };
