@@ -10,27 +10,23 @@ import { CustomSelect } from "@/components/ui/custom/CustomSelect";
 import { LoadingButton } from "@/components/ui/custom/LoadingButton";
 
 export const DepartmentFormModal = ({ onCancel }: { onCancel: () => void }) => {
-  
   const [isSubmitting, setIsSubmitting] = React.useState(false);
   
-  const { register, handleSubmit, control } = useForm<DepartmentFormValues>({
+  const { register, handleSubmit, control, formState: { errors } } = useForm<DepartmentFormValues>({
     resolver: zodResolver(departmentSchema),
-    defaultValues: { status: "Ativo", tipo: "" },
+    defaultValues: { status: "Ativo", tipo: "Administrativo", email: "", telefone: "" },
   });
 
-  
   const onSubmit: SubmitHandler<DepartmentFormValues> = async (data) => {
-    setIsSubmitting(true); // Inicia o estado de loading
-    
+    setIsSubmitting(true);
     try {
-      console.log("Dados do Departamento:", data);
-      // Simulação de chamada para o backend NestJS
+      console.log("Submetendo Departamento:", data);
       await new Promise((resolve) => setTimeout(resolve, 1500));
       onCancel(); 
     } catch (error) {
-      console.error("Erro ao cadastrar:", error);
+      console.error(error);
     } finally {
-      setIsSubmitting(false); // Finaliza o loading independente do resultado
+      setIsSubmitting(false);
     }
   };
 
@@ -50,14 +46,16 @@ export const DepartmentFormModal = ({ onCancel }: { onCancel: () => void }) => {
         </div>
       </header>
 
-     
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-6 max-w-xl text-left">
+        
         <div className="space-y-1.5">
-          <label className="text-xs font-bold text-gray-700">Nome <span className="text-red-500">*</span></label>
+          <label className="text-xs font-bold text-gray-700">
+            Nome <span className="text-red-500">*</span>
+          </label>
           <input 
             {...register("nome")} 
             placeholder="Nome do departamento" 
-            className="w-full p-3.5 border border-gray-200 rounded-xl text-sm outline-none focus:border-[#10b981] transition-all" 
+            className={`w-full p-3.5 bg-white border ${errors.nome ? 'border-red-500' : 'border-gray-200'} rounded-xl outline-none focus:border-[#10b981] transition-all text-sm`} 
           />
         </div>
 
@@ -83,6 +81,26 @@ export const DepartmentFormModal = ({ onCancel }: { onCancel: () => void }) => {
           )}
         />
 
+        <div className="space-y-1.5">
+          <label className="text-xs font-bold text-gray-700">Email</label>
+          <input 
+            {...register("email")}
+            type="email"
+            placeholder="email@exemplo.com"
+            className="w-full p-3.5 bg-white border border-gray-200 rounded-xl text-sm outline-none focus:border-[#10b981]" 
+          />
+        </div>
+
+        <div className="space-y-1.5">
+          <label className="text-xs font-bold text-gray-700">Telefone</label>
+          <input 
+            {...register("telefone")}
+            placeholder="(00) 00000-0000"
+            className="w-full p-3.5 bg-white border border-gray-200 rounded-xl text-sm outline-none focus:border-[#10b981]" 
+          />
+        </div>
+
+        
         <Controller
           name="status"
           control={control}
@@ -99,19 +117,19 @@ export const DepartmentFormModal = ({ onCancel }: { onCancel: () => void }) => {
           )}
         />
 
+        
         <div className="flex items-center gap-3 pt-4">
           <button 
             type="button" 
             onClick={onCancel} 
-            className="px-6 py-3 border border-gray-200 rounded-xl text-sm font-bold hover:bg-gray-50 transition-all"
+            className="px-6 py-3 border border-gray-200 rounded-xl text-sm font-bold text-gray-600 hover:bg-gray-50 transition-all"
           >
             Cancelar
           </button>
-         
           <LoadingButton 
             type="submit" 
             isLoading={isSubmitting} 
-            className="px-8 py-3 bg-[#10b981] text-white rounded-xl text-sm font-bold shadow-sm"
+            className="px-8 py-3 bg-[#10b981] text-white rounded-xl text-sm font-bold shadow-sm hover:bg-[#0da673] transition-all"
           >
             Cadastrar
           </LoadingButton>

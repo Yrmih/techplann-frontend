@@ -1,6 +1,7 @@
 "use client";
 
-import React, { useState } from "react";
+import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import {
   Printer,
@@ -10,38 +11,52 @@ import {
   Building2,
   Handshake,
   LucideIcon,
+  X
 } from "lucide-react";
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
+
+
+import { PartnerForm } from "./PartnerFormModal";
+import { DepartmentFormModal } from "./DepartmentFormModal";
 
 interface EmptyStateProps {
   description: string;
   buttonLabel: string;
   icon: LucideIcon;
+  onAction?: () => void;
 }
 
 const EmptyState = ({
   description,
   buttonLabel,
   icon: Icon,
+  onAction
 }: EmptyStateProps) => (
   <div className="flex flex-col items-center justify-center py-24 bg-white border border-gray-100 rounded-2xl shadow-sm">
     <div className="text-gray-300 mb-4">
       <Icon size={48} strokeWidth={1} />
     </div>
     <p className="text-sm font-medium text-gray-400 mb-6">{description}</p>
-    <button className="text-[#10b981] font-bold text-sm hover:underline transition-all">
+    <button 
+      onClick={onAction}
+      className="text-[#10b981] font-bold text-sm hover:underline transition-all"
+    >
       {buttonLabel}
     </button>
   </div>
 );
 
 export default function StakeholdersPage() {
- 
+  const router = useRouter();
   const [activeTab, setActiveTab] = useState("parceiros");
-
   
+  
+  const [isPartnerModalOpen, setIsPartnerModalOpen] = useState(false);
+  const [isDeptModalOpen, setIsDeptModalOpen] = useState(false);
+
   const getButtonLabel = () => {
     switch (activeTab) {
       case "parceiros":
@@ -52,6 +67,17 @@ export default function StakeholdersPage() {
         return "Nova Empresa";
       default:
         return "Novo Registro";
+    }
+  };
+
+  const handleNewRegistration = () => {
+    if (activeTab === "parceiros") {
+      setIsPartnerModalOpen(true);
+    } else if (activeTab === "departamentos") {
+      setIsDeptModalOpen(true);
+    } else if (activeTab === "empresas") {
+      
+      router.push("/dashboard/registrations/companies");
     }
   };
 
@@ -77,14 +103,15 @@ export default function StakeholdersPage() {
             <Printer size={16} /> Imprimir
           </button>
 
-          {/* Botão que muda o texto dinamicamente */}
-          <button className="flex items-center gap-2 px-5 py-2.5 bg-[#10b981] text-white rounded-xl text-xs font-bold hover:bg-[#0da673] transition-all shadow-md shadow-emerald-100">
+          <button 
+            onClick={handleNewRegistration}
+            className="flex items-center gap-2 px-5 py-2.5 bg-[#10b981] text-white rounded-xl text-xs font-bold hover:bg-[#0da673] transition-all shadow-md shadow-emerald-100 active:scale-95"
+          >
             <Plus size={16} /> {getButtonLabel()}
           </button>
         </div>
       </div>
 
-      {/* Tabs com onValueChange para atualizar o estado */}
       <Tabs 
         defaultValue="parceiros" 
         className="w-full" 
@@ -124,9 +151,10 @@ export default function StakeholdersPage() {
           </div>
         </div>
 
+        {/* Conteúdo Parceiros */}
         <TabsContent value="parceiros" className="mt-0 focus-visible:outline-none">
-          <div className="bg-white border border-gray-100 rounded-3xl shadow-sm overflow-hidden">
-            <div className="p-7 border-b border-gray-50 bg-gray-50/30 text-left">
+          <div className="bg-white border border-gray-100 rounded-3xl shadow-sm overflow-hidden text-left">
+            <div className="p-7 border-b border-gray-50 bg-gray-50/30">
               <h2 className="font-bold text-gray-900 text-sm tracking-tight">
                 Lista de Parceiros
               </h2>
@@ -136,14 +164,16 @@ export default function StakeholdersPage() {
                 description="Nenhum parceiro cadastrado"
                 buttonLabel="Cadastrar primeiro parceiro"
                 icon={Handshake}
+                onAction={() => setIsPartnerModalOpen(true)}
               />
             </div>
           </div>
         </TabsContent>
 
+        
         <TabsContent value="departamentos" className="mt-0 focus-visible:outline-none">
-          <div className="bg-white border border-gray-100 rounded-3xl shadow-sm overflow-hidden">
-            <div className="p-7 border-b border-gray-50 bg-gray-50/30 text-left">
+          <div className="bg-white border border-gray-100 rounded-3xl shadow-sm overflow-hidden text-left">
+            <div className="p-7 border-b border-gray-50 bg-gray-50/30">
               <h2 className="font-bold text-gray-900 text-sm tracking-tight">
                 Lista de Departamentos
               </h2>
@@ -153,14 +183,16 @@ export default function StakeholdersPage() {
                 description="Nenhum departamento cadastrado"
                 buttonLabel="Cadastrar primeiro departamento"
                 icon={Users}
+                onAction={() => setIsDeptModalOpen(true)}
               />
             </div>
           </div>
         </TabsContent>
 
+       
         <TabsContent value="empresas" className="mt-0 focus-visible:outline-none">
-          <div className="bg-white border border-gray-100 rounded-3xl shadow-sm overflow-hidden">
-            <div className="p-7 border-b border-gray-50 bg-gray-50/30 text-left">
+          <div className="bg-white border border-gray-100 rounded-3xl shadow-sm overflow-hidden text-left">
+            <div className="p-7 border-b border-gray-50 bg-gray-50/30">
               <h2 className="font-bold text-gray-900 text-sm tracking-tight">
                 Lista de Empresas
               </h2>
@@ -170,11 +202,27 @@ export default function StakeholdersPage() {
                 description="Nenhuma empresa cadastrada"
                 buttonLabel="Cadastrar primeira empresa"
                 icon={Building2}
+                onAction={() => router.push("/dashboard/registrations/companies")}
               />
             </div>
           </div>
         </TabsContent>
       </Tabs>
+
+      
+      <Dialog open={isPartnerModalOpen} onOpenChange={setIsPartnerModalOpen}>
+        <DialogContent className="max-w-2xl p-0 bg-transparent border-none shadow-none overflow-visible">
+          <PartnerForm onCancel={() => setIsPartnerModalOpen(false)} />
+        </DialogContent>
+      </Dialog>
+
+      {/* Modal Departamento */}
+      <Dialog open={isDeptModalOpen} onOpenChange={setIsDeptModalOpen}>
+        <DialogContent className="max-w-2xl p-0 bg-transparent border-none shadow-none overflow-visible">
+          <DepartmentFormModal onCancel={() => setIsDeptModalOpen(false)} />
+        </DialogContent>
+      </Dialog>
+
     </motion.div>
   );
 }
