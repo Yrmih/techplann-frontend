@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
@@ -10,8 +10,12 @@ import { authLoginSchema } from "@/lib/validators/schema";
 import { AuthLoginCredentials } from "@/types/types";
 import { TargetLogo } from "@/components/ui/svg/TargetLogo";
 
+import { LoadingButton } from "@/components/ui/custom/LoadingButton";
+
 export const LoginForm = () => {
-  const [showPassword, setShowPassword] = React.useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+ 
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const router = useRouter();
 
   const {
@@ -22,15 +26,21 @@ export const LoginForm = () => {
     resolver: zodResolver(authLoginSchema),
   });
 
-  const onSubmit = (data: AuthLoginCredentials) => {
+  const onSubmit = async (data: AuthLoginCredentials) => {
+    setIsSubmitting(true);
     console.log("Tentativa de login com:", data);
+    
+    
+    await new Promise((resolve) => setTimeout(resolve, 1500));
+    
+    setIsSubmitting(false);
     router.push("/dashboard");
   };
 
   return (
     <div className="flex min-h-screen w-full flex-col md:flex-row font-sans overflow-hidden">
      
-      {/* Lado Esquerdo - Visual */}
+      
       <div className="hidden flex-1 flex-col justify-center bg-[#02141a] p-16 text-white md:flex relative">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_50%,rgba(16,185,129,0.05),transparent)] pointer-events-none" />
 
@@ -81,7 +91,7 @@ export const LoginForm = () => {
         </div>
       </div>
 
-      {/* Lado Direito - Formulário */}
+     
       <div className="flex flex-1 items-center justify-center bg-white p-8 lg:p-16">
         <div className="w-full max-w-md">
           <header className="mb-10 text-left">
@@ -96,7 +106,6 @@ export const LoginForm = () => {
                 {...register("email")}
                 type="email"
                 placeholder="ian@sete.com"
-                
                 className={`w-full rounded-xl border p-4 transition-all outline-none text-sm font-medium bg-white
                   ${errors.email ? 'border-red-500' : 'border-gray-100'}
                   hover:border-[#10b981]/50 focus:border-[#10b981] focus:ring-4 focus:ring-[#10b981]/5`}
@@ -113,7 +122,6 @@ export const LoginForm = () => {
                   {...register("senha")}
                   type={showPassword ? "text" : "password"}
                   placeholder="••••••"
-                 
                   className={`w-full rounded-xl border p-4 pr-12 transition-all outline-none text-sm font-medium bg-white
                     ${errors.senha ? 'border-red-500' : 'border-gray-100'}
                     hover:border-[#10b981]/50 focus:border-[#10b981] focus:ring-4 focus:ring-[#10b981]/5`}
@@ -151,13 +159,15 @@ export const LoginForm = () => {
               </button>
             </div>
 
-            <button
+           
+            <LoadingButton
               type="submit"
+              isLoading={isSubmitting}
               className="flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[#10b981] to-[#06b6d4] p-4 font-bold text-white shadow-lg shadow-emerald-100 transition-all hover:opacity-95 active:scale-[0.98]"
             >
               Entrar na plataforma
               <ArrowRight size={18} />
-            </button>
+            </LoadingButton>
           </form>
 
           <footer className="mt-12 text-center text-sm">
