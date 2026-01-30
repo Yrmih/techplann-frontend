@@ -38,10 +38,10 @@ const EmptyState = ({
 );
 
 export default function StakeholdersPage() {
-  // Estado para controlar qual aba está ativa
+ 
   const [activeTab, setActiveTab] = useState("parceiros");
 
-  // Função para retornar o texto do botão com base na aba
+  
   const getButtonLabel = () => {
     switch (activeTab) {
       case "parceiros":
