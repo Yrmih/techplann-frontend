@@ -25,8 +25,8 @@ export const Sidebar = () => {
   const pathname = usePathname();
 
   const menuItems = [
-    { name: "Home", icon: <Home size={20} />, href: "/dashboard" },
-    { name: "Cadastros", icon: <Users size={20} />, href: "/dashboard/registrations" },
+    { name: "Dashboard", icon: <Home size={20} />, href: "/dashboard" },
+    { name: "Stakeholders", icon: <Users size={20} />, href: "/dashboard/registrations" },
     { name: "Planejamentos", icon: <Calendar size={20} />, href: "/dashboard/planning" },
     { name: "SWOT", icon: <LayoutGrid size={20} />, href: "/dashboard/swot" },
     { name: "Canvas", icon: <Building2 size={20} />, href: "/dashboard/canvas" },
