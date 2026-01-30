@@ -11,7 +11,6 @@ import {
   Building2,
   Handshake,
   LucideIcon,
-  X
 } from "lucide-react";
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
