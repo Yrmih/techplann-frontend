@@ -1,4 +1,4 @@
-import { CompanyForm } from "@/components/forms/onboarding/CompanyForm";
+import { ResponsibleForm } from "@/components/forms/onboarding/ResponsibleForm";
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -12,7 +12,7 @@ export default function AccountFormPage() {
     <main className="min-h-screen bg-gray-50/50 flex flex-col items-center">
 
       <div className="w-full max-w-7xl px-4 pb-20">
-        <CompanyForm />
+        <ResponsibleForm />
       </div>
 
       <p className="mt-4 text-sm text-gray-400">

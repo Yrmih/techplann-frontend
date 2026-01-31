@@ -11,17 +11,17 @@ import { Label } from "@/components/ui/label";
 
 import { NextButton } from "../../ui/custom/NextButton";
 import {
-  OrganizationSchema,
+  ResponsibleSchema,
   type RepresentativeData,
 } from "@/lib/validators/schema";
 
-export const CompanyForm = () => {
+export const ResponsibleForm = () => {
   const {
     register,
     handleSubmit,
     formState: { errors, isSubmitting },
   } = useForm<RepresentativeData>({
-    resolver: zodResolver(OrganizationSchema),
+    resolver: zodResolver(ResponsibleSchema),
   });
 
   const onSubmit = (data: RepresentativeData) => {
@@ -45,7 +45,7 @@ export const CompanyForm = () => {
   return (
     <div className="bg-white rounded-2xl border border-gray-100 p-10 shadow-sm max-w-5xl mx-auto font-sans">
       <header className="mb-8">
-        <h2 className="text-2xl font-bold text-gray-900">Empresa</h2>
+        <h2 className="text-2xl font-bold text-gray-900">Responsável</h2>
         <p className="text-sm text-gray-500 mt-1">
           Dados do responsável legal da empresa
         </p>
