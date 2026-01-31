@@ -1,6 +1,6 @@
 "use client";
 
-import { useForm } from "react-hook-form";
+import { SubmitHandler, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { motion } from "framer-motion";
 import { Check, Info } from "lucide-react";
@@ -8,7 +8,8 @@ import { Check, Info } from "lucide-react";
 import { NextButton } from "../../ui/custom/NextButton";
 import {
   planSelectionSchema,
-  type PlanSelectionData,
+  type PlanSelectionInput,
+  type PlanSelectionOutput,
 } from "@/lib/validators/schema";
 import { cn } from "@/lib/utils";
 
@@ -61,14 +62,18 @@ export const SubscriptionForm = () => {
     setValue,
     watch,
     formState: { isSubmitting, errors },
-  } = useForm<PlanSelectionData>({
+  } = useForm<PlanSelectionInput>({
     resolver: zodResolver(planSelectionSchema),
   });
 
   const selectedPlan = watch("plan");
 
-  const onSubmit = (data: PlanSelectionData) => {
-    console.log("Plano Selecionado:", data);
+   const onSubmit: SubmitHandler<PlanSelectionInput> = (data) => {
+    
+    const parsed: PlanSelectionOutput = planSelectionSchema.parse(data);
+
+    console.log("Plano Selecionado:", parsed.plan);
+    
   };
 
   return (

@@ -1,13 +1,20 @@
 import { z } from "zod";
 
-const PLAN_TYPES = ["starter", "professional", "enterprise"] as const;
+export const PLAN_TYPES = ["starter", "professional", "enterprise"] as const;
 
 export const planSelectionSchema = z.object({
-  plan: z.enum(PLAN_TYPES, {
-    // Estas chaves são nativas e extremamente estáveis
-    required_error: "Por favor, selecione um plano para continuar.",
-    invalid_type_error: "Por favor, selecione um plano para continuar.",
-  }),
+  plan: z
+    .string()
+    .min(1, "Por favor, selecione um plano para continuar.")
+    .refine(
+      (value): value is (typeof PLAN_TYPES)[number] =>
+        PLAN_TYPES.includes(value as (typeof PLAN_TYPES)[number]),
+      {
+        message: "Plano inválido.",
+      }
+    ),
 });
 
-export type PlanSelectionData = z.infer<typeof planSelectionSchema>;
+// 👇 IMPORTANTE
+export type PlanSelectionInput = z.input<typeof planSelectionSchema>;
+export type PlanSelectionOutput = z.output<typeof planSelectionSchema>;
