@@ -4,12 +4,16 @@ import { SubmitHandler, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { motion } from "framer-motion";
 import { Check, Info } from "lucide-react";
+import { useRouter } from "next/navigation";
+
+// Hooks de estado e serviço
+import { useOnboardingStore } from "@/stores/useOnboardingStore";
+import { onboardingService } from "@/services/onboarding";
 
 import { NextButton } from "../../ui/custom/NextButton";
 import {
   planSelectionSchema,
   type PlanSelectionInput,
-  type PlanSelectionOutput,
 } from "@/lib/validators/schema";
 import { cn } from "@/lib/utils";
 
@@ -56,7 +60,13 @@ const plans: PlanOption[] = [
   },
 ];
 
+// Nota: Não precisa de onNext porque é a última etapa
 export const SubscriptionForm = () => {
+  const router = useRouter();
+  
+  // Recupera os IDs da store persistente (Zustand)
+  const { onboardingId, tenantId, reset } = useOnboardingStore();
+
   const {
     handleSubmit,
     setValue,
@@ -64,16 +74,32 @@ export const SubscriptionForm = () => {
     formState: { isSubmitting, errors },
   } = useForm<PlanSelectionInput>({
     resolver: zodResolver(planSelectionSchema),
+    defaultValues: {
+      plan: undefined,
+    }
   });
 
   const selectedPlan = watch("plan");
 
-   const onSubmit: SubmitHandler<PlanSelectionInput> = (data) => {
-    
-    const parsed: PlanSelectionOutput = planSelectionSchema.parse(data);
+  const onSubmit: SubmitHandler<PlanSelectionInput> = async (data) => {
+    try {
+      if (!onboardingId || !tenantId) {
+        console.error("Dados de sessão (Onboarding/Tenant) não encontrados.");
+        return;
+      }
 
-    console.log("Plano Selecionado:", parsed.plan);
-    
+      // 1. Envia a escolha do plano para o backend
+      await onboardingService.saveSubscription(onboardingId, tenantId, data);
+
+      // 2. Limpa a Store para que um novo login não caia no onboarding antigo
+      reset();
+
+      // 3. Redireciona para o Dashboard (Fim da esteira)
+      router.push("/dashboard");
+      
+    } catch (error) {
+      console.error("Erro ao processar assinatura no TechPlann:", error);
+    }
   };
 
   return (
@@ -92,7 +118,7 @@ export const SubscriptionForm = () => {
               key={plan.id}
               whileHover={{ scale: 1.04, translateY: -8 }}
               whileTap={{ scale: 0.98 }}
-              onClick={() => setValue("plan", plan.id)}
+              onClick={() => setValue("plan", plan.id, { shouldValidate: true })}
               className={cn(
                 "relative cursor-pointer rounded-2xl border-2 p-6 transition-all duration-300 flex flex-col",
                 "hover:border-[#10b981] hover:shadow-2xl hover:shadow-green-100/50",
@@ -156,7 +182,7 @@ export const SubscriptionForm = () => {
 
         <NextButton
           onBack={() => window.history.back()}
-          nextLabel="Próximo"
+          nextLabel="Concluir Registro"
           isSubmitting={isSubmitting}
         />
       </form>

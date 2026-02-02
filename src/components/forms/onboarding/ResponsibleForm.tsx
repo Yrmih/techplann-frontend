@@ -4,18 +4,28 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { FieldError } from "react-hook-form";
 
-
+// Shadcn UI Components
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
-
+// Componentes customizados, Schemas, Stores e Services
 import { NextButton } from "../../ui/custom/NextButton";
 import {
   ResponsibleSchema,
   type RepresentativeData,
 } from "@/lib/validators/schema";
+import { useOnboardingStore } from "@/stores/useOnboardingStore";
+import { onboardingService } from "@/services/onboarding";
 
-export const ResponsibleForm = () => {
+// Interface para aceitar a função onNext do componente pai
+interface ResponsibleFormProps {
+  onNext: () => void;
+}
+
+export const ResponsibleForm = ({ onNext }: ResponsibleFormProps) => {
+  // Recupera os IDs necessários da Store persistente
+  const { onboardingId, tenantId, organizationId } = useOnboardingStore();
+
   const {
     register,
     handleSubmit,
@@ -24,11 +34,29 @@ export const ResponsibleForm = () => {
     resolver: zodResolver(ResponsibleSchema),
   });
 
-  const onSubmit = (data: RepresentativeData) => {
-    console.log("Dados do Responsável (Step 2):", data);
+  const onSubmit = async (data: RepresentativeData) => {
+    try {
+      // Validação de segurança: garante que as etapas anteriores foram concluídas
+      if (!onboardingId || !tenantId || !organizationId) {
+        console.error("Dados de vínculo (Tenant/Org) não encontrados.");
+        return;
+      }
+
+      // Chama o endpoint POST /onboarding/:id/responsible
+      await onboardingService.saveResponsible(
+        onboardingId,
+        tenantId,
+        organizationId,
+        data
+      );
+
+      // Em vez de router.push, chamamos o onNext para mudar o Step no componente pai para 3 (Planos)
+      onNext();
+    } catch (error) {
+      console.error("Erro ao registrar responsável no TechPlann:", error);
+    }
   };
 
-  
   const inputStyles = (errorField: FieldError | undefined) =>
     `
     bg-white border-gray-200 transition-all text-sm
@@ -106,12 +134,17 @@ export const ResponsibleForm = () => {
             <Input
               {...register("phone")}
               placeholder="(00) 00000-0000"
-              className={inputStyles(undefined)}
+              className={inputStyles(errors.phone)}
             />
+            {errors.phone && (
+              <p className="text-xs text-red-500 font-medium">
+                {errors.phone.message}
+              </p>
+            )}
           </div>
         </div>
 
-        {/* Cargo ocupando a linha inteira */}
+        {/* Cargo */}
         <div className="space-y-2">
           <Label className="text-sm font-medium text-gray-700">Cargo *</Label>
           <Input
