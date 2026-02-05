@@ -17,6 +17,11 @@ import {
 } from "@/lib/validators/schema";
 import { cn } from "@/lib/utils";
 
+// Interface ALINHADA: Recebe o onboardingId diretamente do pai
+interface SubscriptionFormProps {
+  onboardingId: string;
+}
+
 interface PlanOption {
   id: "starter" | "professional" | "enterprise";
   name: string;
@@ -60,12 +65,11 @@ const plans: PlanOption[] = [
   },
 ];
 
-// Nota: Não precisa de onNext porque é a última etapa
-export const SubscriptionForm = () => {
+export const SubscriptionForm = ({ onboardingId }: SubscriptionFormProps) => {
   const router = useRouter();
   
-  // Recupera os IDs da store persistente (Zustand)
-  const { onboardingId, tenantId, reset } = useOnboardingStore();
+  // Recuperamos o tenantId (vindo do Step 1) e a função reset da Store
+  const { tenantId, reset } = useOnboardingStore();
 
   const {
     handleSubmit,
@@ -83,22 +87,28 @@ export const SubscriptionForm = () => {
 
   const onSubmit: SubmitHandler<PlanSelectionInput> = async (data) => {
     try {
+      // VALIDAÇÃO CRÍTICA: Se chegamos aqui, os IDs precisam estar presentes
       if (!onboardingId || !tenantId) {
-        console.error("Dados de sessão (Onboarding/Tenant) não encontrados.");
+        console.error("❌ IDs de sessão ou de Tenant não encontrados para finalizar a assinatura.");
         return;
       }
 
-      // 1. Envia a escolha do plano para o backend
+      console.log(`🚀 Finalizando Onboarding. Vinculando plano ${data.plan} ao Tenant: ${tenantId}`);
+
+      // 1. Envia a escolha do plano para o backend (Grava no Postgres via Prisma)
       await onboardingService.saveSubscription(onboardingId, tenantId, data);
 
-      // 2. Limpa a Store para que um novo login não caia no onboarding antigo
+      console.log("✅ Assinatura concluída com sucesso!");
+
+      // 2. LIMPEZA TOTAL: Removemos os rastros do Onboarding da Store global
+      // Isso evita que o usuário caia no Onboarding novamente ao logar.
       reset();
 
-      // 3. Redireciona para o Dashboard (Fim da esteira)
+      // 3. Redirecionamento Final
       router.push("/dashboard");
       
     } catch (error) {
-      console.error("Erro ao processar assinatura no TechPlann:", error);
+      console.error("❌ Erro ao processar assinatura final:", error);
     }
   };
 
@@ -107,7 +117,7 @@ export const SubscriptionForm = () => {
       <header className="mb-10">
         <h2 className="text-2xl font-bold text-gray-900">Plano</h2>
         <p className="text-sm text-gray-500 mt-1">
-          Escolha o plano ideal para sua empresa
+          Escolha o plano ideal para sua jornada no TechPlann
         </p>
       </header>
 
@@ -120,7 +130,7 @@ export const SubscriptionForm = () => {
               whileTap={{ scale: 0.98 }}
               onClick={() => setValue("plan", plan.id, { shouldValidate: true })}
               className={cn(
-                "relative cursor-pointer rounded-2xl border-2 p-6 transition-all duration-300 flex flex-col",
+                "relative cursor-pointer rounded-2xl border-2 p-6 transition-all duration-300 flex flex-col min-h-[300px]",
                 "hover:border-[#10b981] hover:shadow-2xl hover:shadow-green-100/50",
                 selectedPlan === plan.id
                   ? "border-[#10b981] bg-emerald-50 shadow-sm"
@@ -142,7 +152,7 @@ export const SubscriptionForm = () => {
                 <span className="text-gray-400 text-xs font-medium">/mês</span>
               </div>
 
-              <ul className="mt-6 space-y-3">
+              <ul className="mt-6 space-y-3 flex-grow">
                 {plan.features.map((feature) => (
                   <li
                     key={feature}
