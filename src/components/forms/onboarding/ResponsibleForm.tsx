@@ -17,14 +17,15 @@ import {
 import { useOnboardingStore } from "@/stores/useOnboardingStore";
 import { onboardingService } from "@/services/onboarding";
 
-// Interface para aceitar a função onNext do componente pai
+// Interface ALINHADA: Recebe o onboardingId diretamente do pai (page.tsx)
 interface ResponsibleFormProps {
+  onboardingId: string; 
   onNext: () => void;
 }
 
-export const ResponsibleForm = ({ onNext }: ResponsibleFormProps) => {
-  // Recupera os IDs necessários da Store persistente
-  const { onboardingId, tenantId, organizationId } = useOnboardingStore();
+export const ResponsibleForm = ({ onboardingId, onNext }: ResponsibleFormProps) => {
+  // Recupera os IDs de vínculo gerados no Step 1 da Store persistente
+  const { tenantId, organizationId } = useOnboardingStore();
 
   const {
     register,
@@ -36,13 +37,15 @@ export const ResponsibleForm = ({ onNext }: ResponsibleFormProps) => {
 
   const onSubmit = async (data: RepresentativeData) => {
     try {
-      // Validação de segurança: garante que as etapas anteriores foram concluídas
+      // VALIDAÇÃO DE SEGURANÇA: Garante que todos os IDs necessários existam
       if (!onboardingId || !tenantId || !organizationId) {
-        console.error("Dados de vínculo (Tenant/Org) não encontrados.");
+        console.error("❌ Erro de integridade: IDs de vínculo não encontrados.");
         return;
       }
 
-      // Chama o endpoint POST /onboarding/:id/responsible
+      console.log("🚀 Vinculando responsável ao Tenant/Org no banco...");
+
+      // Chama o endpoint usando o ID injetado via Prop (evita delay da Store)
       await onboardingService.saveResponsible(
         onboardingId,
         tenantId,
@@ -50,10 +53,13 @@ export const ResponsibleForm = ({ onNext }: ResponsibleFormProps) => {
         data
       );
 
-      // Em vez de router.push, chamamos o onNext para mudar o Step no componente pai para 3 (Planos)
-      onNext();
+      console.log("✅ Responsável registrado com sucesso no PostgreSQL!");
+
+      if (typeof onNext === 'function') {
+        onNext();
+      }
     } catch (error) {
-      console.error("Erro ao registrar responsável no TechPlann:", error);
+      console.error("❌ Erro ao registrar responsável:", error);
     }
   };
 
@@ -66,34 +72,29 @@ export const ResponsibleForm = ({ onNext }: ResponsibleFormProps) => {
     focus-visible:ring-offset-0
     outline-none
     ${errorField ? "border-red-500 focus-visible:ring-red-500 focus-visible:border-red-500" : ""}
-  `
-      .replace(/\s+/g, " ")
-      .trim();
+  `.replace(/\s+/g, " ").trim();
 
   return (
     <div className="bg-white rounded-2xl border border-gray-100 p-10 shadow-sm max-w-5xl mx-auto font-sans">
       <header className="mb-8">
         <h2 className="text-2xl font-bold text-gray-900">Responsável</h2>
         <p className="text-sm text-gray-500 mt-1">
-          Dados do responsável legal da empresa
+          Dados do responsável legal para a conta TechPlann
         </p>
       </header>
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+        {/* Nome e CPF */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="space-y-2">
-            <Label className="text-sm font-medium text-gray-700">
-              Nome Completo *
-            </Label>
+            <Label className="text-sm font-medium text-gray-700">Nome Completo *</Label>
             <Input
               {...register("fullName")}
-              placeholder="Nome do responsável legal"
+              placeholder="Nome completo"
               className={inputStyles(errors.fullName)}
             />
             {errors.fullName && (
-              <p className="text-xs text-red-500 font-medium">
-                {errors.fullName.message}
-              </p>
+              <p className="text-xs text-red-500 font-medium">{errors.fullName.message}</p>
             )}
           </div>
           <div className="space-y-2">
@@ -104,58 +105,45 @@ export const ResponsibleForm = ({ onNext }: ResponsibleFormProps) => {
               className={inputStyles(errors.cpf)}
             />
             {errors.cpf && (
-              <p className="text-xs text-red-500 font-medium">
-                {errors.cpf.message}
-              </p>
+              <p className="text-xs text-red-500 font-medium">{errors.cpf.message}</p>
             )}
           </div>
         </div>
 
-        {/* E-mail e Telefone */}
+        {/* Contato Direto */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="space-y-2">
-            <Label className="text-sm font-medium text-gray-700">Email *</Label>
+            <Label className="text-sm font-medium text-gray-700">Email Corporativo *</Label>
             <Input
               {...register("email")}
               type="email"
-              placeholder="responsavel@email.com"
+              placeholder="exemplo@techplann.com"
               className={inputStyles(errors.email)}
             />
             {errors.email && (
-              <p className="text-xs text-red-500 font-medium">
-                {errors.email.message}
-              </p>
+              <p className="text-xs text-red-500 font-medium">{errors.email.message}</p>
             )}
           </div>
           <div className="space-y-2">
-            <Label className="text-sm font-medium text-gray-700">
-              Telefone
-            </Label>
+            <Label className="text-sm font-medium text-gray-700">Telefone / Celular</Label>
             <Input
               {...register("phone")}
               placeholder="(00) 00000-0000"
               className={inputStyles(errors.phone)}
             />
-            {errors.phone && (
-              <p className="text-xs text-red-500 font-medium">
-                {errors.phone.message}
-              </p>
-            )}
           </div>
         </div>
 
-        {/* Cargo */}
+        {/* Cargo / Função */}
         <div className="space-y-2">
           <Label className="text-sm font-medium text-gray-700">Cargo *</Label>
           <Input
             {...register("jobTitle")}
-            placeholder="Diretor, Sócio, etc."
+            placeholder="Ex: Diretor Executivo"
             className={inputStyles(errors.jobTitle)}
           />
           {errors.jobTitle && (
-            <p className="text-xs text-red-500 font-medium">
-              {errors.jobTitle.message}
-            </p>
+            <p className="text-xs text-red-500 font-medium">{errors.jobTitle.message}</p>
           )}
         </div>
 
