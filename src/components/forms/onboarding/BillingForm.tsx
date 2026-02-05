@@ -12,7 +12,12 @@ import { NextButton } from "../../ui/custom/NextButton";
 import { billingSchema, type BillingData } from "@/lib/validators/schema";
 import { cn } from "@/lib/utils";
 
-export const BillingForm = () => {
+// Interface para garantir a navegação do fluxo
+interface BillingFormProps {
+  onNext: () => void;
+}
+
+export const BillingForm = ({ onNext }: BillingFormProps) => {
   const {
     register,
     handleSubmit,
@@ -36,24 +41,25 @@ export const BillingForm = () => {
     focus-visible:ring-offset-0
     outline-none
     ${errorField ? "border-red-500 focus-visible:ring-red-500 focus-visible:border-red-500" : ""}
-  `
-      .replace(/\s+/g, " ")
-      .trim();
+  `.replace(/\s+/g, " ").trim();
 
-  const onSubmit = (data: BillingData) =>
-    console.log("Dados de Pagamento:", data);
+  // FUNÇÃO MOCK: Apenas loga os dados e segue para o próximo Step (Conta)
+  const onSubmit = (data: BillingData) => {
+    console.log("💳 MVP - Dados de Pagamento coletados (Mock):", data);
+    if (typeof onNext === 'function') onNext();
+  };
 
   return (
-    
     <div className="bg-white rounded-2xl border border-gray-100 p-10 shadow-sm max-w-5xl mx-auto font-sans mt-4">
       <header className="mb-8">
         <h2 className="text-2xl font-bold text-gray-900">Pagamento</h2>
-        <p className="text-sm text-gray-500 mt-1">
-          Configure sua forma de pagamento
+        <p className="text-sm text-gray-500 mt-1 italic">
+          Configuração de faturamento para o TechPlann
         </p>
       </header>
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
+        {/* Seleção do Método */}
         <div className="space-y-4">
           <Label className="text-[11px] font-black uppercase tracking-widest text-gray-400">
             Método de Pagamento
@@ -71,20 +77,9 @@ export const BillingForm = () => {
             >
               <CreditCard
                 size={20}
-                className={
-                  paymentMethod === "credit_card"
-                    ? "text-[#10b981]"
-                    : "text-gray-400"
-                }
+                className={paymentMethod === "credit_card" ? "text-[#10b981]" : "text-gray-400"}
               />
-              <span
-                className={cn(
-                  "text-sm font-bold",
-                  paymentMethod === "credit_card"
-                    ? "text-gray-900"
-                    : "text-gray-500",
-                )}
-              >
+              <span className={cn("text-sm font-bold", paymentMethod === "credit_card" ? "text-gray-900" : "text-gray-500")}>
                 Cartão de Crédito
               </span>
             </button>
@@ -101,20 +96,9 @@ export const BillingForm = () => {
             >
               <FileText
                 size={20}
-                className={
-                  paymentMethod === "boleto"
-                    ? "text-[#10b981]"
-                    : "text-gray-400"
-                }
+                className={paymentMethod === "boleto" ? "text-[#10b981]" : "text-gray-400"}
               />
-              <span
-                className={cn(
-                  "text-sm font-bold",
-                  paymentMethod === "boleto"
-                    ? "text-gray-900"
-                    : "text-gray-500",
-                )}
-              >
+              <span className={cn("text-sm font-bold", paymentMethod === "boleto" ? "text-gray-900" : "text-gray-500")}>
                 Boleto Bancário
               </span>
             </button>
@@ -123,16 +107,12 @@ export const BillingForm = () => {
 
         <hr className="border-gray-50" />
 
-        
+        {/* Formulário Dinâmico: Cartão */}
         {paymentMethod === "credit_card" ? (
           <div className="space-y-6 animate-in fade-in slide-in-from-top-4 duration-500">
-            <h3 className="text-sm font-bold text-gray-900 tracking-tight">
-              Dados do Cartão
-            </h3>
+            <h3 className="text-sm font-bold text-gray-900 tracking-tight">Dados do Cartão</h3>
             <div className="space-y-2">
-              <Label className="text-sm font-medium text-gray-700">
-                Número do Cartão *
-              </Label>
+              <Label className="text-sm font-medium text-gray-700">Número do Cartão *</Label>
               <Input
                 {...register("cardNumber")}
                 placeholder="0000 0000 0000 0000"
@@ -140,9 +120,7 @@ export const BillingForm = () => {
               />
             </div>
             <div className="space-y-2">
-              <Label className="text-sm font-medium text-gray-700">
-                Nome no Cartão *
-              </Label>
+              <Label className="text-sm font-medium text-gray-700">Nome no Cartão *</Label>
               <Input
                 {...register("cardName")}
                 placeholder="NOME COMO ESTÁ NO CARTÃO"
@@ -151,72 +129,39 @@ export const BillingForm = () => {
             </div>
             <div className="grid grid-cols-2 gap-6">
               <div className="space-y-2">
-                <Label className="text-sm font-medium text-gray-700">
-                  Validade *
-                </Label>
-                <Input
-                  {...register("expiry")}
-                  placeholder="MM/AA"
-                  className={inputStyles(errors.expiry)}
-                />
+                <Label className="text-sm font-medium text-gray-700">Validade *</Label>
+                <Input {...register("expiry")} placeholder="MM/AA" className={inputStyles(errors.expiry)} />
               </div>
               <div className="space-y-2">
-                <Label className="text-sm font-medium text-gray-700">
-                  CVV *
-                </Label>
-                <Input
-                  {...register("cvv")}
-                  placeholder="****"
-                  className={inputStyles(errors.cvv)}
-                />
+                <Label className="text-sm font-medium text-gray-700">CVV *</Label>
+                <Input {...register("cvv")} placeholder="****" className={inputStyles(errors.cvv)} />
               </div>
             </div>
             <div className="bg-blue-50 border border-blue-100 rounded-xl p-4 flex gap-3 items-center">
               <Info className="text-blue-600 shrink-0" size={18} />
-              <p className="text-[11px] text-blue-800 leading-relaxed">
-                <strong className="font-bold">Integração CORA Bank:</strong> Sua
-                cobrança será processada pelo banco CORA com total segurança e
-                praticidade.
+              <p className="text-[11px] text-blue-800 leading-relaxed italic">
+                Sua cobrança será processada com total segurança via <b>CORA Bank</b>.
               </p>
             </div>
           </div>
         ) : (
+          /* Formulário Dinâmico: Boleto */
           <div className="space-y-6 animate-in fade-in slide-in-from-top-4 duration-500">
-            <h3 className="text-sm font-bold text-gray-900 tracking-tight">
-              Dados Bancários (opcional)
-            </h3>
+            <h3 className="text-sm font-bold text-gray-900 tracking-tight">Dados Bancários (Opcional)</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-2">
-                <Label className="text-sm font-medium text-gray-700">
-                  Banco
-                </Label>
-                <Input
-                  {...register("bankName")}
-                  placeholder="Nome do banco"
-                  className={inputStyles(undefined)}
-                />
+                <Label className="text-sm font-medium text-gray-700">Banco</Label>
+                <Input {...register("bankName")} placeholder="Ex: Banco Cora" className={inputStyles(undefined)} />
               </div>
               <div className="space-y-2">
-                <Label className="text-sm font-medium text-gray-700">
-                  Agência
-                </Label>
-                <Input
-                  {...register("agency")}
-                  placeholder="0000"
-                  className={inputStyles(undefined)}
-                />
+                <Label className="text-sm font-medium text-gray-700">Agência</Label>
+                <Input {...register("agency")} placeholder="0001" className={inputStyles(undefined)} />
               </div>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-2">
-                <Label className="text-sm font-medium text-gray-700">
-                  Conta
-                </Label>
-                <Input
-                  {...register("accountNumber")}
-                  placeholder="00000-0"
-                  className={inputStyles(undefined)}
-                />
+                <Label className="text-sm font-medium text-gray-700">Conta</Label>
+                <Input {...register("accountNumber")} placeholder="00000-0" className={inputStyles(undefined)} />
               </div>
 
               <CustomSelect
@@ -228,14 +173,13 @@ export const BillingForm = () => {
                   { value: "corrente", label: "Conta Corrente" },
                   { value: "poupanca", label: "Conta Poupança" },
                 ]}
-                 error={!!errors.accountType}
+                error={!!errors.accountType}
               />
             </div>
             <div className="bg-emerald-50 border border-emerald-100 rounded-xl p-4 flex items-center gap-3">
               <CheckCircle2 className="text-[#10b981]" size={18} />
               <p className="text-[11px] text-emerald-800 font-medium italic">
-                <b>Boleto via CORA Bank:</b> O boleto será enviado
-                automaticamente para o e-mail cadastrado mensalmente.
+                O boleto será enviado automaticamente para o e-mail cadastrado mensalmente.
               </p>
             </div>
           </div>
@@ -245,7 +189,7 @@ export const BillingForm = () => {
 
         <NextButton
           onBack={() => window.history.back()}
-          nextLabel="Próximo"
+          nextLabel="Avançar para Conta"
           isSubmitting={isSubmitting}
         />
       </form>
