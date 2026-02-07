@@ -1,18 +1,37 @@
-import { Metadata } from "next";
-import { UserAccountForm } from "@/components/forms/onboarding/UserAccountForm";
+"use client";
 
-export const metadata: Metadata = {
-  title: "Criação de Conta | TechPlann",
-  description: "Crie suas credenciais de acesso para começar a utilizar a plataforma TechPlann.",
-};
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { UserAccountForm } from "@/components/forms/onboarding/UserAccountForm";
+import { useOnboardingStore } from "@/stores/useOnboardingStore";
 
 export default function AccountPage() {
+  const router = useRouter();
+  const { onboardingId } = useOnboardingStore();
+
+  useEffect(() => {
+    // Segurança: Não deixa criar conta sem ter passado pelo onboarding
+    if (!onboardingId || onboardingId === "undefined") {
+      router.replace("/onboarding/organization");
+    }
+  }, [onboardingId, router]);
+
+  if (!onboardingId || onboardingId === "undefined") {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <p className="text-gray-500 animate-pulse">Preparando criação de conta...</p>
+      </div>
+    );
+  }
+
   return (
-    
     <main className="min-h-screen bg-gray-50/50 flex flex-col items-center">
-    
       <div className="w-full max-w-7xl px-4 py-8">
-        <UserAccountForm />
+        {/* Passamos o ID e o redirecionamento final */}
+        <UserAccountForm 
+          onboardingId={onboardingId} 
+          onNext={() => router.push("/dashboard")} 
+        />
       </div>
       
       <p className="mt-4 pb-12 text-sm text-gray-400">

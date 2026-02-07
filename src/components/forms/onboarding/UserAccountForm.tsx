@@ -14,7 +14,13 @@ import { cn } from "@/lib/utils";
 // Importando os tipos do seu schema (mantemos para validação visual apenas)
 import { accountCreationSchema, type AccountCreationData } from "@/lib/validators/schema";
 
-export const UserAccountForm = () => {
+// Interface adicionada para resolver o erro de tipagem no page.tsx
+interface UserAccountFormProps {
+  onboardingId: string;
+  onNext?: () => void;
+}
+
+export const UserAccountForm = ({ onboardingId, onNext }: UserAccountFormProps) => {
   const [showPassword, setShowPassword] = React.useState(false);
   const router = useRouter();
   
@@ -36,11 +42,25 @@ export const UserAccountForm = () => {
   );
 
   // FUNÇÃO MOCK: Apenas loga os dados e redireciona para o fim
-  const onSubmit = (data: AccountCreationData) => {
-    console.log("🏁 MVP - Cadastro Finalizado com sucesso:", data);
-    
-    // Redireciona para o dashboard ou uma página de "Bem-vindo"
-    router.push("/dashboard");
+  const onSubmit = async (data: AccountCreationData) => {
+    try {
+      console.log("🏁 MVP - Cadastro Finalizado com sucesso!");
+      console.log("🆔 Onboarding ID vinculado:", onboardingId);
+      console.log("👤 Dados do Usuário:", data);
+      
+      // Simula um pequeno delay de processamento
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+
+      // Se houver uma função onNext passada pelo pai, executa ela
+      if (typeof onNext === "function") {
+        onNext();
+      } else {
+        // Fallback caso não venha onNext: vai direto para o dashboard
+        router.push("/dashboard");
+      }
+    } catch (error) {
+      console.error("❌ Erro ao finalizar cadastro:", error);
+    }
   };
 
   return (
