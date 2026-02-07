@@ -40,7 +40,7 @@ export const onboardingService = {
         `/onboarding/${onboardingId}/organization`,
         payload,
       );
-      return data; // O componente decide se salva tenantId/orgId na store
+      return data; // Retorna { tenantId, organizationId }
     } catch (error) {
       console.error("❌ API: Erro ao salvar organização:", error);
       throw error;
@@ -51,15 +51,16 @@ export const onboardingService = {
   saveResponsible: async (
     onboardingId: string,
     tenantId: string,
-    orgId: string,
+    orgId: string, // Mantemos o nome do argumento na função por clareza
     userData: RepresentativeData,
   ) => {
     try {
+      // MUDANÇA AQUI: Enviamos 'organizationId' para bater com o Controller do NestJS
       const { data } = await api.post(
         `/onboarding/${onboardingId}/responsible`,
         {
           tenantId,
-          orgId,
+          organizationId: orgId, // Mapeamento de orgId para organizationId
           data: userData,
         },
       );

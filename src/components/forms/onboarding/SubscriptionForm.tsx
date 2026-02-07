@@ -79,11 +79,11 @@ export const SubscriptionForm = ({ onboardingId }: SubscriptionFormProps) => {
   } = useForm<PlanSelectionInput>({
     resolver: zodResolver(planSelectionSchema),
     defaultValues: {
-      plan: undefined,
+      planKey: undefined,
     }
   });
 
-  const selectedPlan = watch("plan");
+  const selectedPlan = watch("planKey");
 
   const onSubmit: SubmitHandler<PlanSelectionInput> = async (data) => {
     try {
@@ -93,7 +93,7 @@ export const SubscriptionForm = ({ onboardingId }: SubscriptionFormProps) => {
         return;
       }
 
-      console.log(`🚀 Finalizando Onboarding. Vinculando plano ${data.plan} ao Tenant: ${tenantId}`);
+      console.log(`🚀 Finalizando Onboarding. Vinculando plano ${data.planKey} ao Tenant: ${tenantId}`);
 
       // 1. Envia a escolha do plano para o backend (Grava no Postgres via Prisma)
       await onboardingService.saveSubscription(onboardingId, tenantId, data);
@@ -128,7 +128,7 @@ export const SubscriptionForm = ({ onboardingId }: SubscriptionFormProps) => {
               key={plan.id}
               whileHover={{ scale: 1.04, translateY: -8 }}
               whileTap={{ scale: 0.98 }}
-              onClick={() => setValue("plan", plan.id, { shouldValidate: true })}
+              onClick={() => setValue("planKey", plan.id, { shouldValidate: true })}
               className={cn(
                 "relative cursor-pointer rounded-2xl border-2 p-6 transition-all duration-300 flex flex-col min-h-[300px]",
                 "hover:border-[#10b981] hover:shadow-2xl hover:shadow-green-100/50",
@@ -181,10 +181,10 @@ export const SubscriptionForm = ({ onboardingId }: SubscriptionFormProps) => {
           <span>Debitado via cartão de crédito</span>
         </div>
 
-        {errors.plan && (
+        {errors.planKey && (
           <div className="flex items-center justify-center gap-2 text-red-500 font-bold text-[10px] uppercase tracking-widest bg-red-50 py-2 rounded-lg">
             <Info size={14} />
-            {errors.plan.message}
+            {errors.planKey.message}
           </div>
         )}
 

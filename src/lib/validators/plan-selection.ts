@@ -3,7 +3,7 @@ import { z } from "zod";
 export const PLAN_TYPES = ["starter", "professional", "enterprise"] as const;
 
 export const planSelectionSchema = z.object({
-  plan: z
+  planKey: z
     .string()
     .min(1, "Por favor, selecione um plano para continuar.")
     .refine(
