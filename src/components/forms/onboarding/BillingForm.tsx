@@ -11,13 +11,15 @@ import { CustomSelect } from "@/components/ui/custom/CustomSelect";
 import { NextButton } from "../../ui/custom/NextButton";
 import { billingSchema, type BillingData } from "@/lib/validators/schema";
 import { cn } from "@/lib/utils";
+import { onboardingService } from "@/services/onboarding";
 
 // Interface para garantir a navegação do fluxo
 interface BillingFormProps {
+  onboardingId: string;
   onNext: () => void;
 }
 
-export const BillingForm = ({ onNext }: BillingFormProps) => {
+export const BillingForm = ({ onboardingId, onNext }: BillingFormProps) => {
   const {
     register,
     handleSubmit,
@@ -44,9 +46,24 @@ export const BillingForm = ({ onNext }: BillingFormProps) => {
   `.replace(/\s+/g, " ").trim();
 
   // FUNÇÃO MOCK: Apenas loga os dados e segue para o próximo Step (Conta)
-  const onSubmit = (data: BillingData) => {
-    console.log("💳 MVP - Dados de Pagamento coletados (Mock):", data);
-    if (typeof onNext === 'function') onNext();
+  const onSubmit = async (data: BillingData) => {
+    try {
+      // 1. Logamos os dados para você ver no console que o formulário funciona
+      console.log("💳 [MOCK] Dados de faturamento coletados:", data);
+      console.log("🆔 Onboarding ID:", onboardingId);
+
+      // 2. Simulamos um pequeno delay de rede para a UX ficar realista
+      await new Promise((resolve) => setTimeout(resolve, 800));
+
+      console.log("✅ MVP: Pulando integração real por enquanto.");
+
+      // 3. Seguimos para o próximo passo (Dashboard ou Sucesso)
+      if (typeof onNext === 'function') {
+        onNext();
+      }
+    } catch (error) {
+      console.error("❌ Erro no mock de faturamento:", error);
+    }
   };
 
   return (
