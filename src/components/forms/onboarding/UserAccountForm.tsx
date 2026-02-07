@@ -11,10 +11,12 @@ import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { cn } from "@/lib/utils";
 
-// Importando os tipos do seu schema (mantemos para validação visual apenas)
+// Importando os tipos do seu schema
 import { accountCreationSchema, type AccountCreationData } from "@/lib/validators/schema";
+// Importando a store para realizar o reset final
+import { useOnboardingStore } from "@/stores/useOnboardingStore";
 
-// Interface adicionada para resolver o erro de tipagem no page.tsx
+// Interface para resolver a tipagem e garantir a comunicação com o page.tsx
 interface UserAccountFormProps {
   onboardingId: string;
   onNext?: () => void;
@@ -23,6 +25,9 @@ interface UserAccountFormProps {
 export const UserAccountForm = ({ onboardingId, onNext }: UserAccountFormProps) => {
   const [showPassword, setShowPassword] = React.useState(false);
   const router = useRouter();
+  
+  // Pegamos a função reset da store para limpar o lixo do onboarding ao finalizar
+  const { reset } = useOnboardingStore();
   
   const { 
     register, 
@@ -41,15 +46,22 @@ export const UserAccountForm = ({ onboardingId, onNext }: UserAccountFormProps) 
     hasError && "border-red-500 focus-visible:ring-red-500"
   );
 
-  // FUNÇÃO MOCK: Apenas loga os dados e redireciona para o fim
+  /**
+   * FUNÇÃO DE SUBMISSÃO (MOCK + RESET)
+   * Agora ela limpa a memória do navegador antes de levar o usuário ao Dashboard.
+   */
   const onSubmit = async (data: AccountCreationData) => {
     try {
       console.log("🏁 MVP - Cadastro Finalizado com sucesso!");
       console.log("🆔 Onboarding ID vinculado:", onboardingId);
       console.log("👤 Dados do Usuário:", data);
       
-      // Simula um pequeno delay de processamento
+      // Simula um pequeno delay de processamento para UX (feedback visual de salvamento)
       await new Promise((resolve) => setTimeout(resolve, 1000));
+
+      // AJUSTE FINAL: Limpamos a Store do Onboarding
+      // Isso remove o onboardingId e tenantId do localStorage.
+      reset(); 
 
       // Se houver uma função onNext passada pelo pai, executa ela
       if (typeof onNext === "function") {
@@ -80,7 +92,7 @@ export const UserAccountForm = ({ onboardingId, onNext }: UserAccountFormProps) 
               placeholder="Ex: Ian Lima" 
               className={inputStyles(!!errors.fullName)} 
             />
-            {errors.fullName && <p className="text-xs text-red-500">{errors.fullName.message}</p>}
+            {errors.fullName && <p className="text-xs text-red-500 font-medium mt-1">{errors.fullName.message}</p>}
           </div>
           <div className="space-y-2">
             <Label className="text-sm font-medium text-gray-700">Email de Acesso *</Label>
@@ -89,7 +101,7 @@ export const UserAccountForm = ({ onboardingId, onNext }: UserAccountFormProps) 
               placeholder="exemplo@email.com" 
               className={inputStyles(!!errors.email)} 
             />
-            {errors.email && <p className="text-xs text-red-500">{errors.email.message}</p>}
+            {errors.email && <p className="text-xs text-red-500 font-medium mt-1">{errors.email.message}</p>}
           </div>
         </div>
 
@@ -107,11 +119,12 @@ export const UserAccountForm = ({ onboardingId, onNext }: UserAccountFormProps) 
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
                 className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-[#10b981] transition-colors"
+                title={showPassword ? "Ocultar senha" : "Ver senha"}
               >
                 {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
               </button>
             </div>
-            {errors.password && <p className="text-xs text-red-500">{errors.password.message}</p>}
+            {errors.password && <p className="text-xs text-red-500 font-medium mt-1">{errors.password.message}</p>}
           </div>
           <div className="space-y-2">
             <Label className="text-sm font-medium text-gray-700">Confirmar Senha *</Label>
@@ -121,7 +134,7 @@ export const UserAccountForm = ({ onboardingId, onNext }: UserAccountFormProps) 
               placeholder="Repita a senha" 
               className={inputStyles(!!errors.confirmPassword)} 
             />
-            {errors.confirmPassword && <p className="text-xs text-red-500">{errors.confirmPassword.message}</p>}
+            {errors.confirmPassword && <p className="text-xs text-red-500 font-medium mt-1">{errors.confirmPassword.message}</p>}
           </div>
         </div>
 
@@ -135,12 +148,12 @@ export const UserAccountForm = ({ onboardingId, onNext }: UserAccountFormProps) 
               "data-[state=checked]:bg-[#10b981] data-[state=checked]:border-[#10b981] data-[state=checked]:text-white"
             )}
           />
-          <label htmlFor="terms" className="text-sm text-gray-500 cursor-pointer">
+          <label htmlFor="terms" className="text-sm text-gray-500 cursor-pointer select-none">
             Li e aceito os <span className="text-[#10b981] cursor-pointer hover:underline font-medium">Termos de Uso</span> e a <span className="text-[#10b981] cursor-pointer hover:underline font-medium">Política de Privacidade</span>
           </label>
         </div>
 
-        {/* Resumo Estático (Para fechar o visual) */}
+        {/* Resumo Estático (Para fechar o visual e passar segurança) */}
         <div className="bg-gray-50/50 rounded-xl p-6 space-y-3 border border-gray-100">
           <h3 className="text-[11px] font-black uppercase text-gray-400 tracking-wider">Resumo da Contratação</h3>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-y-2 text-sm">
@@ -163,10 +176,10 @@ export const UserAccountForm = ({ onboardingId, onNext }: UserAccountFormProps) 
           <button
             type="submit"
             disabled={isSubmitting}
-            className="flex items-center gap-2 px-8 py-3 rounded-xl bg-[#10b981] text-white font-bold text-sm hover:bg-[#0da673] transition-all shadow-lg shadow-emerald-100/50 disabled:opacity-50"
+            className="flex items-center gap-2 px-8 py-3 rounded-xl bg-[#10b981] text-white font-bold text-sm hover:bg-[#0da673] transition-all shadow-lg shadow-emerald-100/50 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <CheckSquare size={18} />
-            Finalizar Cadastro
+            {isSubmitting ? "Finalizando..." : "Finalizar Cadastro"}
           </button>
         </div>
       </form>

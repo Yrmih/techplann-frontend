@@ -82,7 +82,7 @@ export const onboardingService = {
         `/onboarding/${onboardingId}/subscription`,
         {
           tenantId,
-          data: planData,
+          ...planData, // 👈 Em vez de 'data: planData', espalhamos o objeto
         },
       );
       return data;
