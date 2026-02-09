@@ -1,23 +1,27 @@
 "use client";
 
-import { ClipboardList, FolderKanban, Target } from "lucide-react";
+import { ClipboardList, FolderKanban, Target, TrendingUp, PieChart as PieIcon } from "lucide-react";
+
+// Ajuste os caminhos de importação conforme sua estrutura de pastas real
 import { MetricCard } from "./MetricCard";
+import { PerformanceChart } from "./PerformanceChart";
+import { StatusProjectsChart } from "./StatusProjectsChart";
 
 export default function Dashboard() {
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div className="flex justify-between items-end">
+      {/* Header com informações da Empresa (conforme seu design) */}
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Dashboard</h1>
           <p className="text-gray-500 text-sm">Visão geral do seu planejamento estratégico.</p>
         </div>
-        <div className="text-xs text-gray-400 bg-gray-50 px-4 py-2 rounded-full border border-gray-100">
+        <div className="text-xs text-gray-400 bg-gray-50 px-4 py-2 rounded-full border border-gray-100 shadow-sm">
           Empresa: <span className="font-semibold text-gray-600">BC Development S/S LTDA</span> • Frank Pereira Cardoso
         </div>
       </div>
       
-      {/* Linha 1: Cards de Métricas */}
+      {/* Linha 1: Cards de Métricas (Top Bar) */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <MetricCard 
           title="Planejamentos"
@@ -45,39 +49,37 @@ export default function Dashboard() {
         />
       </div>
 
-      {/* Linha 2: Gráficos Principais */}
+      {/* Linha 2: Gráficos de Performance e Status */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Performance Geral */}
-        <div className="lg:col-span-2 bg-white p-6 rounded-2xl border border-gray-100 shadow-sm min-h-[400px]">
-          <div className="flex items-center gap-2 mb-6">
+        {/* Container Performance Geral (Barras) */}
+        <div className="lg:col-span-2 bg-white p-6 rounded-2xl border border-gray-100 shadow-sm">
+          <div className="flex items-center gap-2 mb-8">
             <div className="p-2 bg-emerald-50 text-emerald-500 rounded-lg">
-              <span className="text-lg">📈</span>
+              <TrendingUp size={20} />
             </div>
             <div>
               <h3 className="font-bold text-gray-800">Performance Geral</h3>
               <p className="text-xs text-gray-400">Evolução mensal</p>
             </div>
           </div>
-          {/* Aqui entrará o componente do Gráfico de Barras da Recharts */}
-          <div className="h-64 flex items-center justify-center border-2 border-dashed border-gray-50 text-gray-300">
-            [Gráfico de Barras: Meta vs Realizado]
-          </div>
+          
+          <PerformanceChart />
         </div>
 
-        {/* Status Projetos */}
-        <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm">
-          <div className="flex items-center gap-2 mb-6">
+        {/* Container Status Projetos (Donut) */}
+        <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm flex flex-col">
+          <div className="flex items-center gap-2 mb-8">
             <div className="p-2 bg-emerald-50 text-emerald-500 rounded-lg">
-              <span className="text-lg">🕒</span>
+              <PieIcon size={20} />
             </div>
             <div>
               <h3 className="font-bold text-gray-800">Status Projetos</h3>
               <p className="text-xs text-gray-400">Distribuição atual</p>
             </div>
           </div>
-          {/* Aqui entrará o componente do Gráfico Donut da Recharts */}
-          <div className="h-64 flex items-center justify-center border-2 border-dashed border-gray-50 text-gray-300">
-            [Gráfico Donut: Status]
+          
+          <div className="flex-1 flex items-center justify-center">
+            <StatusProjectsChart />
           </div>
         </div>
       </div>
