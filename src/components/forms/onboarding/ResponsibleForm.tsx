@@ -4,7 +4,6 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { FieldError } from "react-hook-form";
 
-// Shadcn UI Components
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
@@ -19,11 +18,14 @@ import { onboardingService } from "@/services/onboarding";
 
 // Interface ALINHADA: Recebe o onboardingId diretamente do pai (page.tsx)
 interface ResponsibleFormProps {
-  onboardingId: string; 
+  onboardingId: string;
   onNext: () => void;
 }
 
-export const ResponsibleForm = ({ onboardingId, onNext }: ResponsibleFormProps) => {
+export const ResponsibleForm = ({
+  onboardingId,
+  onNext,
+}: ResponsibleFormProps) => {
   // Recupera os IDs de vínculo gerados no Step 1 da Store persistente
   const { tenantId, organizationId } = useOnboardingStore();
 
@@ -35,27 +37,39 @@ export const ResponsibleForm = ({ onboardingId, onNext }: ResponsibleFormProps) 
     resolver: zodResolver(ResponsibleSchema),
   });
 
+  // FUNÇÃO REESTRUTURADA: Limpa os dados de CPF e Telefone antes de enviar
   const onSubmit = async (data: RepresentativeData) => {
     try {
       // VALIDAÇÃO DE SEGURANÇA: Garante que todos os IDs necessários existam
       if (!onboardingId || !tenantId || !organizationId) {
-        console.error("❌ Erro de integridade: IDs de vínculo não encontrados.");
+        console.error(
+          "❌ Erro de integridade: IDs de vínculo não encontrados.",
+        );
         return;
       }
 
-      console.log("🚀 Vinculando responsável ao Tenant/Org no banco...");
+      console.log(
+        "🚀 Sanitizando dados do responsável e vinculando ao banco...",
+      );
 
-      // Chama o endpoint usando o ID injetado via Prop (evita delay da Store)
+      // LIMPEZA Remove pontos, hífens e parênteses (deixa apenas números)
+      const cleanUserData = {
+        ...data,
+        cpf: data.cpf.replace(/\D/g, ""),
+        phone: data.phone?.replace(/\D/g, ""),
+      };
+
+      // Chama o endpoint usando os dados limpos
       await onboardingService.saveResponsible(
         onboardingId,
         tenantId,
         organizationId,
-        data
+        cleanUserData,
       );
 
-      console.log("✅ Responsável registrado com sucesso no PostgreSQL!");
+      console.log("✅ Responsável (Pietro) registrado com sucesso!");
 
-      if (typeof onNext === 'function') {
+      if (typeof onNext === "function") {
         onNext();
       }
     } catch (error) {
@@ -72,7 +86,9 @@ export const ResponsibleForm = ({ onboardingId, onNext }: ResponsibleFormProps) 
     focus-visible:ring-offset-0
     outline-none
     ${errorField ? "border-red-500 focus-visible:ring-red-500 focus-visible:border-red-500" : ""}
-  `.replace(/\s+/g, " ").trim();
+  `
+      .replace(/\s+/g, " ")
+      .trim();
 
   return (
     <div className="bg-white rounded-2xl border border-gray-100 p-10 shadow-sm max-w-5xl mx-auto font-sans">
@@ -87,14 +103,19 @@ export const ResponsibleForm = ({ onboardingId, onNext }: ResponsibleFormProps) 
         {/* Nome e CPF */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="space-y-2">
-            <Label className="text-sm font-medium text-gray-700">Nome Completo *</Label>
+            <Label className="text-sm font-medium text-gray-700">
+              Nome Completo *
+            </Label>
             <Input
               {...register("fullName")}
               placeholder="Nome completo"
+              maxLength={100}
               className={inputStyles(errors.fullName)}
             />
             {errors.fullName && (
-              <p className="text-xs text-red-500 font-medium">{errors.fullName.message}</p>
+              <p className="text-xs text-red-500 font-medium">
+                {errors.fullName.message}
+              </p>
             )}
           </div>
           <div className="space-y-2">
@@ -102,48 +123,60 @@ export const ResponsibleForm = ({ onboardingId, onNext }: ResponsibleFormProps) 
             <Input
               {...register("cpf")}
               placeholder="000.000.000-00"
+              maxLength={14}
               className={inputStyles(errors.cpf)}
             />
             {errors.cpf && (
-              <p className="text-xs text-red-500 font-medium">{errors.cpf.message}</p>
+              <p className="text-xs text-red-500 font-medium">
+                {errors.cpf.message}
+              </p>
             )}
           </div>
         </div>
 
-        {/* Contato Direto */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="space-y-2">
-            <Label className="text-sm font-medium text-gray-700">Email Corporativo *</Label>
+            <Label className="text-sm font-medium text-gray-700">
+              Email Corporativo *
+            </Label>
             <Input
               {...register("email")}
               type="email"
               placeholder="exemplo@techplann.com"
+              maxLength={100}
               className={inputStyles(errors.email)}
             />
             {errors.email && (
-              <p className="text-xs text-red-500 font-medium">{errors.email.message}</p>
+              <p className="text-xs text-red-500 font-medium">
+                {errors.email.message}
+              </p>
             )}
           </div>
           <div className="space-y-2">
-            <Label className="text-sm font-medium text-gray-700">Telefone / Celular</Label>
+            <Label className="text-sm font-medium text-gray-700">
+              Telefone / Celular
+            </Label>
             <Input
               {...register("phone")}
               placeholder="(00) 00000-0000"
+              maxLength={15}
               className={inputStyles(errors.phone)}
             />
           </div>
         </div>
 
-        {/* Cargo / Função */}
         <div className="space-y-2">
           <Label className="text-sm font-medium text-gray-700">Cargo *</Label>
           <Input
             {...register("jobTitle")}
             placeholder="Ex: Diretor Executivo"
+            maxLength={50}
             className={inputStyles(errors.jobTitle)}
           />
           {errors.jobTitle && (
-            <p className="text-xs text-red-500 font-medium">{errors.jobTitle.message}</p>
+            <p className="text-xs text-red-500 font-medium">
+              {errors.jobTitle.message}
+            </p>
           )}
         </div>
 

@@ -23,14 +23,18 @@ import {
 } from "@/lib/validators/schema";
 import { useOnboardingStore } from "@/stores/useOnboardingStore";
 import { onboardingService } from "@/services/onboarding";
+import { BRAZIL_STATES } from "@/lib/constants/brazil-states";
 
 // Interface ATUALIZADA: Recebe o onboardingId como Prop obrigatória
 interface OrganizationFormProps {
-  onboardingId: string; 
+  onboardingId: string;
   onNext: () => void;
 }
 
-export const OrganizationForm = ({ onboardingId, onNext }: OrganizationFormProps) => {
+export const OrganizationForm = ({
+  onboardingId,
+  onNext,
+}: OrganizationFormProps) => {
   // Usamos a store apenas para SALVAR os IDs gerados pelo backend
   const { setTenantAndOrg } = useOnboardingStore();
 
@@ -43,22 +47,33 @@ export const OrganizationForm = ({ onboardingId, onNext }: OrganizationFormProps
     resolver: zodResolver(organizationStepOneSchema),
   });
 
-  // FUNÇÃO BLINDADA: Usa o onboardingId vindo diretamente da Prop
+  // FUNÇÃO REESTRUTURADA: Limpa os dados antes de enviar para a API
   const onSubmit = async (data: OrganizationStepOneData) => {
     try {
-      // Log de depuração para confirmar a presença do ID no momento do clique
-      console.log("🚀 Iniciando salvamento direto no banco com ID:", onboardingId);
+      console.log("🚀 Sanitizando dados e salvando com ID:", onboardingId);
 
-      // 1. Chamada ao service (POST /onboarding/:id/organization)
-      const response = await onboardingService.saveOrganization(onboardingId, data);
-      
-      // 2. Persiste tenantId e organizationId na Store para os próximos passos
+      // 💡 LIMPEZA: Remove caracteres não numéricos para bater com o DTO do Back-end
+      const cleanData = {
+        ...data,
+        cnpj: data.cnpj.replace(/\D/g, ""),
+        cep: data.cep.replace(/\D/g, ""),
+        telefone: data.telefone?.replace(/\D/g, ""),
+        celular: data.celular.replace(/\D/g, ""),
+      };
+
+      // 1. Chamada ao service com dados sanitizados
+      const response = await onboardingService.saveOrganization(
+        onboardingId,
+        cleanData
+      );
+
+      // 2. Persiste tenantId e organizationId na Store
       setTenantAndOrg(response.tenantId, response.organizationId);
 
       console.log("✅ Empresa registrada com sucesso no PostgreSQL!");
 
-      // 3. Transição segura para o Step 2
-      if (typeof onNext === 'function') {
+      // 3. Transição para o Step 2
+      if (typeof onNext === "function") {
         onNext();
       }
     } catch (error) {
@@ -100,17 +115,23 @@ export const OrganizationForm = ({ onboardingId, onNext }: OrganizationFormProps
             <Input
               {...register("razaoSocial")}
               placeholder="Razão social"
+              maxLength={100}
               className={inputStyles(errors.razaoSocial)}
             />
             {errors.razaoSocial && (
-              <p className="text-xs text-red-500">{errors.razaoSocial.message}</p>
+              <p className="text-xs text-red-500">
+                {errors.razaoSocial.message}
+              </p>
             )}
           </div>
           <div className="space-y-2">
-            <Label className="text-sm font-medium text-gray-700">Nome Fantasia</Label>
+            <Label className="text-sm font-medium text-gray-700">
+              Nome Fantasia
+            </Label>
             <Input
               {...register("nomeFantasia")}
               placeholder="Nome fantasia"
+              maxLength={100}
               className={inputStyles(errors.nomeFantasia)}
             />
           </div>
@@ -125,23 +146,32 @@ export const OrganizationForm = ({ onboardingId, onNext }: OrganizationFormProps
             <Input
               {...register("cnpj")}
               placeholder="00.000.000/0000-00"
+              maxLength={18}
               className={inputStyles(errors.cnpj)}
             />
-            {errors.cnpj && <p className="text-xs text-red-500">{errors.cnpj.message}</p>}
+            {errors.cnpj && (
+              <p className="text-xs text-red-500">{errors.cnpj.message}</p>
+            )}
           </div>
           <div className="space-y-2">
-            <Label className="text-sm font-medium text-gray-700">Inscrição Estadual</Label>
+            <Label className="text-sm font-medium text-gray-700">
+              Inscrição Estadual
+            </Label>
             <Input
               {...register("inscricaoEstadual")}
               placeholder="IE"
+              maxLength={20}
               className={inputStyles(errors.inscricaoEstadual)}
             />
           </div>
           <div className="space-y-2">
-            <Label className="text-sm font-medium text-gray-700">Inscrição Municipal</Label>
+            <Label className="text-sm font-medium text-gray-700">
+              Inscrição Municipal
+            </Label>
             <Input
               {...register("inscricaoMunicipal")}
               placeholder="IM"
+              maxLength={20}
               className={inputStyles(errors.inscricaoMunicipal)}
             />
           </div>
@@ -155,16 +185,23 @@ export const OrganizationForm = ({ onboardingId, onNext }: OrganizationFormProps
             </Label>
             <Input
               {...register("email")}
+              type="email"
               placeholder="contato@empresa.com"
+              maxLength={100}
               className={inputStyles(errors.email)}
             />
-            {errors.email && <p className="text-xs text-red-500">{errors.email.message}</p>}
+            {errors.email && (
+              <p className="text-xs text-red-500">{errors.email.message}</p>
+            )}
           </div>
           <div className="space-y-2">
-            <Label className="text-sm font-medium text-gray-700">Telefone</Label>
+            <Label className="text-sm font-medium text-gray-700">
+              Telefone
+            </Label>
             <Input
               {...register("telefone")}
               placeholder="(00) 0000-0000"
+              maxLength={14}
               className={inputStyles(errors.telefone)}
             />
           </div>
@@ -173,6 +210,7 @@ export const OrganizationForm = ({ onboardingId, onNext }: OrganizationFormProps
             <Input
               {...register("celular")}
               placeholder="(00) 00000-0000"
+              maxLength={15}
               className={inputStyles(errors.celular)}
             />
           </div>
@@ -189,22 +227,29 @@ export const OrganizationForm = ({ onboardingId, onNext }: OrganizationFormProps
               <Input
                 {...register("cep")}
                 placeholder="00000-000"
+                maxLength={9}
                 className={inputStyles(errors.cep)}
               />
             </div>
             <div className="md:col-span-2 space-y-2">
-              <Label className="text-sm font-medium text-gray-700">Endereço</Label>
+              <Label className="text-sm font-medium text-gray-700">
+                Endereço
+              </Label>
               <Input
                 {...register("endereco")}
                 placeholder="Logradouro..."
+                maxLength={150}
                 className={inputStyles(errors.endereco)}
               />
             </div>
             <div className="space-y-2">
-              <Label className="text-sm font-medium text-gray-700">Número</Label>
+              <Label className="text-sm font-medium text-gray-700">
+                Número
+              </Label>
               <Input
                 {...register("numero")}
                 placeholder="Nº"
+                maxLength={10}
                 className={inputStyles(errors.numero)}
               />
             </div>
@@ -212,44 +257,59 @@ export const OrganizationForm = ({ onboardingId, onNext }: OrganizationFormProps
 
           <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
             <div className="space-y-2">
-              <Label className="text-sm font-medium text-gray-700">Complemento</Label>
+              <Label className="text-sm font-medium text-gray-700">
+                Complemento
+              </Label>
               <Input
                 {...register("complemento")}
                 placeholder="Ex: Sala 10"
+                maxLength={50}
                 className={inputStyles(errors.complemento)}
               />
             </div>
             <div className="space-y-2">
-              <Label className="text-sm font-medium text-gray-700">Bairro</Label>
+              <Label className="text-sm font-medium text-gray-700">
+                Bairro
+              </Label>
               <Input
                 {...register("bairro")}
                 placeholder="Bairro"
+                maxLength={50}
                 className={inputStyles(errors.bairro)}
               />
             </div>
             <div className="space-y-2">
-              <Label className="text-sm font-medium text-gray-700">Cidade</Label>
+              <Label className="text-sm font-medium text-gray-700">
+                Cidade
+              </Label>
               <Input
                 {...register("cidade")}
                 placeholder="Cidade"
+                maxLength={50}
                 className={inputStyles(errors.cidade)}
               />
             </div>
             <div className="space-y-2">
-              <Label className="text-sm font-medium text-gray-700">Estado</Label>
+              <Label className="text-sm font-medium text-gray-700">
+                Estado
+              </Label>
               <Select onValueChange={(v) => setValue("estado", v)}>
-                <SelectTrigger className={`bg-white border-gray-200 focus:ring-[#10b981] focus:border-[#10b981] ${errors.estado ? "border-red-500" : ""}`}>
+                <SelectTrigger
+                  className={`bg-white border-gray-200 focus:ring-[#10b981] focus:border-[#10b981] ${errors.estado ? "border-red-500" : ""}`}
+                >
                   <SelectValue placeholder="UF" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="AC">Acre</SelectItem>
-                  <SelectItem value="PA">Pará</SelectItem>
-                  <SelectItem value="SP">São Paulo</SelectItem>
-                  <SelectItem value="RJ">Rio de Janeiro</SelectItem>
-                  <SelectItem value="MG">Minas Gerais</SelectItem>
+                  {BRAZIL_STATES.map((estado) => (
+                    <SelectItem key={estado.value} value={estado.value}>
+                      {estado.value}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
-              {errors.estado && <p className="text-xs text-red-500">{errors.estado.message}</p>}
+              {errors.estado && (
+                <p className="text-xs text-red-500">{errors.estado.message}</p>
+              )}
             </div>
           </div>
         </div>
