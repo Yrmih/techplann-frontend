@@ -1,6 +1,20 @@
 import { MoreHorizontal } from "lucide-react";
 
-export function PlanningTable({ data }: { data: any[] }) {
+
+interface PlanningItem {
+  id: number | string;
+  nome: string;
+  cliente: string;
+  projetos: number;
+  status: 'ATIVO' | 'CONCLUÍDO' | string;
+}
+
+
+interface PlanningTableProps {
+  data: PlanningItem[];
+}
+
+export function PlanningTable({ data }: PlanningTableProps) {
   return (
     <div className="overflow-x-auto">
       <table className="w-full text-left border-collapse">

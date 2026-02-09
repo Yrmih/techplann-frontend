@@ -1,10 +1,10 @@
 "use client";
 
-import React, { useState } from "react";
+import { useState } from "react";
 import { Plus, FileText, Search } from "lucide-react";
 import Link from "next/link";
 import { PlanningTable } from "./PlanningTable";
-import { EmptyPlanning } from "./EmptyPlanning"; // Crie este também se quiser o estado vazio
+import { EmptyPlanning } from "./EmptyPlanning";
 
 export default function Planning() {
   const [plannings, setPlannings] = useState([
