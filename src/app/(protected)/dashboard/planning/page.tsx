@@ -1,5 +1,5 @@
-import { PlanningTable } from "@/components/home-dashboard/planning/PlanningTable";
+import Planning from "@/components/home-dashboard/planning/Planning";
 
 export default function PlanningPage() {
-  return <PlanningTable />;
+  return <Planning />;
 }
