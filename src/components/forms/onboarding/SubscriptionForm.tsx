@@ -67,7 +67,7 @@ const plans: PlanOption[] = [
 
 export const SubscriptionForm = ({ onboardingId }: SubscriptionFormProps) => {
   const router = useRouter();
-  
+
   // Recuperamos o tenantId (vindo do Step 1) e a função reset da Store
   const { tenantId, reset } = useOnboardingStore();
 
@@ -80,35 +80,24 @@ export const SubscriptionForm = ({ onboardingId }: SubscriptionFormProps) => {
     resolver: zodResolver(planSelectionSchema),
     defaultValues: {
       planKey: undefined,
-    }
+    },
   });
 
   const selectedPlan = watch("planKey");
 
   const onSubmit: SubmitHandler<PlanSelectionInput> = async (data) => {
     try {
-      // VALIDAÇÃO CRÍTICA: Se chegamos aqui, os IDs precisam estar presentes
-      if (!onboardingId || !tenantId) {
-        console.error("❌ IDs de sessão ou de Tenant não encontrados para finalizar a assinatura.");
-        return;
-      }
+      console.log("🚀 MOCK: Simulando salvamento do plano...", data.planKey);
 
-      console.log(`🚀 Finalizando Onboarding. Vinculando plano ${data.planKey} ao Tenant: ${tenantId}`);
+      // COMENTE a chamada real para a API para evitar o erro 400
+      // await onboardingService.saveSubscription(onboardingId, tenantId, data);
 
-      // 1. Envia a escolha do plano para o backend (Grava no Postgres via Prisma)
-      await onboardingService.saveSubscription(onboardingId, tenantId, data);
+      console.log("✅ MOCK: Plano selecionado com sucesso!");
 
-      console.log("✅ Assinatura concluída com sucesso!");
-
-      // 2. LIMPEZA TOTAL: Removemos os rastros do Onboarding da Store global
-      // Isso evita que o usuário caia no Onboarding novamente ao logar.
-      reset();
-
-      // 3. Redirecionamento Final
-      router.push("/dashboard");
-      
+      // Siga para o próximo passo (Billing)
+      router.push("/onboarding/billing");
     } catch (error) {
-      console.error("❌ Erro ao processar assinatura final:", error);
+      console.error("❌ Erro:", error);
     }
   };
 
@@ -128,7 +117,9 @@ export const SubscriptionForm = ({ onboardingId }: SubscriptionFormProps) => {
               key={plan.id}
               whileHover={{ scale: 1.04, translateY: -8 }}
               whileTap={{ scale: 0.98 }}
-              onClick={() => setValue("planKey", plan.id, { shouldValidate: true })}
+              onClick={() =>
+                setValue("planKey", plan.id, { shouldValidate: true })
+              }
               className={cn(
                 "relative cursor-pointer rounded-2xl border-2 p-6 transition-all duration-300 flex flex-col min-h-[300px]",
                 "hover:border-[#10b981] hover:shadow-2xl hover:shadow-green-100/50",

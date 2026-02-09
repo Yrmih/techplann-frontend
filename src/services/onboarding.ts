@@ -72,19 +72,28 @@ export const onboardingService = {
   },
 
   // 3. Plano
+  // Local: src/services/onboarding.ts
+
   saveSubscription: async (
     onboardingId: string,
     tenantId: string,
     planData: PlanSelectionInput,
   ) => {
     try {
+      // Montamos o payload EXATAMENTE como o DTO do seu backend exige
+      const payload = {
+        tenantId,
+        planKey: planData.planKey, // 👈 Garantimos que o campo planKey esteja na raiz
+        billingCycle: "monthly", // 👈 Adicionamos o default para evitar que o NestJS receba undefined
+      };
+
+      console.log("🚀 Enviando Payload final para o Backend:", payload);
+
       const { data } = await api.post(
         `/onboarding/${onboardingId}/subscription`,
-        {
-          tenantId,
-          ...planData, // 👈 Em vez de 'data: planData', espalhamos o objeto
-        },
+        payload, // 👈 Enviamos o objeto plano, sem 'data: ...'
       );
+
       return data;
     } catch (error) {
       console.error("❌ API: Erro ao salvar plano:", error);
