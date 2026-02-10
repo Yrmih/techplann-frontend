@@ -1,16 +1,49 @@
 "use client";
 
-import { useState } from "react";
-import { TrendingUp, ShieldAlert, Lightbulb, AlertCircle, Search } from "lucide-react";
+import React, { useState } from "react";
+import { 
+  Plus, 
+  Pencil, 
+  TrendingUp, 
+  ShieldAlert, 
+  Lightbulb, 
+  AlertCircle, 
+  LucideIcon, 
+  Calendar,
+  Zap,
+  Crosshair,
+  RefreshCw,
+  ShieldCheck
+} from "lucide-react";
+import { AnimatePresence, motion } from "framer-motion";
+
 import { CustomSelect } from "@/components/ui/custom/CustomSelect";
 import { SwotCreateModal } from "./SwotCreateModal";
 import { SwotCreateValues } from "@/lib/validators/swot.schema";
+import { SWOT_MOCK_DATA } from "@/lib/mock/swot.mock";
+
+interface SwotItem {
+  label: string;
+  value: number;
+}
+
+interface SwotCardProps {
+  title: string;
+  color: string;
+  icon: LucideIcon;
+  items: SwotItem[];
+  total?: number;
+  onAdd: () => void;
+  isCruzado?: boolean;
+}
 
 export const SwotAnalysisPage = () => {
   const [isInitialized, setIsInitialized] = useState(false);
   const [isCruzada, setIsCruzada] = useState(false);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [activeSwot, setActiveSwot] = useState<SwotCreateValues | null>(null);
+
+  const selectedProject = "Planejamento Estratégico 2025";
 
   const handleInit = (data: SwotCreateValues) => {
     setActiveSwot(data);
@@ -19,91 +52,153 @@ export const SwotAnalysisPage = () => {
   };
 
   return (
-    <div className="space-y-8 p-8 max-w-[1600px] mx-auto min-h-screen">
-      {/* Header com Filtros e Selects */}
-      <header className="flex flex-col md:flex-row justify-between items-end gap-6 bg-white p-6 rounded-[24px] border border-gray-100 shadow-sm">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 w-full text-left">
-          <CustomSelect 
-            label="Análise SWOT" 
-            placeholder="Selecione ou crie..." 
-            options={[{ value: "new", label: "+ Nova Análise" }]} 
-            onValueChange={(val) => val === "new" && setShowCreateModal(true)}
-          />
-          <CustomSelect label="Planejamento" placeholder="Selecione..." options={[]} onValueChange={() => {}} />
-          <CustomSelect label="Empresa" placeholder="Selecione..." options={[]} onValueChange={() => {}} />
-          <div className="space-y-2">
-             <label className="text-sm font-medium text-gray-700">Filtrar</label>
-             <div className="relative">
-                <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-                <input placeholder="Buscar..." className="w-full pl-10 h-11 bg-white border border-gray-200 rounded-xl text-sm outline-none focus:border-[#10b981]" />
-             </div>
-          </div>
+    <div className="space-y-10 p-10 max-w-[1600px] mx-auto min-h-screen bg-[#f8fafc]">
+      
+      {/* 1. HEADER - TÍTULO E PLANEJAMENTO NA DIREITA */}
+      <div className="flex justify-between items-start px-1">
+        <div className="text-left">
+          <h1 className="text-[32px] font-black text-gray-900 tracking-tight uppercase leading-none">Análise SWOT</h1>
+          <div className="h-1 w-12 bg-[#10b981] mt-4 rounded-full" />
         </div>
-      </header>
 
-      {!isInitialized ? (
-        /* Estado Zerado */
-        <div className="flex flex-col items-center justify-center py-40 bg-white rounded-[32px] border border-dashed border-gray-200">
-          <div className="p-4 bg-emerald-50 rounded-full mb-4 text-[#10b981]">
-            <TrendingUp size={40} />
+        <div className="w-full md:w-[320px] text-left">
+          <div className="flex items-center gap-2 mb-2 ml-1">
+            <Calendar size={14} className="text-gray-400" />
+            <label className="text-[10px] font-bold text-gray-400 uppercase tracking-[1.5px]">Planejamento</label>
           </div>
-          <h2 className="text-xl font-black text-gray-900">Nenhuma análise SWOT ativa</h2>
-          <p className="text-gray-500 mb-6">Inicie criando uma nova análise no seletor acima.</p>
-          <button 
-            onClick={() => setShowCreateModal(true)}
-            className="px-8 py-3 bg-[#10b981] text-white rounded-xl font-bold shadow-lg shadow-emerald-100"
-          >
-            Começar Agora
-          </button>
+          <CustomSelect 
+            placeholder="Selecione o projeto..." 
+            value="p1"
+            options={[{ value: "p1", label: selectedProject }]} 
+            onValueChange={() => {}} 
+          />
         </div>
-      ) : (
-        /* UI Gerada com Matrizes */
-        <div className="space-y-8 animate-in fade-in duration-500">
-          <div className="flex justify-between items-center">
-             <div className="text-left">
-                <h2 className="text-2xl font-black uppercase text-gray-900">{activeSwot?.nome}</h2>
-                <p className="text-gray-500 text-sm">{activeSwot?.descricao}</p>
-             </div>
-             
-             {/* Switch SWOT Tradicional vs Cruzada */}
-             <div className="bg-gray-100 p-1 rounded-xl flex gap-1">
+      </div>
+
+      {/* 2. BARRA DE FERRAMENTAS */}
+      <div className="flex flex-col md:flex-row items-end gap-6 px-1">
+        <div className="w-full md:w-[320px] text-left relative">
+          <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-[1.5px] mb-2 ml-1">Análise SWOT</label>
+          <div className="relative">
+            <CustomSelect 
+              placeholder="Selecione ou crie..." 
+              value={isInitialized ? "active" : ""}
+              options={[
+                { value: "new", label: "+ Criar Nova Análise" },
+                ...(isInitialized ? [{ value: "active", label: activeSwot?.nome || "" }] : [])
+              ]} 
+              onValueChange={(val) => val === "new" && setShowCreateModal(true)}
+            />
+            {isInitialized && (
+              <button 
+                onClick={() => setShowCreateModal(true)}
+                className="absolute right-10 top-1/2 -translate-y-1/2 text-gray-400 hover:text-[#10b981] transition-colors"
+              >
+                <Pencil size={14} strokeWidth={2} />
+              </button>
+            )}
+          </div>
+        </div>
+
+        <div className="w-full md:w-[320px] text-left">
+          <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-[1.5px] mb-2 ml-1">Departamento</label>
+          <CustomSelect 
+            placeholder="Todos os setores" 
+            options={[
+              { value: "comercial", label: "Comercial" },
+              { value: "ti", label: "T.I / Desenvolvimento" }
+            ]} 
+            onValueChange={() => {}} 
+          />
+        </div>
+      </div>
+
+      <AnimatePresence mode="wait">
+        {!isInitialized ? (
+          <div key="empty" className="h-[500px]" />
+        ) : (
+          <motion.div key="active" initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} className="space-y-8 px-1">
+            
+            <div className="flex justify-start items-center border-b border-gray-100 pb-6 gap-6">
+              <div className="bg-gray-100 p-1.5 rounded-2xl flex gap-1 border border-gray-200">
                 <button 
-                  onClick={() => setIsCruzada(false)}
-                  className={`px-4 py-2 rounded-lg text-[10px] font-black transition-all ${!isCruzada ? 'bg-white shadow-sm text-[#10b981]' : 'text-gray-400'}`}
+                  onClick={() => setIsCruzada(false)} 
+                  className={`px-6 py-2.5 rounded-xl text-[10px] font-black transition-all ${!isCruzada ? 'bg-white text-[#10b981]' : 'text-gray-400'}`}
                 >
                   TRADICIONAL
                 </button>
                 <button 
-                  onClick={() => setIsCruzada(true)}
-                  className={`px-4 py-2 rounded-lg text-[10px] font-black transition-all ${isCruzada ? 'bg-white shadow-sm text-[#10b981]' : 'text-gray-400'}`}
+                  onClick={() => setIsCruzada(true)} 
+                  className={`px-6 py-2.5 rounded-xl text-[10px] font-black transition-all ${isCruzada ? 'bg-white text-[#10b981]' : 'text-gray-400'}`}
                 >
-                  CRUZADA (MATRIZ)
+                  SWOT CRUZADO
                 </button>
-             </div>
-          </div>
-
-          {/* Renderização condicional conforme imagem 9 */}
-          {isCruzada ? (
-            <div className="bg-white p-8 rounded-[32px] border border-gray-100 shadow-sm overflow-hidden">
-               {/* Grid de Matriz Cruzada aqui (Estratégias de Confronto) */}
-               <p className="text-gray-400 font-bold italic">Visualização de Matriz Cruzada: Confronto de Forças vs Oportunidades...</p>
+              </div>
+              <h2 className="text-sm font-bold text-gray-400 uppercase tracking-[3px]">
+                {isCruzada ? "Matriz de Estratégias (Cruzamento)" : "Matriz de Confronto"}
+              </h2>
             </div>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <SwotCard title="FORÇAS" color="bg-[#10b981]" icon={TrendingUp} items={[]} total={0} onAdd={()=>{}} />
-              <SwotCard title="FRAQUEZAS" color="bg-[#ef4444]" icon={ShieldAlert} items={[]} total={0} onAdd={()=>{}} />
-              <SwotCard title="OPORTUNIDADES" color="bg-[#0ea5e9]" icon={Lightbulb} items={[]} total={0} onAdd={()=>{}} />
-              <SwotCard title="AMEAÇAS" color="bg-[#f59e0b]" icon={AlertCircle} items={[]} total={0} onAdd={()=>{}} />
-            </div>
-          )}
-        </div>
-      )}
 
-      <SwotCreateModal 
-        isOpen={showCreateModal} 
-        onClose={() => setShowCreateModal(false)} 
-        onSuccess={handleInit}
-      />
+            {!isCruzada ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                {SWOT_MOCK_DATA.tradicional.map((card, index) => (
+                  <SwotCard 
+                    key={index} 
+                    title={card.title}
+                    color={card.color}
+                    icon={card.icon}
+                    items={card.items}
+                    total={card.total}
+                    onAdd={() => {}} 
+                  />
+                ))}
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <SwotCard title="ESTRATÉGIA OFENSIVA (F + O)" color="bg-emerald-500" icon={Zap} items={[{ label: SWOT_MOCK_DATA.cruzada.ofensiva, value: 90 }]} onAdd={() => {}} isCruzado />
+                <SwotCard title="ESTRATÉGIA DE CONFRONTO (F + A)" color="bg-amber-500" icon={Crosshair} items={[{ label: SWOT_MOCK_DATA.cruzada.confronto, value: 85 }]} onAdd={() => {}} isCruzado />
+                <SwotCard title="ESTRATÉGIA DE REFORÇO (F + O)" color="bg-blue-500" icon={RefreshCw} items={[{ label: SWOT_MOCK_DATA.cruzada.reforco, value: 75 }]} onAdd={() => {}} isCruzado />
+                <SwotCard title="ESTRATÉGIA DEFENSIVA (F + A)" color="bg-rose-500" icon={ShieldCheck} items={[{ label: SWOT_MOCK_DATA.cruzada.defensiva, value: 95 }]} onAdd={() => {}} isCruzado />
+              </div>
+            )}
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      <SwotCreateModal isOpen={showCreateModal} onClose={() => setShowCreateModal(false)} onSuccess={handleInit} />
     </div>
   );
 };
+
+const SwotCard = ({ title, color, icon: Icon, items, total, onAdd, isCruzado }: SwotCardProps) => (
+  <div className="bg-white rounded-[32px] border border-gray-100 flex flex-col h-full text-left transition-all overflow-hidden">
+    <div className={`p-6 ${color} text-white flex items-center justify-between`}>
+      <span className="font-black text-[11px] tracking-[1.5px] uppercase flex items-center gap-3">
+        <Icon size={18} strokeWidth={2.5} /> {title}
+      </span>
+      <button onClick={onAdd} className="bg-white/20 hover:bg-white/30 p-2 rounded-xl transition-all">
+        <Plus size={22} />
+      </button>
+    </div>
+    <div className="p-10 space-y-6 flex-1">
+      {items.map((item, i) => (
+        <div key={i} className="flex flex-col gap-2 border-b border-gray-50 pb-5 last:border-0">
+          <div className="flex justify-between items-start gap-4">
+            <span className="text-sm font-bold leading-relaxed text-gray-700">
+              {item.label}
+            </span>
+            <span className="bg-gray-50 px-3 py-1 rounded-lg text-[10px] font-black text-[#10b981] whitespace-nowrap">
+              {item.value}%
+            </span>
+          </div>
+        </div>
+      ))}
+    </div>
+    {total !== undefined && (
+      <div className="p-6 bg-gray-50/50 border-t border-gray-100 flex justify-between text-[11px] font-bold uppercase text-gray-400 tracking-widest">
+        <span>Impacto Estratégico:</span>
+        <span className="text-gray-900 font-bold">{total} pts</span>
+      </div>
+    )}
+  </div>
+);
