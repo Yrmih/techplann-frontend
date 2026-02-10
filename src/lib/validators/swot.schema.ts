@@ -1,8 +1,16 @@
 import * as z from "zod";
 
-export const swotItemSchema = z.object({
-  descricao: z.string().min(3, "A descrição deve ter pelo menos 3 caracteres"),
-  pontuacaao: z.number().min(1, "Mínimo 1").max(100, "Máximo 100"),
+// Schema para o Modal de Criação Inicial
+export const swotCreateSchema = z.object({
+  nome: z.string().min(3, "O nome deve ter pelo menos 3 caracteres"),
+  descricao: z.string().optional(),
 });
 
+// Schema para Itens das Matrizes (Forças, Fraquezas, etc)
+export const swotItemSchema = z.object({
+  descricao: z.string().min(5, "Descreva o item com mais detalhes"),
+  pontuacaao: z.number().min(1).max(100),
+});
+
+export type SwotCreateValues = z.infer<typeof swotCreateSchema>;
 export type SwotItemValues = z.infer<typeof swotItemSchema>;

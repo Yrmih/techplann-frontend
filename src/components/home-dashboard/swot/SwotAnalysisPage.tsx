@@ -1,160 +1,109 @@
 "use client";
 
-import React, { useState } from "react";
-import { motion } from "framer-motion";
-import { 
-  Plus, 
-  Printer, 
-  Users, 
-  TrendingUp, 
-  AlertCircle, 
-  Lightbulb, 
-  ShieldAlert, 
-  LucideIcon 
-} from "lucide-react";
-
-import { SwotItemModal } from "./SwotItemModal";
-import { SwotRadarChart } from "./SwotRadarChart";
-
-
-const mockRadarData = [
-  { subject: 'Forças', A: 57, fullMark: 100 },
-  { subject: 'Fraquezas', A: 37, fullMark: 100 },
-  { subject: 'Oportunidades', A: 55, fullMark: 100 },
-  { subject: 'Ameaças', A: 32, fullMark: 100 },
-];
-
-
-type SwotType = "Força" | "Fraqueza" | "Oportunidade" | "Ameaça";
-
-interface SwotItem {
-  label: string;
-  value: number;
-}
-
-interface SwotCardProps {
-  title: string;
-  color: string;
-  icon: LucideIcon;
-  items: SwotItem[];
-  total: number;
-  onAdd: (tipo: SwotType) => void;
-}
-
-
-const SwotCard = ({ title, color, icon: Icon, items, total, onAdd }: SwotCardProps) => (
-  <motion.div 
-    whileHover={{ scale: 1.02 }} 
-    className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden flex flex-col h-full"
-  >
-    <div className={`p-4 ${color} text-white flex items-center justify-between`}>
-      <div className="flex items-center gap-2 font-black uppercase text-xs tracking-widest text-left">
-        <Icon size={16} /> {title}
-      </div>
-      <button 
-        onClick={() => onAdd(title.slice(0, -1) as SwotType)}
-        className="bg-white/20 hover:bg-white/40 p-1.5 rounded-lg transition-all"
-      >
-        <Plus size={18} />
-      </button>
-    </div>
-    <div className="flex-1 p-4 space-y-3 text-left">
-      {items.map((item, i) => (
-        <div key={i} className="flex items-center justify-between text-sm py-2 border-b border-gray-50 last:border-0">
-          <span className="text-gray-600 font-medium">{item.label}</span>
-          <span className="bg-gray-50 text-emerald-600 font-bold px-2 py-1 rounded-md">{item.value}</span>
-        </div>
-      ))}
-    </div>
-    <div className="p-4 bg-gray-50/50 border-t border-gray-100 flex justify-between text-xs font-bold text-gray-400">
-      <span>Total:</span>
-      <span className="text-gray-900">{total} pontos</span>
-    </div>
-  </motion.div>
-);
+import { useState } from "react";
+import { TrendingUp, ShieldAlert, Lightbulb, AlertCircle, Search } from "lucide-react";
+import { CustomSelect } from "@/components/ui/custom/CustomSelect";
+import { SwotCreateModal } from "./SwotCreateModal";
+import { SwotCreateValues } from "@/lib/validators/swot.schema";
 
 export const SwotAnalysisPage = () => {
-  const [modalType, setModalType] = useState<SwotType | null>(null);
+  const [isInitialized, setIsInitialized] = useState(false);
+  const [isCruzada, setIsCruzada] = useState(false);
+  const [showCreateModal, setShowCreateModal] = useState(false);
+  const [activeSwot, setActiveSwot] = useState<SwotCreateValues | null>(null);
+
+  const handleInit = (data: SwotCreateValues) => {
+    setActiveSwot(data);
+    setIsInitialized(true);
+    setShowCreateModal(false);
+  };
 
   return (
-    <div className="space-y-8 p-8 max-w-[1600px] mx-auto">
-      
-      <div className="flex justify-between items-start">
-        <div className="text-left">
-          <h1 className="text-3xl font-black text-gray-900 tracking-tight">Análise SWOT</h1>
-          <p className="text-gray-500 font-medium text-sm text-left">
-            Planejamento: <span className="text-gray-900 uppercase">Planejamento Estratégico</span>
-          </p>
+    <div className="space-y-8 p-8 max-w-[1600px] mx-auto min-h-screen">
+      {/* Header com Filtros e Selects */}
+      <header className="flex flex-col md:flex-row justify-between items-end gap-6 bg-white p-6 rounded-[24px] border border-gray-100 shadow-sm">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 w-full text-left">
+          <CustomSelect 
+            label="Análise SWOT" 
+            placeholder="Selecione ou crie..." 
+            options={[{ value: "new", label: "+ Nova Análise" }]} 
+            onValueChange={(val) => val === "new" && setShowCreateModal(true)}
+          />
+          <CustomSelect label="Planejamento" placeholder="Selecione..." options={[]} onValueChange={() => {}} />
+          <CustomSelect label="Empresa" placeholder="Selecione..." options={[]} onValueChange={() => {}} />
+          <div className="space-y-2">
+             <label className="text-sm font-medium text-gray-700">Filtrar</label>
+             <div className="relative">
+                <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                <input placeholder="Buscar..." className="w-full pl-10 h-11 bg-white border border-gray-200 rounded-xl text-sm outline-none focus:border-[#10b981]" />
+             </div>
+          </div>
         </div>
-        <div className="flex gap-3">
-          <button className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 rounded-xl text-xs font-bold text-gray-600 hover:bg-gray-50 transition-all">
-            <Users size={16}/> Departamentos
-          </button>
-          <button className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 rounded-xl text-xs font-bold text-gray-600 hover:bg-gray-50 transition-all">
-            <Printer size={16}/> Imprimir
+      </header>
+
+      {!isInitialized ? (
+        /* Estado Zerado */
+        <div className="flex flex-col items-center justify-center py-40 bg-white rounded-[32px] border border-dashed border-gray-200">
+          <div className="p-4 bg-emerald-50 rounded-full mb-4 text-[#10b981]">
+            <TrendingUp size={40} />
+          </div>
+          <h2 className="text-xl font-black text-gray-900">Nenhuma análise SWOT ativa</h2>
+          <p className="text-gray-500 mb-6">Inicie criando uma nova análise no seletor acima.</p>
+          <button 
+            onClick={() => setShowCreateModal(true)}
+            className="px-8 py-3 bg-[#10b981] text-white rounded-xl font-bold shadow-lg shadow-emerald-100"
+          >
+            Começar Agora
           </button>
         </div>
-      </div>
+      ) : (
+        /* UI Gerada com Matrizes */
+        <div className="space-y-8 animate-in fade-in duration-500">
+          <div className="flex justify-between items-center">
+             <div className="text-left">
+                <h2 className="text-2xl font-black uppercase text-gray-900">{activeSwot?.nome}</h2>
+                <p className="text-gray-500 text-sm">{activeSwot?.descricao}</p>
+             </div>
+             
+             {/* Switch SWOT Tradicional vs Cruzada */}
+             <div className="bg-gray-100 p-1 rounded-xl flex gap-1">
+                <button 
+                  onClick={() => setIsCruzada(false)}
+                  className={`px-4 py-2 rounded-lg text-[10px] font-black transition-all ${!isCruzada ? 'bg-white shadow-sm text-[#10b981]' : 'text-gray-400'}`}
+                >
+                  TRADICIONAL
+                </button>
+                <button 
+                  onClick={() => setIsCruzada(true)}
+                  className={`px-4 py-2 rounded-lg text-[10px] font-black transition-all ${isCruzada ? 'bg-white shadow-sm text-[#10b981]' : 'text-gray-400'}`}
+                >
+                  CRUZADA (MATRIZ)
+                </button>
+             </div>
+          </div>
 
-      
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <SwotCard 
-          title="FORÇAS" color="bg-[#10b981]" icon={TrendingUp} total={57} 
-          onAdd={setModalType}
-          items={[{label: "Atendimento ao Cliente", value: 27}, {label: "Equipe qualificada", value: 30}]} 
-        />
-        <SwotCard 
-          title="FRAQUEZAS" color="bg-[#ef4444]" icon={ShieldAlert} total={37} 
-          onAdd={setModalType}
-          items={[{label: "Processos manuais", value: 22}, {label: "Infraestrutura defasada", value: 15}]} 
-        />
-        <SwotCard 
-          title="OPORTUNIDADES" color="bg-[#0ea5e9]" icon={Lightbulb} total={55} 
-          onAdd={setModalType}
-          items={[{label: "Expansão digital", value: 30}, {label: "Novos mercados", value: 25}]} 
-        />
-        <SwotCard 
-          title="AMEAÇAS" color="bg-[#f59e0b]" icon={AlertCircle} total={32} 
-          onAdd={setModalType}
-          items={[{label: "Concorrência agressiva", value: 20}, {label: "Regulamentação", value: 12}]} 
-        />
-      </div>
-
-      
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 pt-4">
-       
-        <div className="bg-white p-8 rounded-3xl border border-gray-100 shadow-sm space-y-6 text-left">
-          <h3 className="font-bold text-gray-900 text-left">Pontuação SWOT</h3>
-          {mockRadarData.map((d, i) => (
-            <div key={i} className="space-y-2">
-              <div className="flex justify-between text-[10px] font-black">
-                <span className="text-gray-400 uppercase tracking-widest">{d.subject}</span>
-                <span className="text-gray-900">{d.A}</span>
-              </div>
-              <div className="w-full bg-gray-100 h-2 rounded-full overflow-hidden">
-                <div 
-                  className="h-full bg-[#10b981] transition-all duration-500" 
-                  style={{ width: `${d.A}%` }}
-                ></div>
-              </div>
+          {/* Renderização condicional conforme imagem 9 */}
+          {isCruzada ? (
+            <div className="bg-white p-8 rounded-[32px] border border-gray-100 shadow-sm overflow-hidden">
+               {/* Grid de Matriz Cruzada aqui (Estratégias de Confronto) */}
+               <p className="text-gray-400 font-bold italic">Visualização de Matriz Cruzada: Confronto de Forças vs Oportunidades...</p>
             </div>
-          ))}
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <SwotCard title="FORÇAS" color="bg-[#10b981]" icon={TrendingUp} items={[]} total={0} onAdd={()=>{}} />
+              <SwotCard title="FRAQUEZAS" color="bg-[#ef4444]" icon={ShieldAlert} items={[]} total={0} onAdd={()=>{}} />
+              <SwotCard title="OPORTUNIDADES" color="bg-[#0ea5e9]" icon={Lightbulb} items={[]} total={0} onAdd={()=>{}} />
+              <SwotCard title="AMEAÇAS" color="bg-[#f59e0b]" icon={AlertCircle} items={[]} total={0} onAdd={()=>{}} />
+            </div>
+          )}
         </div>
-
-        
-        <div className="lg:col-span-2">
-          <SwotRadarChart data={mockRadarData} />
-        </div>
-      </div>
-
-      
-      {modalType && (
-        <SwotItemModal 
-          isOpen={!!modalType} 
-          onClose={() => setModalType(null)} 
-          tipo={modalType} 
-        />
       )}
+
+      <SwotCreateModal 
+        isOpen={showCreateModal} 
+        onClose={() => setShowCreateModal(false)} 
+        onSuccess={handleInit}
+      />
     </div>
   );
 };
