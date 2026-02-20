@@ -37,43 +37,46 @@ export const ResponsibleForm = ({
     resolver: zodResolver(ResponsibleSchema),
   });
 
-  // FUNÇÃO REESTRUTURADA: Limpa os dados de CPF e Telefone antes de enviar
+  // FUNÇÃO REESTRUTURADA: Purifica os dados para bater com o rigor do Backend
   const onSubmit = async (data: RepresentativeData) => {
     try {
-      // VALIDAÇÃO DE SEGURANÇA: Garante que todos os IDs necessários existam
+      // VALIDAÇÃO DE SEGURANÇA: Garante integridade do fluxo
       if (!onboardingId || !tenantId || !organizationId) {
-        console.error(
-          "❌ Erro de integridade: IDs de vínculo não encontrados.",
-        );
+        console.error("❌ Erro de integridade: IDs de vínculo não encontrados.");
         return;
       }
 
-      console.log(
-        "🚀 Sanitizando dados do responsável e vinculando ao banco...",
-      );
+      console.log("🚀 Purificando dados do responsável para o Pipeline...");
 
-      // LIMPEZA Remove pontos, hífens e parênteses (deixa apenas números)
-      const cleanUserData = {
-        ...data,
-        cpf: data.cpf.replace(/\D/g, ""),
-        phone: data.phone?.replace(/\D/g, ""),
+      /**
+       * 💡 RECONSTRUÇÃO MANUAL (Deep Clean):
+       * Mapeamos para 'undefined' campos que não são obrigatórios.
+       * Isso evita erros de validação no ZodValidationPipe do Backend.
+       */
+      const purifiedUserData: RepresentativeData = {
+        fullName: data.fullName,
+        cpf: data.cpf.replace(/\D/g, ""), // Apenas números para o Banco
+        email: data.email,
+        jobTitle: data.jobTitle,
+        // Se o telefone estiver vazio, envia undefined para satisfazer o DTO opcional
+        phone: data.phone ? data.phone.replace(/\D/g, "") : undefined,
       };
 
-      // Chama o endpoint usando os dados limpos
+      // Chamada ao service usando os dados purificados e tipados profissionalmente
       await onboardingService.saveResponsible(
         onboardingId,
         tenantId,
         organizationId,
-        cleanUserData,
+        purifiedUserData
       );
 
-      console.log("✅ Responsável (Pietro) registrado com sucesso!");
+      console.log("✅ Responsável registrado com sucesso!");
 
       if (typeof onNext === "function") {
         onNext();
       }
     } catch (error) {
-      console.error("❌ Erro ao registrar responsável:", error);
+      console.error("❌ Erro ao registrar responsável no Pipeline:", error);
     }
   };
 

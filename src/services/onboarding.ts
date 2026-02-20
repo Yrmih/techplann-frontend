@@ -1,6 +1,6 @@
 import axios from "axios";
 
-// Importe seus tipos
+// tipos
 import { OrganizationStepOneData } from "@/lib/validators/schema";
 import { RepresentativeData } from "@/lib/validators/responsible";
 import { PlanSelectionInput } from "@/lib/validators/plan-selection";
@@ -25,7 +25,9 @@ export const onboardingService = {
     }
   },
 
-  // 1. Organização (TechNova) - Recebe o ID obrigatoriamente
+  /**
+   * Manutenção: Adicionado spread operator para garantir o envio de um objeto limpo.
+   */
   saveOrganization: async (
     onboardingId: string,
     payload: OrganizationStepOneData,
@@ -35,10 +37,10 @@ export const onboardingService = {
     }
 
     try {
-      // Chamada direta usando o ID injetado via Props no componente
+      // 💡 O spread {...payload} garante que enviamos um objeto novo e purificado
       const { data } = await api.post(
         `/onboarding/${onboardingId}/organization`,
-        payload,
+        { ...payload },
       );
       return data; // Retorna { tenantId, organizationId }
     } catch (error) {
@@ -51,17 +53,17 @@ export const onboardingService = {
   saveResponsible: async (
     onboardingId: string,
     tenantId: string,
-    orgId: string, // Mantemos o nome do argumento na função por clareza
+    orgId: string,
     userData: RepresentativeData,
   ) => {
     try {
-      // MUDANÇA AQUI: Enviamos 'organizationId' para bater com o Controller do NestJS
+      // Enviamos 'organizationId' para bater exatamente com o Controller do NestJS
       const { data } = await api.post(
         `/onboarding/${onboardingId}/responsible`,
         {
           tenantId,
-          organizationId: orgId, // Mapeamento de orgId para organizationId
-          data: userData,
+          organizationId: orgId,
+          data: { ...userData }, // Também aplicado aqui por segurança
         },
       );
       return data;
@@ -71,9 +73,7 @@ export const onboardingService = {
     }
   },
 
-  // 3. Plano
-  // Local: src/services/onboarding.ts
-
+  // 3. Assinatura / Plano
   saveSubscription: async (
     onboardingId: string,
     tenantId: string,
@@ -83,15 +83,18 @@ export const onboardingService = {
       // Montamos o payload EXATAMENTE como o DTO do seu backend exige
       const payload = {
         tenantId,
-        planKey: planData.planKey, // 👈 Garantimos que o campo planKey esteja na raiz
-        billingCycle: "monthly", // 👈 Adicionamos o default para evitar que o NestJS receba undefined
+        planKey: planData.planKey,
+        billingCycle: "monthly", // Valor padrão para evitar erros de validação
       };
 
-      console.log("🚀 Enviando Payload final para o Backend:", payload);
+      console.log(
+        "🚀 Enviando Payload final de assinatura para o Backend:",
+        payload,
+      );
 
       const { data } = await api.post(
         `/onboarding/${onboardingId}/subscription`,
-        payload, // 👈 Enviamos o objeto plano, sem 'data: ...'
+        payload,
       );
 
       return data;

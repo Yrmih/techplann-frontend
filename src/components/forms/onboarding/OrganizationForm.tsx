@@ -47,37 +47,53 @@ export const OrganizationForm = ({
     resolver: zodResolver(organizationStepOneSchema),
   });
 
-  // FUNÇÃO REESTRUTURADA: Limpa os dados antes de enviar para a API
+  // FUNÇÃO ATUALIZADA: Reconstrói o objeto para garantir compatibilidade total de tipos (String vs Undefined)
   const onSubmit = async (data: OrganizationStepOneData) => {
     try {
-      console.log("🚀 Sanitizando dados e salvando com ID:", onboardingId);
+      console.log("🚀 Iniciando salvamento purificado para ID:", onboardingId);
 
-      // 💡 LIMPEZA: Remove caracteres não numéricos para bater com o DTO do Back-end
-      const cleanData = {
-        ...data,
+      /**
+       * PURIFICAÇÃO PROFISSIONAL:
+       * Para satisfazer o TypeScript (erro ts(2345)), convertemos campos opcionais
+       * em strings vazias ("") em vez de 'undefined'. Isso ocorre porque o seu
+       * DTO/Service espera uma string para esses campos no contrato Axios.
+       */
+      const purifiedData: OrganizationStepOneData = {
+        razaoSocial: data.razaoSocial,
+        nomeFantasia: data.nomeFantasia || "",
         cnpj: data.cnpj.replace(/\D/g, ""),
-        cep: data.cep.replace(/\D/g, ""),
-        telefone: data.telefone?.replace(/\D/g, ""),
+        inscricaoEstadual: data.inscricaoEstadual || "",
+        inscricaoMunicipal: data.inscricaoMunicipal || "",
+        email: data.email,
+        // Garante que o telefone seja sempre uma string (mesmo que vazia)
+        telefone: data.telefone ? data.telefone.replace(/\D/g, "") : "",
         celular: data.celular.replace(/\D/g, ""),
+        cep: data.cep.replace(/\D/g, ""),
+        endereco: data.endereco,
+        numero: data.numero,
+        complemento: data.complemento || "",
+        bairro: data.bairro,
+        cidade: data.cidade,
+        estado: data.estado,
       };
 
-      // 1. Chamada ao service com dados sanitizados
+      // 1. Chamada ao service passando o objeto reconstruído e tipado corretamente
       const response = await onboardingService.saveOrganization(
         onboardingId,
-        cleanData
+        purifiedData,
       );
 
-      // 2. Persiste tenantId e organizationId na Store
+      // 2. Persiste tenantId e organizationId na Store (retornados pelo Prisma/Redis)
       setTenantAndOrg(response.tenantId, response.organizationId);
 
-      console.log("✅ Empresa registrada com sucesso no PostgreSQL!");
+      console.log("✅ Empresa registrada com sucesso!");
 
       // 3. Transição para o Step 2
       if (typeof onNext === "function") {
         onNext();
       }
     } catch (error) {
-      console.error("❌ Erro ao registrar empresa:", error);
+      console.error("❌ Erro ao registrar empresa no Onboarding:", error);
     }
   };
 
