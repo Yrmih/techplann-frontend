@@ -4,6 +4,7 @@ import axios from "axios";
 import { OrganizationStepOneData } from "@/lib/validators/schema";
 import { RepresentativeData } from "@/lib/validators/responsible";
 import { PlanSelectionInput } from "@/lib/validators/plan-selection";
+import { AccountCreationData } from "@/lib/validators/user-account.schema";
 
 const api = axios.create({
   baseURL: process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:3001",
@@ -13,7 +14,7 @@ const api = axios.create({
 });
 
 export const onboardingService = {
-  // 0. Inicializa o fluxo - Apenas retorna o dado, não mexe na store aqui dentro
+  // 0. Inicializa o fluxo
   start: async (): Promise<{ onboardingId: string; next: string }> => {
     try {
       const { data } = await api.post("/onboarding/start");
@@ -25,9 +26,7 @@ export const onboardingService = {
     }
   },
 
-  /**
-   * Manutenção: Adicionado spread operator para garantir o envio de um objeto limpo.
-   */
+  // 1. Organização
   saveOrganization: async (
     onboardingId: string,
     payload: OrganizationStepOneData,
@@ -37,19 +36,18 @@ export const onboardingService = {
     }
 
     try {
-      // 💡 O spread {...payload} garante que enviamos um objeto novo e purificado
       const { data } = await api.post(
         `/onboarding/${onboardingId}/organization`,
         { ...payload },
       );
-      return data; // Retorna { tenantId, organizationId }
+      return data;
     } catch (error) {
       console.error("❌ API: Erro ao salvar organização:", error);
       throw error;
     }
   },
 
-  // 2. Responsável (Pietro)
+  // 2. Responsável
   saveResponsible: async (
     onboardingId: string,
     tenantId: string,
@@ -57,13 +55,12 @@ export const onboardingService = {
     userData: RepresentativeData,
   ) => {
     try {
-      // Enviamos 'organizationId' para bater exatamente com o Controller do NestJS
       const { data } = await api.post(
         `/onboarding/${onboardingId}/responsible`,
         {
           tenantId,
           organizationId: orgId,
-          data: { ...userData }, // Também aplicado aqui por segurança
+          data: { ...userData },
         },
       );
       return data;
@@ -80,17 +77,11 @@ export const onboardingService = {
     planData: PlanSelectionInput,
   ) => {
     try {
-      // Montamos o payload EXATAMENTE como o DTO do seu backend exige
       const payload = {
         tenantId,
         planKey: planData.planKey,
-        billingCycle: "monthly", // Valor padrão para evitar erros de validação
+        billingCycle: "monthly",
       };
-
-      console.log(
-        "🚀 Enviando Payload final de assinatura para o Backend:",
-        payload,
-      );
 
       const { data } = await api.post(
         `/onboarding/${onboardingId}/subscription`,
@@ -100,6 +91,44 @@ export const onboardingService = {
       return data;
     } catch (error) {
       console.error("❌ API: Erro ao salvar plano:", error);
+      throw error;
+    }
+  },
+
+  /* ============================================================
+     5. CONTA (UPGRADE FINAL)
+     ============================================================ */
+  /**
+   * Finaliza o onboarding ativando a senha do usuário.
+   * Bate com o endpoint @Post(':id/account') que criamos no NestJS.
+   */
+  finalizeAccount: async (
+    onboardingId: string,
+    accountData: AccountCreationData,
+  ) => {
+    // 💡 Detalhe de segurança: Validar o ID antes da chamada
+    if (!onboardingId || onboardingId === "undefined") {
+      throw new Error("ID de onboarding inválido para finalização de conta.");
+    }
+
+    try {
+      console.log("🚀 Enviando upgrade de conta para o backend...");
+
+      /**
+       * Os nomes dos campos (fullName, email, password)
+       * devem ser idênticos ao userAccountSchema do Backend.
+       */
+      const { data } = await api.post(`/onboarding/${onboardingId}/account`, {
+        fullName: accountData.fullName,
+        email: accountData.email,
+        password: accountData.password,
+        confirmPassword: accountData.confirmPassword,
+      });
+
+      console.log("✅ API: Conta ativada com sucesso!");
+      return data;
+    } catch (error) {
+      console.error("❌ API: Erro ao finalizar conta de acesso:", error);
       throw error;
     }
   },
