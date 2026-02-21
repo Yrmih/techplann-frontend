@@ -15,7 +15,7 @@ import {
   planSelectionSchema,
   type PlanSelectionInput,
 } from "@/lib/validators/schema";
-import { cn } from "@/lib/utils";
+import { cn } from "@/lib/utils/utils";
 
 // Interface ALINHADA: Recebe o onboardingId diretamente do pai
 interface SubscriptionFormProps {

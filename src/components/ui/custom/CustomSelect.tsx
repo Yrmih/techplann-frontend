@@ -8,7 +8,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
-import { cn } from "@/lib/utils";
+import { cn } from "@/lib/utils/utils";
 
 interface CustomSelectProps {
   label?: string;
@@ -32,9 +32,7 @@ export const CustomSelect = ({
   return (
     <div className={cn("space-y-2 w-full", className)}>
       {label && (
-        <Label className="text-sm font-medium text-gray-700">
-          {label}
-        </Label>
+        <Label className="text-sm font-medium text-gray-700">{label}</Label>
       )}
       <Select value={value} onValueChange={onValueChange}>
         <SelectTrigger
@@ -48,16 +46,16 @@ export const CustomSelect = ({
         >
           <SelectValue placeholder={placeholder} />
         </SelectTrigger>
-        
+
         <SelectContent className="rounded-xl border-gray-100 shadow-2xl p-1 animate-in fade-in zoom-in-95">
           {options.map((option) => (
-            <SelectItem 
-              key={option.value} 
+            <SelectItem
+              key={option.value}
               value={option.value}
               className={cn(
                 "text-sm cursor-pointer py-2.5 rounded-lg transition-colors",
                 "data-[highlighted]:bg-[#10b981] data-[highlighted]:text-white",
-                "focus:bg-[#10b981] focus:text-white"
+                "focus:bg-[#10b981] focus:text-white",
               )}
             >
               {option.label}
