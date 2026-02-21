@@ -16,6 +16,12 @@ import {
 import { useOnboardingStore } from "@/stores/useOnboardingStore";
 import { onboardingService } from "@/services/onboarding";
 
+// Importação das máscaras específicas do Responsável
+import {
+  maskResponsibleCPF,
+  maskResponsiblePhone,
+} from "@/lib/utils/responsible-masks";
+
 // Interface ALINHADA: Recebe o onboardingId diretamente do pai (page.tsx)
 interface ResponsibleFormProps {
   onboardingId: string;
@@ -32,6 +38,7 @@ export const ResponsibleForm = ({
   const {
     register,
     handleSubmit,
+    setValue, // Detalhe importante: necessário para atualizar o valor com máscara
     formState: { errors, isSubmitting },
   } = useForm<RepresentativeData>({
     resolver: zodResolver(ResponsibleSchema),
@@ -42,7 +49,9 @@ export const ResponsibleForm = ({
     try {
       // VALIDAÇÃO DE SEGURANÇA: Garante integridade do fluxo
       if (!onboardingId || !tenantId || !organizationId) {
-        console.error("❌ Erro de integridade: IDs de vínculo não encontrados.");
+        console.error(
+          "❌ Erro de integridade: IDs de vínculo não encontrados.",
+        );
         return;
       }
 
@@ -55,19 +64,19 @@ export const ResponsibleForm = ({
        */
       const purifiedUserData: RepresentativeData = {
         fullName: data.fullName,
-        cpf: data.cpf.replace(/\D/g, ""), // Apenas números para o Banco
+        cpf: data.cpf.replace(/\D/g, ""), // Remove pontuação para o Banco
         email: data.email,
         jobTitle: data.jobTitle,
         // Se o telefone estiver vazio, envia undefined para satisfazer o DTO opcional
         phone: data.phone ? data.phone.replace(/\D/g, "") : undefined,
       };
 
-      // Chamada ao service usando os dados purificados e tipados profissionalmente
+      // Chamada ao service usando os dados purificados
       await onboardingService.saveResponsible(
         onboardingId,
         tenantId,
         organizationId,
-        purifiedUserData
+        purifiedUserData,
       );
 
       console.log("✅ Responsável registrado com sucesso!");
@@ -126,8 +135,13 @@ export const ResponsibleForm = ({
             <Input
               {...register("cpf")}
               placeholder="000.000.000-00"
-              maxLength={14}
               className={inputStyles(errors.cpf)}
+              // Detalhe: Máscara de CPF com validação automática
+              onChange={(e) =>
+                setValue("cpf", maskResponsibleCPF(e.target.value), {
+                  shouldValidate: true,
+                })
+              }
             />
             {errors.cpf && (
               <p className="text-xs text-red-500 font-medium">
@@ -162,8 +176,13 @@ export const ResponsibleForm = ({
             <Input
               {...register("phone")}
               placeholder="(00) 00000-0000"
-              maxLength={15}
               className={inputStyles(errors.phone)}
+              // Detalhe: Máscara dinâmica para fixo ou celular
+              onChange={(e) =>
+                setValue("phone", maskResponsiblePhone(e.target.value), {
+                  shouldValidate: true,
+                })
+              }
             />
           </div>
         </div>
