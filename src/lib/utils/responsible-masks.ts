@@ -1,5 +1,3 @@
-// src/lib/utils/responsible-masks.ts
-
 /**
  * Máscaras específicas para o formulário de Responsável (Step 2)
  * Garante a formatação visual do CPF e Telefone conforme o padrão brasileiro.
@@ -20,7 +18,7 @@ export const maskResponsibleCPF = (value: string) => {
  */
 export const maskResponsiblePhone = (value: string) => {
   const cleanValue = value.replace(/\D/g, ""); //
-  
+
   if (cleanValue.length <= 10) {
     return cleanValue
       .replace(/^(\d{2})(\d)/, "($1) $2")
