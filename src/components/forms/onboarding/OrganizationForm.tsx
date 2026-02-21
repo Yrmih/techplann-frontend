@@ -25,7 +25,13 @@ import { useOnboardingStore } from "@/stores/useOnboardingStore";
 import { onboardingService } from "@/services/onboarding";
 import { BRAZIL_STATES } from "@/lib/constants/brazil-states";
 
-// Interface ATUALIZADA: Recebe o onboardingId como Prop obrigatória
+// Importação das máscaras específicas
+import {
+  maskOrganizationCNPJ,
+  maskOrganizationCEP,
+  maskOrganizationPhone,
+} from "@/lib/utils/organization-masks";
+
 interface OrganizationFormProps {
   onboardingId: string;
   onNext: () => void;
@@ -35,29 +41,45 @@ export const OrganizationForm = ({
   onboardingId,
   onNext,
 }: OrganizationFormProps) => {
-  // Usamos a store apenas para SALVAR os IDs gerados pelo backend
   const { setTenantAndOrg } = useOnboardingStore();
 
   const {
     register,
     handleSubmit,
     setValue,
+    watch, // Adicionado watch para monitorar o valor do estado
     formState: { errors, isSubmitting },
   } = useForm<OrganizationStepOneData>({
     resolver: zodResolver(organizationStepOneSchema),
   });
 
-  // FUNÇÃO ATUALIZADA: Reconstrói o objeto para garantir compatibilidade total de tipos (String vs Undefined)
+  // Monitora o valor do campo "estado" de forma reativa e tipada
+  const estadoValue = watch("estado");
+
+  // Função para busca automática de CEP via ViaCEP
+  const handleCEPBlur = async (e: React.FocusEvent<HTMLInputElement>) => {
+    const cep = e.target.value.replace(/\D/g, "");
+    if (cep.length !== 8) return;
+
+    try {
+      const response = await fetch(`https://viacep.com.br/ws/${cep}/json/`);
+      const data = await response.json();
+
+      if (!data.erro) {
+        setValue("endereco", data.logradouro, { shouldValidate: true });
+        setValue("bairro", data.bairro, { shouldValidate: true });
+        setValue("cidade", data.localidade, { shouldValidate: true });
+        setValue("estado", data.uf, { shouldValidate: true });
+      }
+    } catch (error) {
+      console.error("❌ Erro ao buscar CEP:", error);
+    }
+  };
+
   const onSubmit = async (data: OrganizationStepOneData) => {
     try {
       console.log("🚀 Iniciando salvamento purificado para ID:", onboardingId);
 
-      /**
-       * PURIFICAÇÃO PROFISSIONAL:
-       * Para satisfazer o TypeScript (erro ts(2345)), convertemos campos opcionais
-       * em strings vazias ("") em vez de 'undefined'. Isso ocorre porque o seu
-       * DTO/Service espera uma string para esses campos no contrato Axios.
-       */
       const purifiedData: OrganizationStepOneData = {
         razaoSocial: data.razaoSocial,
         nomeFantasia: data.nomeFantasia || "",
@@ -65,7 +87,6 @@ export const OrganizationForm = ({
         inscricaoEstadual: data.inscricaoEstadual || "",
         inscricaoMunicipal: data.inscricaoMunicipal || "",
         email: data.email,
-        // Garante que o telefone seja sempre uma string (mesmo que vazia)
         telefone: data.telefone ? data.telefone.replace(/\D/g, "") : "",
         celular: data.celular.replace(/\D/g, ""),
         cep: data.cep.replace(/\D/g, ""),
@@ -77,18 +98,15 @@ export const OrganizationForm = ({
         estado: data.estado,
       };
 
-      // 1. Chamada ao service passando o objeto reconstruído e tipado corretamente
       const response = await onboardingService.saveOrganization(
         onboardingId,
         purifiedData,
       );
 
-      // 2. Persiste tenantId e organizationId na Store (retornados pelo Prisma/Redis)
       setTenantAndOrg(response.tenantId, response.organizationId);
 
       console.log("✅ Empresa registrada com sucesso!");
 
-      // 3. Transição para o Step 2
       if (typeof onNext === "function") {
         onNext();
       }
@@ -162,8 +180,12 @@ export const OrganizationForm = ({
             <Input
               {...register("cnpj")}
               placeholder="00.000.000/0000-00"
-              maxLength={18}
               className={inputStyles(errors.cnpj)}
+              onChange={(e) =>
+                setValue("cnpj", maskOrganizationCNPJ(e.target.value), {
+                  shouldValidate: true,
+                })
+              }
             />
             {errors.cnpj && (
               <p className="text-xs text-red-500">{errors.cnpj.message}</p>
@@ -217,8 +239,10 @@ export const OrganizationForm = ({
             <Input
               {...register("telefone")}
               placeholder="(00) 0000-0000"
-              maxLength={14}
               className={inputStyles(errors.telefone)}
+              onChange={(e) =>
+                setValue("telefone", maskOrganizationPhone(e.target.value))
+              }
             />
           </div>
           <div className="space-y-2">
@@ -226,8 +250,12 @@ export const OrganizationForm = ({
             <Input
               {...register("celular")}
               placeholder="(00) 00000-0000"
-              maxLength={15}
               className={inputStyles(errors.celular)}
+              onChange={(e) =>
+                setValue("celular", maskOrganizationPhone(e.target.value), {
+                  shouldValidate: true,
+                })
+              }
             />
           </div>
         </div>
@@ -243,8 +271,13 @@ export const OrganizationForm = ({
               <Input
                 {...register("cep")}
                 placeholder="00000-000"
-                maxLength={9}
                 className={inputStyles(errors.cep)}
+                onChange={(e) =>
+                  setValue("cep", maskOrganizationCEP(e.target.value), {
+                    shouldValidate: true,
+                  })
+                }
+                onBlur={handleCEPBlur}
               />
             </div>
             <div className="md:col-span-2 space-y-2">
@@ -309,7 +342,13 @@ export const OrganizationForm = ({
               <Label className="text-sm font-medium text-gray-700">
                 Estado
               </Label>
-              <Select onValueChange={(v) => setValue("estado", v)}>
+              
+              <Select
+                value={estadoValue}
+                onValueChange={(v) =>
+                  setValue("estado", v, { shouldValidate: true })
+                }
+              >
                 <SelectTrigger
                   className={`bg-white border-gray-200 focus:ring-[#10b981] focus:border-[#10b981] ${errors.estado ? "border-red-500" : ""}`}
                 >
