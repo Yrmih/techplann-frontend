@@ -1,25 +1,31 @@
 "use client";
 
-import React, { useEffect } from "react"; // 1. Importação essencial para carregar os dados
+import React, { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Eye, EyeOff, CheckSquare } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { cn } from "@/lib/utils/utils";
 
-// Importando os tipos do seu schema
+/**
+ * Garantindo que estamos usando o Schema que contém as regras de
+ * Letra Maiúscula e Números exigidas pelo Backend.
+ */
 import {
   accountCreationSchema,
   type AccountCreationData,
-} from "@/lib/validators/schema";
-// Importando a store para realizar o reset final e buscar dados
-import { useOnboardingStore } from "@/stores/useOnboardingStore";
+} from "@/lib/validators/user-account.schema";
 
-// Importando a máscara de sanitização para manter o padrão
+// Importando a store e o serviço real de API
+import { useOnboardingStore } from "@/stores/useOnboardingStore";
+import { onboardingService } from "@/services/onboarding";
+
+// Importando a máscara de sanitização
 import { sanitizeFullName } from "@/lib/utils/user-account-mask";
 
 interface UserAccountFormProps {
@@ -34,7 +40,7 @@ export const UserAccountForm = ({
   const [showPassword, setShowPassword] = React.useState(false);
   const router = useRouter();
 
-  // 2. Pegamos o reset da store
+  // Pegamos o reset da store para limpar o processo ao finalizar
   const { reset } = useOnboardingStore();
 
   const {
@@ -47,12 +53,10 @@ export const UserAccountForm = ({
   });
 
   /**
-   * 3. DETALHE ESQUECIDO: Lógica de Herança Real
-   * Este efeito garante que o Nome e Email vindos do Step 2
-   * apareçam assim que a tela carregar.
+   * Lógica de Herança Real
+   * Preenche os campos automaticamente com os dados vindos do Step 2
    */
   useEffect(() => {
-    // Busca os dados que você salvou no Step 2 (ajuste a chave conforme sua store/localStorage)
     const savedName = localStorage.getItem("onboarding_user_name") || "";
     const savedEmail = localStorage.getItem("onboarding_user_email") || "";
 
@@ -69,15 +73,21 @@ export const UserAccountForm = ({
       hasError && "border-red-500 focus-visible:ring-red-500",
     );
 
+  /**
+   * 💡 SUBMIT REAL:
+   * Conecta com o finalizeAccount que criamos no OnboardingService.
+   */
   const onSubmit = async (data: AccountCreationData) => {
     try {
-      console.log("🏁 MVP - Cadastro Finalizado com sucesso!");
+      // 1. Chamada de API para realizar o Upgrade de PENDING para ACTIVE
+      await onboardingService.finalizeAccount(onboardingId, data);
 
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      toast.success("Cadastro finalizado com sucesso! Bem-vindo.");
 
-      // 4. Limpeza da memória para evitar que o Onboarding reabra sozinho
+      // 2. Limpeza da memória para evitar que o Onboarding reabra sozinho
       reset();
 
+      // 3. Redirecionamento
       if (typeof onNext === "function") {
         onNext();
       } else {
@@ -85,6 +95,7 @@ export const UserAccountForm = ({
       }
     } catch (error) {
       console.error("❌ Erro ao finalizar cadastro:", error);
+      toast.error("Erro ao ativar sua conta. Verifique sua conexão ou dados.");
     }
   };
 
@@ -108,7 +119,6 @@ export const UserAccountForm = ({
               {...register("fullName")}
               placeholder="Ex: Ian Lima"
               className={inputStyles(!!errors.fullName)}
-              // 5. Aplica a sanitização para evitar números no nome
               onChange={(e) =>
                 setValue("fullName", sanitizeFullName(e.target.value))
               }
@@ -125,7 +135,7 @@ export const UserAccountForm = ({
             </Label>
             <Input
               {...register("email")}
-              readOnly // O Email é o login, herda do Step 2 e não deve ser alterado aqui
+              readOnly
               className={cn(
                 inputStyles(!!errors.email),
                 "bg-gray-50 cursor-not-allowed",
@@ -178,25 +188,31 @@ export const UserAccountForm = ({
         </div>
 
         {/* Termos de Uso (Layout Bolinha) */}
-        <div className="flex items-center space-x-2 py-2">
-          <Checkbox
-            id="terms"
-            // Garante que o checkbox atualize o Zod
-            onCheckedChange={(checked) =>
-              setValue("acceptTerms", !!checked, { shouldValidate: true })
-            }
-            className={cn(
-              "h-5 w-5 rounded-full border-gray-300 transition-all",
-              "data-[state=checked]:bg-[#10b981] data-[state=checked]:border-[#10b981] data-[state=checked]:text-white",
-            )}
-          />
-          <label
-            htmlFor="terms"
-            className="text-sm text-gray-500 cursor-pointer select-none"
-          >
-            Li e aceito os{" "}
-            <span className="text-[#10b981] font-medium">Termos de Uso</span>
-          </label>
+        <div className="flex flex-col space-y-1">
+          <div className="flex items-center space-x-2 py-2">
+            <Checkbox
+              id="terms"
+              onCheckedChange={(checked) =>
+                setValue("acceptTerms", !!checked, { shouldValidate: true })
+              }
+              className={cn(
+                "h-5 w-5 rounded-full border-gray-300 transition-all",
+                "data-[state=checked]:bg-[#10b981] data-[state=checked]:border-[#10b981] data-[state=checked]:text-white",
+              )}
+            />
+            <label
+              htmlFor="terms"
+              className="text-sm text-gray-500 cursor-pointer select-none"
+            >
+              Li e aceito os{" "}
+              <span className="text-[#10b981] font-medium">Termos de Uso</span>
+            </label>
+          </div>
+          {errors.acceptTerms && (
+            <p className="text-xs text-red-500 font-medium">
+              {errors.acceptTerms.message}
+            </p>
+          )}
         </div>
 
         {/* Resumo Estático */}
@@ -223,8 +239,8 @@ export const UserAccountForm = ({
         <div className="flex justify-between items-center">
           <button
             type="button"
-            onClick={() => window.history.back()}
-            className="text-sm font-bold text-gray-400"
+            onClick={() => router.back()}
+            className="text-sm font-bold text-gray-400 hover:text-gray-600 transition-colors"
           >
             ← Voltar
           </button>
@@ -232,7 +248,7 @@ export const UserAccountForm = ({
           <button
             type="submit"
             disabled={isSubmitting}
-            className="flex items-center gap-2 px-8 py-3 rounded-xl bg-[#10b981] text-white font-bold text-sm hover:bg-[#0da673] transition-all"
+            className="flex items-center gap-2 px-8 py-3 rounded-xl bg-[#10b981] text-white font-bold text-sm hover:bg-[#0da673] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <CheckSquare size={18} />
             {isSubmitting ? "Finalizando..." : "Finalizar Cadastro"}
