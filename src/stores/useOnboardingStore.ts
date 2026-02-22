@@ -20,33 +20,34 @@ export const useOnboardingStore = create<OnboardingState>()(
       tenantId: null,
       organizationId: null,
 
-      // Atualiza o ID da sessão (Pai usa isso para persistência de navegação)
+      // Atualiza o ID da sessão para persistência
       setOnboardingId: (id) => {
-        console.log("📦 Store: Persistindo onboardingId no LocalStorage...");
         set({ onboardingId: id });
       },
 
-      // Salva o vínculo criado no Step 1 para ser usado no Step 2 e 3
+      // Salva o vínculo criado no Step 1
       setTenantAndOrg: (tenantId, orgId) => {
-        console.log("📦 Store: Vinculando Tenant e Org...");
         set({
           tenantId,
           organizationId: orgId,
         });
       },
 
-      // Limpa tudo ao finalizar ou em caso de erro crítico
+      // Limpa tudo ao finalizar para garantir que o Onboarding não reabra
       reset: () => {
-        console.log("🧹 Store: Limpando dados do onboarding.");
         set({
           onboardingId: null,
           tenantId: null,
           organizationId: null,
         });
+
+        // Limpa os dados temporários de herança para não deixar rastros no navegador
+        localStorage.removeItem("onboarding_user_name");
+        localStorage.removeItem("onboarding_user_email");
       },
     }),
     {
-      name: "techplann-onboarding-storage", // Chave no LocalStorage do browser
+      name: "techplann-onboarding-storage",
     },
   ),
 );
