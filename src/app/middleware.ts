@@ -1,7 +1,14 @@
+import { NextResponse } from "next/server";
+import type { NextRequest } from "next/server";
 
-import { redirect } from "next/navigation";
+export function middleware(request: NextRequest) {
+  // Verifica o cookie ou token (Middleware não lê localStorage,
+  // por isso o DashboardLayout ainda é importante como segunda camada)
+  const token = request.cookies.get("next-auth.session-token"); // Exemplo se usar cookies
 
-export default function RootPage() {
-  // Se aqui estiver "/dashboard/registrations", mude para:
-  redirect("/dashboard"); 
+  if (request.nextUrl.pathname.startsWith("/dashboard") && !token) {
+    // return NextResponse.redirect(new URL('/login', request.url));
+  }
+
+  return NextResponse.next();
 }
