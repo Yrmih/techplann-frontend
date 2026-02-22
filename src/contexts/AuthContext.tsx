@@ -3,11 +3,25 @@
 import { createContext, useContext, useState, ReactNode } from "react";
 import { useRouter } from "next/navigation";
 
+/**
+ * Interface para os dados da Organização.
+ * Necessária para alimentar o card da empresa na Sidebar.
+ */
+interface Organization {
+  name: string;
+  cnpj: string;
+}
+
+/**
+ * Interface do Usuário expandida.
+ * Inclui o objeto opcional organization para suportar o Auto-Login completo.
+ */
 interface User {
   id: string;
   nome: string;
   email: string;
   tenantId: string;
+  organization?: Organization; // 💡 Adicionado para o layout da Sidebar
 }
 
 interface AuthContextData {
@@ -28,7 +42,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   /**
    * ESTADO INICIALIZADO DIRETAMENTE
    * Verificamos o localStorage já na criação do estado.
-   * Isso evita "cascading renders" e o aviso do React.
+   * Isso evita "cascading renders" e garante performance no carregamento.
    */
   const [user, setUser] = useState<User | null>(() => {
     if (typeof window !== "undefined") {
@@ -44,11 +58,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return null;
   });
 
-  // Como o 'user' é resolvido instantaneamente, o loading já pode começar como false
+  // Estado de loading inicializado como false pois a carga do localStorage é síncrona
   const [loading] = useState(false);
 
   const isAuthenticated = !!user;
 
+  /**
+   * Função de Login
+   * Salva o Token JWT e os dados do Usuário (com a Empresa) no LocalStorage.
+   */
   const login = (token: string, user: User) => {
     localStorage.setItem("@TechPlann:token", token);
     localStorage.setItem("@TechPlann:user", JSON.stringify(user));
@@ -57,6 +75,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     router.push("/dashboard");
   };
 
+  /**
+   * Função de Logout
+   * Limpa as credenciais e redireciona para a página de login.
+   */
   const logout = () => {
     localStorage.removeItem("@TechPlann:token");
     localStorage.removeItem("@TechPlann:user");
@@ -73,6 +95,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   );
 }
 
+/**
+ * Hook personalizado useAuth
+ * Facilita o acesso ao contexto em qualquer componente da aplicação.
+ */
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (!context) {
