@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { OrganizationForm } from "@/components/forms/onboarding/OrganizationForm";
 import { useOnboardingStore } from "@/stores/useOnboardingStore";
-import { onboardingService } from "@/services/onboarding";
+import { onboardingService } from "@/services/onboarding/onboarding.service";
 
 export default function OrganizationPage() {
   const router = useRouter(); // 👈 Inicialize o router
@@ -30,14 +30,19 @@ export default function OrganizationPage() {
     init();
   }, [onboardingId, setOnboardingId]);
 
-  if (loading) return <div className="p-20 text-center text-emerald-600 font-bold animate-pulse">Carregando sessão...</div>;
+  if (loading)
+    return (
+      <div className="p-20 text-center text-emerald-600 font-bold animate-pulse">
+        Carregando sessão...
+      </div>
+    );
 
   return (
     <main className="min-h-screen bg-gray-50/50 flex flex-col items-center">
       <div className="w-full max-w-7xl px-4 py-12">
-        <OrganizationForm 
-          onboardingId={onboardingId!} 
-          onNext={() => router.push('/onboarding/responsible')} // 👈 Use router.push aqui!
+        <OrganizationForm
+          onboardingId={onboardingId!}
+          onNext={() => router.push("/onboarding/responsible")} // 👈 Use router.push aqui!
         />
       </div>
       {/* ... restante do código */}

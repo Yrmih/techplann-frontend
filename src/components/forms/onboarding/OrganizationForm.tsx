@@ -22,7 +22,7 @@ import {
   type OrganizationStepOneData,
 } from "@/lib/validators/schema";
 import { useOnboardingStore } from "@/stores/useOnboardingStore";
-import { onboardingService } from "@/services/onboarding";
+import { onboardingService } from "@/services/onboarding/onboarding.service";
 import { BRAZIL_STATES } from "@/lib/constants/brazil-states";
 
 // Importação das máscaras específicas
@@ -342,7 +342,7 @@ export const OrganizationForm = ({
               <Label className="text-sm font-medium text-gray-700">
                 Estado
               </Label>
-              
+
               <Select
                 value={estadoValue}
                 onValueChange={(v) =>

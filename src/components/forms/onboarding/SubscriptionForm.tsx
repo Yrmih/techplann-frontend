@@ -8,7 +8,7 @@ import { useRouter } from "next/navigation";
 
 // Hooks de estado e serviço
 import { useOnboardingStore } from "@/stores/useOnboardingStore";
-import { onboardingService } from "@/services/onboarding";
+import { onboardingService } from "@/services/onboarding/onboarding.service";
 
 import { NextButton } from "../../ui/custom/NextButton";
 import {

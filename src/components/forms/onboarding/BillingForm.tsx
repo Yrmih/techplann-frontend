@@ -11,7 +11,7 @@ import { CustomSelect } from "@/components/ui/custom/CustomSelect";
 import { NextButton } from "../../ui/custom/NextButton";
 import { billingSchema, type BillingData } from "@/lib/validators/schema";
 import { cn } from "@/lib/utils/utils";
-import { onboardingService } from "@/services/onboarding";
+import { onboardingService } from "@/services/onboarding/onboarding.service";
 
 // Importação das máscaras de faturamento
 import {
@@ -170,9 +170,17 @@ export const BillingForm = ({ onboardingId, onNext }: BillingFormProps) => {
                 {...register("cardNumber")}
                 placeholder="0000 0000 0000 0000"
                 className={inputStyles(errors.cardNumber)}
-                onChange={(e) => setValue("cardNumber", maskCardNumber(e.target.value), { shouldValidate: true })}
+                onChange={(e) =>
+                  setValue("cardNumber", maskCardNumber(e.target.value), {
+                    shouldValidate: true,
+                  })
+                }
               />
-              {errors.cardNumber && <p className="text-xs text-red-500">{errors.cardNumber.message}</p>}
+              {errors.cardNumber && (
+                <p className="text-xs text-red-500">
+                  {errors.cardNumber.message}
+                </p>
+              )}
             </div>
             <div className="space-y-2">
               <Label className="text-sm font-medium text-gray-700">
@@ -182,9 +190,15 @@ export const BillingForm = ({ onboardingId, onNext }: BillingFormProps) => {
                 {...register("cardName")}
                 placeholder="NOME COMO ESTÁ NO CARTÃO"
                 className={inputStyles(errors.cardName)}
-                onChange={(e) => setValue("cardName", e.target.value.toUpperCase())}
+                onChange={(e) =>
+                  setValue("cardName", e.target.value.toUpperCase())
+                }
               />
-              {errors.cardName && <p className="text-xs text-red-500">{errors.cardName.message}</p>}
+              {errors.cardName && (
+                <p className="text-xs text-red-500">
+                  {errors.cardName.message}
+                </p>
+              )}
             </div>
             <div className="grid grid-cols-2 gap-6">
               <div className="space-y-2">
@@ -195,9 +209,17 @@ export const BillingForm = ({ onboardingId, onNext }: BillingFormProps) => {
                   {...register("expiry")}
                   placeholder="MM/AA"
                   className={inputStyles(errors.expiry)}
-                  onChange={(e) => setValue("expiry", maskExpiryDate(e.target.value), { shouldValidate: true })}
+                  onChange={(e) =>
+                    setValue("expiry", maskExpiryDate(e.target.value), {
+                      shouldValidate: true,
+                    })
+                  }
                 />
-                {errors.expiry && <p className="text-xs text-red-500">{errors.expiry.message}</p>}
+                {errors.expiry && (
+                  <p className="text-xs text-red-500">
+                    {errors.expiry.message}
+                  </p>
+                )}
               </div>
               <div className="space-y-2">
                 <Label className="text-sm font-medium text-gray-700">
@@ -207,9 +229,15 @@ export const BillingForm = ({ onboardingId, onNext }: BillingFormProps) => {
                   {...register("cvv")}
                   placeholder="***"
                   className={inputStyles(errors.cvv)}
-                  onChange={(e) => setValue("cvv", maskCVV(e.target.value), { shouldValidate: true })}
+                  onChange={(e) =>
+                    setValue("cvv", maskCVV(e.target.value), {
+                      shouldValidate: true,
+                    })
+                  }
                 />
-                {errors.cvv && <p className="text-xs text-red-500">{errors.cvv.message}</p>}
+                {errors.cvv && (
+                  <p className="text-xs text-red-500">{errors.cvv.message}</p>
+                )}
               </div>
             </div>
             <div className="bg-blue-50 border border-blue-100 rounded-xl p-4 flex gap-3 items-center">
@@ -245,7 +273,9 @@ export const BillingForm = ({ onboardingId, onNext }: BillingFormProps) => {
                   {...register("agency")}
                   placeholder="0001"
                   className={inputStyles(undefined)}
-                  onChange={(e) => setValue("agency", maskAgency(e.target.value))}
+                  onChange={(e) =>
+                    setValue("agency", maskAgency(e.target.value))
+                  }
                 />
               </div>
             </div>
@@ -258,7 +288,9 @@ export const BillingForm = ({ onboardingId, onNext }: BillingFormProps) => {
                   {...register("accountNumber")}
                   placeholder="00000-0"
                   className={inputStyles(undefined)}
-                  onChange={(e) => setValue("accountNumber", maskBankAccount(e.target.value))}
+                  onChange={(e) =>
+                    setValue("accountNumber", maskBankAccount(e.target.value))
+                  }
                 />
               </div>
 

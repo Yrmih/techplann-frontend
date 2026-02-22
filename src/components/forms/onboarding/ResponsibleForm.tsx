@@ -14,7 +14,7 @@ import {
   type RepresentativeData,
 } from "@/lib/validators/schema";
 import { useOnboardingStore } from "@/stores/useOnboardingStore";
-import { onboardingService } from "@/services/onboarding";
+import { onboardingService } from "@/services/onboarding/onboarding.service";
 
 // Importação das máscaras específicas do Responsável
 import {

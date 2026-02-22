@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useRef } from "react"; // Adicionado useRef
 import { useOnboardingStore } from "@/stores/useOnboardingStore";
-import { onboardingService } from "@/services/onboarding";
+import { onboardingService } from "@/services/onboarding/onboarding.service";
 
 // Importe dos formulários
 import { OrganizationForm } from "@/components/forms/onboarding/OrganizationForm";

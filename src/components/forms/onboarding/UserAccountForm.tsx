@@ -23,7 +23,7 @@ import {
 
 // Importando a store e o serviço real de API
 import { useOnboardingStore } from "@/stores/useOnboardingStore";
-import { onboardingService } from "@/services/onboarding";
+import { onboardingService } from "@/services/onboarding/onboarding.service";
 
 // Importando a máscara de sanitização
 import { sanitizeFullName } from "@/lib/utils/user-account-mask";
