@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 
 /**
  * Interface para os dados da Organização.
- * Necessária para alimentar o card da empresa na Sidebar.
+ * Necessária para alimentar o card da empresa na Sidebar (Clone do Figma).
  */
 interface Organization {
   name: string;
@@ -14,14 +14,16 @@ interface Organization {
 
 /**
  * Interface do Usuário expandida.
- * Inclui o objeto opcional organization para suportar o Auto-Login completo.
+ * Inclui o objeto organization para suportar a exibição de dados dinâmicos.
  */
 interface User {
   id: string;
   nome: string;
   email: string;
   tenantId: string;
-  organization?: Organization; // 💡 Adicionado para o layout da Sidebar
+  role?: string;
+  cargo?: string;
+  organization?: Organization; // 🚀 Vital para o card da Sidebar
 }
 
 interface AuthContextData {
@@ -41,8 +43,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   /**
    * ESTADO INICIALIZADO DIRETAMENTE
-   * Verificamos o localStorage já na criação do estado.
-   * Isso evita "cascading renders" e garante performance no carregamento.
+   * Verificamos o localStorage já na criação do estado para evitar "piscadas" de UI.
    */
   const [user, setUser] = useState<User | null>(() => {
     if (typeof window !== "undefined") {
@@ -51,6 +52,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         try {
           return JSON.parse(recoveredUser);
         } catch {
+          // 🛡️ Se o JSON estiver inválido, removemos do storage para evitar erros
+          localStorage.removeItem("@TechPlann:user");
+          localStorage.removeItem("@TechPlann:token");
           return null;
         }
       }
@@ -58,14 +62,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return null;
   });
 
-  // Estado de loading inicializado como false pois a carga do localStorage é síncrona
+  // O loading começa como false pois a carga do localStorage é síncrona
   const [loading] = useState(false);
 
   const isAuthenticated = !!user;
 
   /**
    * Função de Login
-   * Salva o Token JWT e os dados do Usuário (com a Empresa) no LocalStorage.
+   * Persiste a sessão e redireciona para o Dashboard.
+   * Utilizada tanto no LoginForm quanto na finalização do Onboarding.
    */
   const login = (token: string, user: User) => {
     localStorage.setItem("@TechPlann:token", token);
@@ -77,7 +82,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   /**
    * Função de Logout
-   * Limpa as credenciais e redireciona para a página de login.
+   * Limpa os dados sensíveis e volta para a tela de acesso.
    */
   const logout = () => {
     localStorage.removeItem("@TechPlann:token");
@@ -97,7 +102,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
 /**
  * Hook personalizado useAuth
- * Facilita o acesso ao contexto em qualquer componente da aplicação.
  */
 export const useAuth = () => {
   const context = useContext(AuthContext);
