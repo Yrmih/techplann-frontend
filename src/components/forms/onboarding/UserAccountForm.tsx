@@ -74,23 +74,34 @@ export const UserAccountForm = ({
     );
 
   /**
-   * 💡 SUBMIT REAL:
-   * Conecta com o finalizeAccount que criamos no OnboardingService.
+   * 💡 SUBMIT COM AUTO-LOGIN:
+   * Agora salva o token retornado pelo backend para entrar direto no sistema.
    */
   const onSubmit = async (data: AccountCreationData) => {
     try {
-      // 1. Chamada de API para realizar o Upgrade de PENDING para ACTIVE
-      await onboardingService.finalizeAccount(onboardingId, data);
+      console.log("🚀 Finalizando conta e realizando auto-login...");
+
+      // 1. Chamada de API para realizar o Upgrade e obter o Token JWT
+      const response = await onboardingService.finalizeAccount(
+        onboardingId,
+        data,
+      );
+
+      // 2. 🔑 AUTO-LOGIN: Salvando a sessão no navegador para o AuthContext/Middleware
+      // Usamos os prefixos padrões para garantir compatibilidade com seu sistema de Auth
+      localStorage.setItem("@TechPlann:token", response.token);
+      localStorage.setItem("@TechPlann:user", JSON.stringify(response.user));
 
       toast.success("Cadastro finalizado com sucesso! Bem-vindo.");
 
-      // 2. Limpeza da memória para evitar que o Onboarding reabra sozinho
+      // 3. Limpeza da memória do onboarding para evitar reabertura acidental
       reset();
 
-      // 3. Redirecionamento
+      // 4. Redirecionamento direto para a área logada
       if (typeof onNext === "function") {
         onNext();
       } else {
+        // O DashboardLayout agora encontrará o token no localStorage e permitirá o acesso
         router.push("/dashboard");
       }
     } catch (error) {
