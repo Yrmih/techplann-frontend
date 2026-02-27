@@ -1,4 +1,4 @@
-import NewCompanyForm from "@/components/home-dashboard/registrations/NewCompanyForm";
+import NewCompanyForm from "@/components/home-dashboard/stakeholders/NewCompanyForm";
 
 export default function NewCompanyPage() {
   return (

@@ -1,14 +1,12 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import {
   Printer,
   Search,
   Plus,
   Users,
-  Building2,
   Handshake,
   LucideIcon,
 } from "lucide-react";
@@ -16,7 +14,6 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
-
 
 import { PartnerForm } from "./PartnerFormModal";
 import { DepartmentFormModal } from "./DepartmentFormModal";
@@ -49,10 +46,7 @@ const EmptyState = ({
 );
 
 export default function StakeholdersPage() {
-  const router = useRouter();
   const [activeTab, setActiveTab] = useState("parceiros");
-  
-  
   const [isPartnerModalOpen, setIsPartnerModalOpen] = useState(false);
   const [isDeptModalOpen, setIsDeptModalOpen] = useState(false);
 
@@ -62,8 +56,6 @@ export default function StakeholdersPage() {
         return "Novo Parceiro";
       case "departamentos":
         return "Novo Departamento";
-      case "empresas":
-        return "Nova Empresa";
       default:
         return "Novo Registro";
     }
@@ -74,9 +66,6 @@ export default function StakeholdersPage() {
       setIsPartnerModalOpen(true);
     } else if (activeTab === "departamentos") {
       setIsDeptModalOpen(true);
-    } else if (activeTab === "empresas") {
-      
-      router.push("/dashboard/registrations/companies");
     }
   };
 
@@ -93,7 +82,7 @@ export default function StakeholdersPage() {
             Stakeholders
           </h1>
           <p className="text-gray-500 font-medium mt-1">
-            Gerencie parceiros, departamentos e empresas
+            Gerencie parceiros e departamentos internos
           </p>
         </div>
 
@@ -130,12 +119,6 @@ export default function StakeholdersPage() {
             >
               <Users size={16} /> Departamentos
             </TabsTrigger>
-            <TabsTrigger
-              value="empresas"
-              className="flex items-center gap-2 px-8 py-3 rounded-xl data-[state=active]:bg-white data-[state=active]:shadow-md data-[state=active]:text-gray-900 text-gray-500 font-bold text-xs h-full"
-            >
-              <Building2 size={16} /> Empresas
-            </TabsTrigger>
           </TabsList>
 
           <div className="relative w-80">
@@ -169,7 +152,7 @@ export default function StakeholdersPage() {
           </div>
         </TabsContent>
 
-        
+        {/* Conteúdo Departamentos */}
         <TabsContent value="departamentos" className="mt-0 focus-visible:outline-none">
           <div className="bg-white border border-gray-100 rounded-3xl shadow-sm overflow-hidden text-left">
             <div className="p-7 border-b border-gray-50 bg-gray-50/30">
@@ -187,28 +170,9 @@ export default function StakeholdersPage() {
             </div>
           </div>
         </TabsContent>
-
-       
-        <TabsContent value="empresas" className="mt-0 focus-visible:outline-none">
-          <div className="bg-white border border-gray-100 rounded-3xl shadow-sm overflow-hidden text-left">
-            <div className="p-7 border-b border-gray-50 bg-gray-50/30">
-              <h2 className="font-bold text-gray-900 text-sm tracking-tight">
-                Lista de Empresas
-              </h2>
-            </div>
-            <div className="min-h-[450px] flex flex-col justify-center px-6">
-              <EmptyState
-                description="Nenhuma empresa cadastrada"
-                buttonLabel="Cadastrar primeira empresa"
-                icon={Building2}
-                onAction={() => router.push("/dashboard/registrations/companies")}
-              />
-            </div>
-          </div>
-        </TabsContent>
       </Tabs>
 
-      
+      {/* Modal Parceiro */}
       <Dialog open={isPartnerModalOpen} onOpenChange={setIsPartnerModalOpen}>
         <DialogContent className="max-w-2xl p-0 bg-transparent border-none shadow-none overflow-visible">
           <PartnerForm onCancel={() => setIsPartnerModalOpen(false)} />

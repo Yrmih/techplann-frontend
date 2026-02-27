@@ -1,4 +1,4 @@
-import PartnersTable from "@/components/home-dashboard/registrations/StakeholdersTable";
+import PartnersTable from "@/components/home-dashboard/stakeholders/StakeholdersTable";
 
 export default function StakeholdersPage() {
   return <PartnersTable />;
