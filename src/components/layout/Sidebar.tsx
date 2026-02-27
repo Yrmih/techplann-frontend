@@ -33,7 +33,7 @@ export const Sidebar = () => {
     {
       name: "Stakeholders",
       icon: <Users size={20} />,
-      href: "/dashboard/registrations",
+      href: "/dashboard/stakeholders",
     },
     {
       name: "Planejamentos",

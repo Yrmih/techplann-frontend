@@ -15,14 +15,17 @@ export default function DashboardLayout({
   const router = useRouter();
 
   // PROTEÇÃO: Se não estiver logado, manda para o login
+  // PROTEÇÃO: Comentado temporariamente para testes
   useEffect(() => {
-    if (!loading && !isAuthenticated) {
-      router.push("/login");
-    }
+    // if (!loading && !isAuthenticated) {
+    //   router.push("/login");
+    // }
   }, [isAuthenticated, loading, router]);
 
-  // ⏳ Enquanto verifica a sessão, mostra um loading (evita o "flash" de conteúdo)
-  if (loading || !isAuthenticated) {
+  // Altere a linha abaixo para ignorar o "!isAuthenticated"
+  // De: if (loading || !isAuthenticated)
+  // Para:
+  if (loading) { 
     return (
       <div className="h-screen w-screen flex items-center justify-center bg-[#050b18]">
         <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#10b981]"></div>
