@@ -156,7 +156,7 @@ export const BusinessCanvasPage = () => {
             items={data["Atividades Principais"]} onAdd={handleOpenAdd} onEdit={handleOpenEdit} onDelete={handleDelete} rowSpan="row-span-1" 
           />
           <CanvasBlock 
-            title="Recursos Principais" icon={Briefcase} color="bg-[#3b82f6]" 
+            title="Recursos Principais" icon={Wallet} color="bg-[#3b82f6]" 
             items={data["Recursos Principais"]} onAdd={handleOpenAdd} onEdit={handleOpenEdit} onDelete={handleDelete} rowSpan="row-span-1" 
           />
         </div>
