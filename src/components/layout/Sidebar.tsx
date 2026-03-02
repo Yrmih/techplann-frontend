@@ -10,7 +10,7 @@ import {
   Home,
   Users,
   Calendar,
-  LayoutGrid,
+  Target,
   Building2,
   Zap,
   BarChart,
@@ -28,34 +28,51 @@ export const Sidebar = () => {
   const pathname = usePathname();
   const { user, logout } = useAuth();
 
+  /**
+   * Ordem das sessões atualizada conforme solicitado:
+   * Dashboard, Stakeholders, Planejamentos, SWOT, Canvas, Cultura, Projetos, BSC e Segurança.
+   * Ícones corrigidos: SWOT (Target) e Cultura (Users).
+   */
   const menuItems = [
-    { name: "Dashboard", icon: <Home size={20} />, href: "/dashboard" },
+    { name: "Dashboard", icon: <Home size={22} />, href: "/dashboard" },
     {
       name: "Stakeholders",
-      icon: <Users size={20} />,
+      icon: <Users size={22} />,
       href: "/dashboard/stakeholders",
     },
     {
       name: "Planejamentos",
-      icon: <Calendar size={20} />,
+      icon: <Calendar size={22} />,
       href: "/dashboard/planning",
     },
-    { name: "SWOT", icon: <LayoutGrid size={20} />, href: "/dashboard/swot" },
+    {
+      name: "SWOT",
+      icon: <Target size={22} />,
+      href: "/dashboard/swot",
+    },
     {
       name: "Canvas",
-      icon: <Building2 size={20} />,
+      icon: <Building2 size={22} />,
       href: "/dashboard/canvas",
     },
-    { name: "Cultura", icon: <Zap size={20} />, href: "/dashboard/culture" },
-    { name: "BSC", icon: <BarChart size={20} />, href: "/dashboard/bsc" },
+    {
+      name: "Cultura",
+      icon: <Users size={22} />, // Ícone de dois avatares conforme imagem
+      href: "/dashboard/culture",
+    },
     {
       name: "Projetos",
-      icon: <FolderKanban size={20} />,
+      icon: <FolderKanban size={22} />,
       href: "/dashboard/projects",
     },
     {
+      name: "BSC",
+      icon: <BarChart size={22} />,
+      href: "/dashboard/bsc",
+    },
+    {
       name: "Segurança",
-      icon: <ShieldCheck size={20} />,
+      icon: <ShieldCheck size={22} />,
       href: "/dashboard/security",
     },
   ];
@@ -78,7 +95,7 @@ export const Sidebar = () => {
           )}
         </Link>
 
-        {/* 💡 ChevronLeft para recolher */}
+        {/* ChevronLeft para recolher */}
         {!isCollapsed && (
           <button
             onClick={() => setIsCollapsed(true)}
@@ -88,7 +105,7 @@ export const Sidebar = () => {
           </button>
         )}
 
-        {/* 💡 ChevronRight para expandir quando estiver colapsado */}
+        {/* ChevronRight para expandir quando estiver colapsado */}
         {isCollapsed && (
           <button
             onClick={() => setIsCollapsed(false)}
@@ -118,7 +135,7 @@ export const Sidebar = () => {
                   {item.icon}
                 </div>
                 {!isCollapsed && (
-                  <span className="text-[13px] font-medium">{item.name}</span>
+                  <span className="text-[14px] font-semibold">{item.name}</span>
                 )}
               </div>
             </Link>
@@ -126,7 +143,7 @@ export const Sidebar = () => {
         })}
       </nav>
 
-      {/* Footer Identity (Clone do Figma) */}
+      {/* Footer Identity */}
       <div className="p-4 border-t border-slate-800/50 bg-[#050b18]">
         {!isCollapsed ? (
           <div className="space-y-2 mb-4">
@@ -137,7 +154,7 @@ export const Sidebar = () => {
               </div>
               <div className="flex-1 min-w-0">
                 <p className="text-[12px] font-bold text-slate-100 truncate leading-tight">
-                  Exemplo Tech
+                  {user?.organization?.name || "Exemplo Tech"}
                 </p>
                 <p className="text-[10px] text-slate-500 truncate mt-0.5">
                   CNPJ: 12.345.678/0001-99
@@ -173,9 +190,9 @@ export const Sidebar = () => {
             href="/dashboard/settings"
             className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-slate-400 hover:bg-slate-800/30 hover:text-white transition-all ${isCollapsed ? "justify-center" : ""}`}
           >
-            <Settings size={18} />
+            <Settings size={20} />
             {!isCollapsed && (
-              <span className="text-[13px] font-medium">Configurações</span>
+              <span className="text-[14px] font-semibold">Configurações</span>
             )}
           </Link>
 
@@ -183,9 +200,9 @@ export const Sidebar = () => {
             onClick={logout}
             className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-slate-400 hover:bg-red-500/10 hover:text-red-400 transition-all ${isCollapsed ? "justify-center" : ""}`}
           >
-            <LogOut size={18} />
+            <LogOut size={20} />
             {!isCollapsed && (
-              <span className="text-[13px] font-medium">Sair</span>
+              <span className="text-[14px] font-semibold">Sair</span>
             )}
           </button>
         </div>
