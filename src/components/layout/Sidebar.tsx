@@ -11,7 +11,7 @@ import {
   Users,
   Calendar,
   Target,
-  Building2,
+  LayoutGrid,
   Zap,
   BarChart,
   FolderKanban,
@@ -52,7 +52,7 @@ export const Sidebar = () => {
     },
     {
       name: "Canvas",
-      icon: <Building2 size={22} />,
+      icon: <LayoutGrid size={22} />,
       href: "/dashboard/canvas",
     },
     {
