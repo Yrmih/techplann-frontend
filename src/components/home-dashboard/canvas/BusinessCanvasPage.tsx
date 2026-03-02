@@ -1,12 +1,12 @@
 "use client";
 
-import React, { useState } from "react";
+import { useState } from "react";
 import { motion } from "framer-motion";
 import { 
   Plus, 
   Printer, 
   Users, 
-  Briefcase, 
+  Handshake, 
   Zap, 
   Heart, 
   UserCheck, 
@@ -146,7 +146,7 @@ export const BusinessCanvasPage = () => {
 
       <div className="grid grid-cols-5 gap-4 h-[750px]">
         <CanvasBlock 
-          title="Parcerias Principais" icon={Briefcase} color="bg-[#3b82f6]" 
+          title="Parcerias Principais" icon={Handshake} color="bg-[#3b82f6]" 
           items={data["Parcerias Principais"]} onAdd={handleOpenAdd} onEdit={handleOpenEdit} onDelete={handleDelete}
         />
         

@@ -29,7 +29,6 @@ export const Sidebar = () => {
   const { user, logout } = useAuth();
 
   /**
-   * Ordem das sessões atualizada conforme solicitado:
    * Dashboard, Stakeholders, Planejamentos, SWOT, Canvas, Cultura, Projetos, BSC e Segurança.
    * Ícones corrigidos: SWOT (Target) e Cultura (Users).
    */
@@ -57,7 +56,7 @@ export const Sidebar = () => {
     },
     {
       name: "Cultura",
-      icon: <Users size={22} />, // Ícone de dois avatares conforme imagem
+      icon: <Users size={22} />,
       href: "/dashboard/culture",
     },
     {
