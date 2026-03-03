@@ -7,10 +7,10 @@ import {
   Printer, 
   Users, 
   Handshake, 
-  Zap, 
-  Heart, 
-  UserCheck, 
-  Share2, 
+  Activity,
+  Truck, 
+  Heart,
+  Gift,
   DollarSign, 
   Wallet,
   LucideIcon,
@@ -152,7 +152,7 @@ export const BusinessCanvasPage = () => {
         
         <div className="col-span-1 grid grid-rows-2 gap-4">
           <CanvasBlock 
-            title="Atividades Principais" icon={Zap} color="bg-[#3b82f6]" 
+            title="Atividades Principais" icon={Activity} color="bg-[#3b82f6]" 
             items={data["Atividades Principais"]} onAdd={handleOpenAdd} onEdit={handleOpenEdit} onDelete={handleDelete} rowSpan="row-span-1" 
           />
           <CanvasBlock 
@@ -162,17 +162,17 @@ export const BusinessCanvasPage = () => {
         </div>
 
         <CanvasBlock 
-          title="Proposta de Valor" icon={Heart} color="bg-[#f43f5e]" 
+          title="Proposta de Valor" icon={Gift} color="bg-[#f43f5e]" 
           items={data["Proposta de Valor"]} onAdd={handleOpenAdd} onEdit={handleOpenEdit} onDelete={handleDelete}
         />
 
         <div className="col-span-1 grid grid-rows-2 gap-4">
           <CanvasBlock 
-            title="Relacionamento com Clientes" icon={UserCheck} color="bg-[#10b981]" 
+            title="Relacionamento com Clientes" icon={Heart} color="bg-[#10b981]" 
             items={data["Relacionamento com Clientes"]} onAdd={handleOpenAdd} onEdit={handleOpenEdit} onDelete={handleDelete} rowSpan="row-span-1" 
           />
           <CanvasBlock 
-            title="Canais" icon={Share2} color="bg-[#10b981]" 
+            title="Canais" icon={Truck} color="bg-[#10b981]" 
             items={data["Canais"]} onAdd={handleOpenAdd} onEdit={handleOpenEdit} onDelete={handleDelete} rowSpan="row-span-1" 
           />
         </div>

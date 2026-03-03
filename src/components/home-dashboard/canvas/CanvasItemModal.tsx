@@ -29,7 +29,7 @@ export const CanvasItemModal = ({ isOpen, onClose, title, color, defaultText }: 
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[450px] p-0 overflow-hidden border-none rounded-2xl bg-white shadow-2xl">
+      <DialogContent className="sm:max-w-[450px] p-0 overflow-hidden border-none rounded-2xl bg-white shadow-2xl [&>button]:hidden">
         <DialogHeader className={`p-4 ${color} text-white flex flex-row items-center justify-between`}>
           <DialogTitle className="text-sm font-black uppercase tracking-widest">
             {defaultText ? `Editar ${title}` : `Adicionar ${title}`}
