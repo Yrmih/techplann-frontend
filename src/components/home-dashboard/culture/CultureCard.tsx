@@ -8,11 +8,17 @@ interface CultureCardProps {
   headerBg: string;
 }
 
-export function CultureCard({ title, description, icon: Icon, iconBg, headerBg }: CultureCardProps) {
+export function CultureCard({
+  title,
+  description,
+  icon: Icon,
+  iconBg,
+  headerBg,
+}: CultureCardProps) {
   return (
-    <div className="bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden flex flex-col h-full">
+    <div className="bg-white rounded-lg border border-gray-100 shadow-sm overflow-hidden flex flex-col h-full">
       <div className={`${headerBg} p-4 flex items-center gap-3`}>
-        <div className={`p-2 ${iconBg} text-white rounded-xl shadow-sm`}>
+        <div className={`p-2 ${iconBg} text-white rounded-md shadow-sm`}>
           <Icon size={18} />
         </div>
         <span className="text-sm font-bold text-white">{title}</span>
