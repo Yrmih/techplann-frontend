@@ -36,6 +36,10 @@ export default function Culture() {
     }
   };
 
+  const handleRemoveValue = (valueToRemove: string) => {
+    setValores(valores.filter((v) => v !== valueToRemove));
+  };
+
   return (
     <div className="space-y-8 pb-10">
       {/* Header */}
@@ -72,7 +76,7 @@ export default function Culture() {
           description="Ser a plataforma líder em gestão estratégica na América Latina, reconhecida pela inovação e impacto positivo nos negócios de nossos clientes."
         />
 
-        {/* Card de Valores - Refinado com Input dinâmico e ícone Sparkles */}
+        {/* Card de Valores */}
         <div className="bg-white rounded-lg border border-gray-100 shadow-sm overflow-hidden flex flex-col h-full">
           <div className="bg-[#10b981] p-4 flex items-center justify-between">
             <div className="flex items-center gap-3">
@@ -90,7 +94,7 @@ export default function Culture() {
           </div>
 
           <div className="p-8 space-y-6">
-            {/* Campo de Input (Aparece ao clicar no +) */}
+            {/* Input para novos valores */}
             {isAdding && (
               <div className="flex items-center gap-2 animate-in fade-in slide-in-from-top-2 duration-300">
                 <div className="relative flex-1 group">
@@ -122,18 +126,19 @@ export default function Culture() {
               </div>
             )}
 
-            {/* Listagem das Flags (Valores Salvos) */}
+            {/* Listagem das Flags com Hover de Exclusão */}
             <div className="flex flex-wrap gap-3">
               {valores.map((val) => (
                 <div
                   key={val}
-                  className="flex items-center gap-2 px-4 py-2 bg-gray-50 border border-gray-100 rounded-md text-xs font-bold text-gray-600 shadow-sm hover:border-emerald-200 transition-colors cursor-default"
+                  onClick={() => handleRemoveValue(val)}
+                  className="group flex items-center gap-2 px-4 py-2 bg-gray-50 border border-gray-100 rounded-md text-xs font-bold text-gray-600 shadow-sm transition-all cursor-pointer hover:bg-red-50 hover:border-red-200 hover:text-red-600"
                 >
-                  <div className="text-[#10b981]">
-                    {/* Ícone atualizado para Sparkles conforme solicitado */}
+                  <div className="text-[#10b981] group-hover:text-red-500 transition-colors">
                     <Sparkles size={14} />
                   </div>
-                  {val}
+                  <span>{val}</span>
+                  <X size={12} className="hidden group-hover:block ml-1" />
                 </div>
               ))}
 
@@ -147,11 +152,11 @@ export default function Culture() {
         </div>
       </div>
 
-      {/* Resumo da Cultura (Seção Inferior) */}
+      {/* Resumo da Cultura - Corrigido com Palitos Coloridos */}
       <div className="bg-white p-8 rounded-lg border border-gray-100 shadow-sm space-y-8">
         <div className="flex items-center gap-3">
           <div className="p-2 bg-emerald-50 text-emerald-500 rounded-md">
-            <Rocket size={18} />
+            <Sparkles size={18} />
           </div>
           <div className="text-left">
             <h3 className="text-sm font-bold text-gray-800 leading-tight">
@@ -165,26 +170,39 @@ export default function Culture() {
 
         <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
           {[
-            { label: "Propósito", color: "text-[#e11d48]", bg: "bg-[#fff1f2]" },
-            { label: "Missão", color: "text-[#f59e0b]", bg: "bg-[#fffbeb]" },
-            { label: "Visão", color: "text-[#06b6d4]", bg: "bg-[#ecfeff]" },
+            {
+              label: "Propósito",
+              color: "bg-[#e11d48]",
+              textColor: "text-gray-500",
+            },
+            {
+              label: "Missão",
+              color: "bg-[#f59e0b]",
+              textColor: "text-gray-500",
+            },
+            {
+              label: "Visão",
+              color: "bg-[#06b6d4]",
+              textColor: "text-gray-500",
+            },
             {
               label: "Valores",
               color: "text-[#10b981]",
-              bg: "bg-[#f0fdf4]",
+              textColor: "text-gray-500",
               count: valores.length,
             },
           ].map((item) => (
             <div
               key={item.label}
-              className="bg-gray-50/50 border border-gray-100 rounded-lg p-6 flex flex-col items-center justify-center space-y-3 group hover:shadow-md transition-all"
+              className="bg-gray-50/50 border border-gray-100 rounded-lg p-6 flex flex-col items-center justify-center space-y-4 group hover:shadow-md transition-all"
             >
               {item.count !== undefined ? (
                 <span className={`text-3xl font-black ${item.color}`}>
                   {item.count}
                 </span>
               ) : (
-                <Check className={`${item.color}`} size={24} />
+                /* Palitos coloridos conforme o MVP */
+                <div className={`h-1 w-8 rounded-full ${item.color}`} />
               )}
               <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">
                 {item.label}
