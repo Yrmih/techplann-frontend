@@ -1,17 +1,40 @@
 "use client";
 
-import { Target, Eye, Gem, Rocket, Check, Plus } from "lucide-react";
+import { useState } from "react";
+import {
+  Target,
+  Eye,
+  Gem,
+  Rocket,
+  Check,
+  Plus,
+  Sparkles,
+  Save,
+  X,
+} from "lucide-react";
 import { CultureCard } from "./CultureCard";
 
 export default function Culture() {
-  const valores = [
+  // Estado para os valores e para o controle do input
+  const [valores, setValores] = useState([
     "Inovação",
     "Excelência",
     "Integridade",
     "Colaboração",
     "Foco no Cliente",
     "Sustentabilidade",
-  ];
+  ]);
+
+  const [isAdding, setIsAdding] = useState(false);
+  const [newValue, setNewValue] = useState("");
+
+  const handleAddValue = () => {
+    if (newValue.trim()) {
+      setValores([...valores, newValue.trim()]);
+      setNewValue("");
+      setIsAdding(false);
+    }
+  };
 
   return (
     <div className="space-y-8 pb-10">
@@ -49,7 +72,7 @@ export default function Culture() {
           description="Ser a plataforma líder em gestão estratégica na América Latina, reconhecida pela inovação e impacto positivo nos negócios de nossos clientes."
         />
 
-        {/* Card de Valores - Ajustado para rounded-lg para bordas mais quadradas conforme MVP */}
+        {/* Card de Valores - Refinado com Input dinâmico e ícone Sparkles */}
         <div className="bg-white rounded-lg border border-gray-100 shadow-sm overflow-hidden flex flex-col h-full">
           <div className="bg-[#10b981] p-4 flex items-center justify-between">
             <div className="flex items-center gap-3">
@@ -58,27 +81,73 @@ export default function Culture() {
               </div>
               <span className="text-sm font-bold text-white">Valores</span>
             </div>
-            <button className="text-white hover:bg-white/10 p-1 rounded-md transition-all">
+            <button
+              onClick={() => setIsAdding(true)}
+              className="text-white hover:bg-white/10 p-1 rounded-md transition-all active:scale-90"
+            >
               <Plus size={18} />
             </button>
           </div>
-          <div className="p-8 flex flex-wrap gap-3">
-            {valores.map((val) => (
-              <div
-                key={val}
-                className="flex items-center gap-2 px-4 py-2 bg-gray-50 border border-gray-100 rounded-md text-xs font-bold text-gray-600 shadow-sm"
-              >
-                <div className="text-[#10b981]">
-                  <Rocket size={12} className="rotate-45" />
+
+          <div className="p-8 space-y-6">
+            {/* Campo de Input (Aparece ao clicar no +) */}
+            {isAdding && (
+              <div className="flex items-center gap-2 animate-in fade-in slide-in-from-top-2 duration-300">
+                <div className="relative flex-1 group">
+                  <input
+                    autoFocus
+                    type="text"
+                    value={newValue}
+                    onChange={(e) => setNewValue(e.target.value)}
+                    onKeyDown={(e) => e.key === "Enter" && handleAddValue()}
+                    placeholder="Novo valor..."
+                    className="w-full h-11 px-4 bg-gray-50 border border-gray-200 rounded-xl text-sm font-medium outline-none transition-all group-hover:border-[#10b981] focus:border-[#10b981] focus:bg-white focus:ring-4 focus:ring-emerald-50"
+                  />
                 </div>
-                {val}
+                <button
+                  onClick={handleAddValue}
+                  className="h-11 w-11 flex items-center justify-center bg-[#10b981] text-white rounded-xl hover:bg-[#0da673] transition-all shadow-md shadow-emerald-100"
+                >
+                  <Save size={18} />
+                </button>
+                <button
+                  onClick={() => {
+                    setIsAdding(false);
+                    setNewValue("");
+                  }}
+                  className="h-11 w-11 flex items-center justify-center border border-gray-200 text-gray-400 rounded-xl hover:bg-gray-50 transition-all"
+                >
+                  <X size={18} />
+                </button>
               </div>
-            ))}
+            )}
+
+            {/* Listagem das Flags (Valores Salvos) */}
+            <div className="flex flex-wrap gap-3">
+              {valores.map((val) => (
+                <div
+                  key={val}
+                  className="flex items-center gap-2 px-4 py-2 bg-gray-50 border border-gray-100 rounded-md text-xs font-bold text-gray-600 shadow-sm hover:border-emerald-200 transition-colors cursor-default"
+                >
+                  <div className="text-[#10b981]">
+                    {/* Ícone atualizado para Sparkles conforme solicitado */}
+                    <Sparkles size={14} />
+                  </div>
+                  {val}
+                </div>
+              ))}
+
+              {valores.length === 0 && !isAdding && (
+                <p className="text-gray-400 text-sm font-medium italic">
+                  Clique em + para cadastrar valores
+                </p>
+              )}
+            </div>
           </div>
         </div>
       </div>
 
-      {/* Resumo da Cultura (Seção Inferior) - Ajustado para rounded-lg */}
+      {/* Resumo da Cultura (Seção Inferior) */}
       <div className="bg-white p-8 rounded-lg border border-gray-100 shadow-sm space-y-8">
         <div className="flex items-center gap-3">
           <div className="p-2 bg-emerald-50 text-emerald-500 rounded-md">
@@ -103,14 +172,14 @@ export default function Culture() {
               label: "Valores",
               color: "text-[#10b981]",
               bg: "bg-[#f0fdf4]",
-              count: 6,
+              count: valores.length,
             },
           ].map((item) => (
             <div
               key={item.label}
               className="bg-gray-50/50 border border-gray-100 rounded-lg p-6 flex flex-col items-center justify-center space-y-3 group hover:shadow-md transition-all"
             >
-              {item.count ? (
+              {item.count !== undefined ? (
                 <span className={`text-3xl font-black ${item.color}`}>
                   {item.count}
                 </span>
