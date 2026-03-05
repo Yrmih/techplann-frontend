@@ -11,7 +11,8 @@ interface CanvasItemModalProps {
   onClose: () => void;
   title: string;
   color: string;
-  defaultText?: string; 
+  defaultText?: string;
+  onSave: (text: string) => void
 }
 
 export const CanvasItemModal = ({ isOpen, onClose, title, color, defaultText }: CanvasItemModalProps) => {
