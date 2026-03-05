@@ -27,7 +27,7 @@ export default function ProjectsPage() {
   return (
     <div className="space-y-8 pb-10 relative min-h-screen bg-gray-50/30">
       
-      {/* Toast Notification - Padronizado conforme image_224304.png */}
+      {/* Toast Notification */}
       <AnimatePresence>
         {toast && (
           <motion.div
@@ -49,7 +49,7 @@ export default function ProjectsPage() {
         )}
       </AnimatePresence>
 
-      {/* Banner Superior com Gradiente - Idêntico ao image_2159cb.png */}
+      {/* Banner Superior com Gradiente*/}
       <div className="relative w-full h-48 bg-gradient-to-r from-[#10b981] via-[#10b981] to-[#3b82f6] rounded-3xl p-10 flex flex-col justify-between shadow-lg shadow-emerald-100/20 overflow-hidden">
         {/* Detalhe de luz abstrato ao fundo */}
         <div className="absolute top-0 right-0 w-96 h-96 bg-white/10 rounded-full blur-3xl -mr-20 -mt-20 pointer-events-none" />
@@ -69,7 +69,7 @@ export default function ProjectsPage() {
         </div>
       </div>
 
-      {/* Filtros e Busca conforme image_2159cb.png */}
+      {/* Filtros e Busca */}
       <div className="px-2 space-y-6">
         <div className="flex flex-col md:flex-row items-center gap-4">
           {/* Seletor de Planejamento Unificado */}
@@ -96,7 +96,7 @@ export default function ProjectsPage() {
           </div>
         </div>
 
-        {/* Estado Vazio Central - Idêntico ao image_2159cb.png */}
+        {/* Estado Vazio Central */}
         <div className="bg-white rounded-[40px] border border-gray-100/50 p-24 flex flex-col items-center justify-center space-y-6 text-center shadow-sm">
           <div className="bg-gray-50 p-6 rounded-[32px]">
             <FolderKanban size={56} className="text-gray-200" />
@@ -107,7 +107,7 @@ export default function ProjectsPage() {
           </div>
         </div>
 
-        {/* Legenda conforme image_2159cb.png */}
+        {/* Legenda */}
         <div className="flex items-center gap-6 px-4">
           <span className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">Legenda:</span>
           <div className="flex items-center gap-1.5">
@@ -124,7 +124,7 @@ export default function ProjectsPage() {
           </div>
         </div>
 
-        {/* Listagem das Entidades na parte inferior - image_2159cb.png */}
+        {/* Listagem das Entidades na parte inferior*/}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {/* Card Projetos */}
           <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden flex flex-col min-h-[160px]">
