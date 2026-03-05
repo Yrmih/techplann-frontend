@@ -11,11 +11,10 @@ import {
   Sparkles,
   Save,
   X,
-  Pencil,
+  SquarePen,
   ChevronDown,
   ClipboardList,
 } from "lucide-react";
-import { CultureCard } from "./CultureCard";
 import { motion, AnimatePresence } from "framer-motion";
 
 type CardType = "Propósito" | "Missão" | "Visão";
@@ -119,7 +118,7 @@ export default function Culture() {
   ];
 
   return (
-    <div className="space-y-10 pb-10 relative text-left max-w-[1600px] mx-auto">
+    <div className="space-y-10 pb-10 relative text-left max-w-[1600px] mx-auto px-4">
       {/* Toast */}
       <AnimatePresence>
         {toast && (
@@ -127,11 +126,11 @@ export default function Culture() {
             initial={{ opacity: 0, x: 50 }}
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: 50 }}
-            className="fixed bottom-10 right-10 z-[100] bg-[#050b18] border border-slate-800 text-white px-5 py-4 rounded-xl shadow-2xl flex items-center gap-4 min-w-[320px] justify-between"
+            className="fixed bottom-10 right-10 z-[100] bg-[#051b11] border border-emerald-900/30 text-white px-5 py-4 rounded-xl shadow-2xl flex items-center gap-4 min-w-[320px] justify-between"
           >
             <div className="flex items-center gap-3">
-              <div className="bg-[#10b981] rounded-full p-1.5 flex items-center justify-center">
-                <Check size={14} className="text-white stroke-[3.5px]" />
+              <div className="bg-emerald-500 rounded-full p-1">
+                <Check size={14} className="text-[#051b11]" />
               </div>
               <span className="text-sm font-bold tracking-tight">
                 {toast.message}
@@ -139,7 +138,7 @@ export default function Culture() {
             </div>
             <button
               onClick={() => setToast(null)}
-              className="text-slate-500 hover:text-white transition-colors"
+              className="text-white/50 hover:text-white transition-colors"
             >
               <X size={20} />
             </button>
@@ -153,19 +152,15 @@ export default function Culture() {
           <h1 className="text-3xl font-black text-gray-900 tracking-tight mb-1">
             Cultura Organizacional
           </h1>
-          <p className="text-base text-gray-400 font-medium tracking-tight">
-            Define o perfil e a identidade da sua organização.
+          <p className="text-base text-gray-400 font-medium tracking-tight italic">
+            Defina o propósito, missão, visão e valores da sua organização
           </p>
         </div>
-
         <div className="group flex items-center gap-4 bg-white p-2 pr-6 rounded-2xl shadow-md border border-gray-100 hover:border-gray-200 transition-all cursor-pointer min-w-[340px]">
-          <div className="bg-[#10b981] p-3 rounded-xl text-white shadow-md transition-transform">
+          <div className="text-[#10b981] pl-2">
             <ClipboardList size={22} strokeWidth={2.5} />
           </div>
           <div className="flex flex-col flex-1">
-            <span className="text-[10px] font-black text-gray-300 uppercase tracking-[0.15em] leading-none mb-1.5">
-              Planejamento Atual
-            </span>
             <span className="text-sm font-black text-gray-800 tracking-tight">
               Expansão Regional 2026
             </span>
@@ -174,25 +169,28 @@ export default function Culture() {
         </div>
       </div>
 
-      {/* Grid Superior */}
+      {/* Grid de Cards Superiores Sincronizados */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 px-2">
         {cardsConfig.map((card) => (
-          <div key={card.type} className="group relative">
+          <div
+            key={card.type}
+            className="group relative bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden flex flex-col min-h-[300px]"
+          >
             {editCard.type === card.type ? (
-              <div className="bg-white rounded-2xl border-2 border-emerald-500 shadow-xl p-8 animate-in fade-in zoom-in-95 h-full flex flex-col min-h-[250px]">
+              <div className="p-8 h-full flex flex-col flex-1">
                 <div className="flex items-center gap-3 mb-6">
                   <div
-                    className={`p-2.5 ${card.iconBg} text-white rounded-xl shadow-md`}
+                    className={`p-2 ${card.iconBg} text-white rounded-md shadow-sm`}
                   >
                     <card.icon size={20} />
                   </div>
-                  <span className="text-lg font-black text-gray-800 tracking-tight">
-                    Ajustar {card.type}
+                  <span className="text-lg font-bold text-gray-800 tracking-tight">
+                    {card.type}
                   </span>
                 </div>
                 <textarea
                   autoFocus
-                  className="w-full flex-1 p-5 bg-gray-50 rounded-2xl text-base text-gray-600 outline-none resize-none border-2 border-transparent focus:border-emerald-100 focus:bg-white transition-all font-semibold leading-relaxed"
+                  className="w-full flex-1 p-5 bg-gray-50 border border-gray-100 rounded-xl text-base text-gray-600 outline-none resize-none hover:border-[#10b981] focus:border-[#10b981] focus:bg-white transition-all font-semibold"
                   value={editCard.value}
                   onChange={(e) =>
                     setEditCard({ ...editCard, value: e.target.value })
@@ -201,50 +199,60 @@ export default function Culture() {
                 <div className="flex justify-end gap-3 mt-6">
                   <button
                     onClick={() => setEditCard({ type: null, value: "" })}
-                    className="px-5 py-2.5 text-sm font-black text-gray-400 hover:text-gray-600"
+                    className="flex items-center gap-2 px-6 py-2.5 border border-gray-100 rounded-xl text-sm font-bold text-gray-400 hover:bg-gray-50 uppercase tracking-wider transition-all"
                   >
-                    CANCELAR
+                    <X size={16} /> Cancelar
                   </button>
                   <button
                     onClick={handleSaveCardContent}
-                    className="px-8 py-3 bg-[#10b981] text-white rounded-xl text-sm font-black flex items-center gap-2 shadow-lg hover:bg-[#0da673] active:scale-95 transition-all"
+                    className="flex items-center gap-2 px-8 py-2.5 bg-[#10b981] text-white rounded-xl text-sm font-bold shadow-md hover:bg-[#0da673] active:scale-95 uppercase tracking-wider transition-all"
                   >
-                    <Save size={16} /> SALVAR ALTERAÇÃO
+                    <Save size={16} /> Salvar
                   </button>
                 </div>
               </div>
             ) : (
               <>
-                <CultureCard
-                  title={card.type}
-                  icon={card.icon}
-                  headerBg={card.color}
-                  iconBg={card.iconBg}
-                  description={card.val}
-                />
-                <button
-                  onClick={() =>
-                    setEditCard({ type: card.type, value: card.val })
-                  }
-                  className="absolute top-4 right-4 p-3 bg-white/90 backdrop-blur-sm border border-gray-100 rounded-full text-gray-400 shadow-md opacity-0 group-hover:opacity-100 transition-all hover:text-emerald-500 hover:scale-110 z-10"
+                <div
+                  className={`${card.color} p-4 flex items-center justify-between`}
                 >
-                  <Pencil size={18} />
-                </button>
+                  <div className="flex items-center gap-3">
+                    <div
+                      className={`p-2 ${card.iconBg} text-white rounded-md shadow-sm`}
+                    >
+                      <card.icon size={18} />
+                    </div>
+                    <span className="text-sm font-bold text-white">
+                      {card.type}
+                    </span>
+                  </div>
+                  <button
+                    onClick={() =>
+                      setEditCard({ type: card.type, value: card.val })
+                    }
+                    className="p-2 text-white/50 hover:text-white transition-all"
+                  >
+                    <SquarePen size={18} strokeWidth={2.5} />
+                  </button>
+                </div>
+                <div className="p-8 flex-1 flex items-center">
+                  <p className="text-gray-600 font-medium leading-relaxed text-left">
+                    {card.val}
+                  </p>
+                </div>
               </>
             )}
           </div>
         ))}
 
         {/* Card de Valores */}
-        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden flex flex-col h-full group">
-          <div className="bg-[#10b981] p-5 flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <div className="p-2.5 bg-[#059669] text-white rounded-xl shadow-inner shadow-black/10">
-                <Gem size={20} />
+        <div className="group bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden flex flex-col min-h-[300px]">
+          <div className="bg-[#10b981] p-4 flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-[#059669] text-white rounded-md shadow-sm">
+                <Gem size={18} />
               </div>
-              <span className="text-base font-black text-white uppercase tracking-widest">
-                Valores
-              </span>
+              <span className="text-sm font-bold text-white">Valores</span>
             </div>
             <button
               onClick={() => {
@@ -252,12 +260,12 @@ export default function Culture() {
                 setEditingIndex(null);
                 setTempValue("");
               }}
-              className="bg-white/20 text-white hover:bg-white/40 p-2 rounded-xl transition-all active:scale-90"
+              className="text-white hover:bg-white/10 p-2 rounded-md transition-all active:scale-90"
             >
               <Plus size={20} />
             </button>
           </div>
-          <div className="p-8 space-y-8 flex-1">
+          <div className="p-8 space-y-8 flex-1 flex flex-col text-left">
             <AnimatePresence>
               {(isAdding || editingIndex !== null) && (
                 <motion.div
@@ -272,14 +280,12 @@ export default function Culture() {
                     value={tempValue}
                     onChange={(e) => setTempValue(e.target.value)}
                     onKeyDown={(e) => e.key === "Enter" && handleSaveValor()}
-                    placeholder={
-                      editingIndex !== null ? "Editar..." : "Novo valor..."
-                    }
-                    className="flex-1 h-14 px-6 bg-gray-50 border-2 border-transparent rounded-2xl text-sm font-bold outline-none focus:border-emerald-500 focus:bg-white transition-all shadow-inner"
+                    className="flex-1 h-14 px-6 bg-gray-50 border border-gray-100 rounded-xl text-sm font-bold outline-none hover:border-[#10b981] focus:border-[#10b981] transition-all shadow-inner"
+                    placeholder="Novo valor..."
                   />
                   <button
                     onClick={handleSaveValor}
-                    className="h-14 w-14 flex items-center justify-center bg-[#10b981] text-white rounded-2xl shadow-md hover:bg-[#0da673] transition-all"
+                    className="h-14 w-14 flex items-center justify-center bg-[#10b981] text-white rounded-xl shadow-md hover:bg-[#0da673]"
                   >
                     <Save size={20} />
                   </button>
@@ -288,7 +294,7 @@ export default function Culture() {
                       setIsAdding(false);
                       setEditingIndex(null);
                     }}
-                    className="h-14 w-14 flex items-center justify-center border-2 border-gray-100 text-gray-300 rounded-2xl hover:bg-gray-50 transition-all"
+                    className="h-14 w-14 flex items-center justify-center border border-gray-100 text-gray-300 rounded-xl hover:bg-gray-50 transition-all"
                   >
                     <X size={20} />
                   </button>
@@ -299,7 +305,7 @@ export default function Culture() {
               {valores.map((val, index) => (
                 <div
                   key={`v-${index}`}
-                  className="group/flag flex items-center gap-3 px-5 py-3 bg-gray-50 border border-gray-100 rounded-xl text-xs font-black text-gray-600 shadow-sm transition-all hover:bg-red-50 hover:border-red-200 hover:text-red-600 cursor-default"
+                  className="group/flag flex items-center gap-3 px-6 py-2.5 bg-gray-50 border border-gray-100 rounded-full text-xs font-black text-gray-600 shadow-sm transition-all hover:bg-red-50 hover:border-red-200 hover:text-red-600 cursor-default"
                 >
                   <div className="text-emerald-500 group-hover/flag:text-red-500 transition-colors">
                     <Sparkles size={16} />
@@ -312,18 +318,18 @@ export default function Culture() {
                         setEditingIndex(index);
                         setTempValue(valores[index]);
                       }}
-                      className="p-1 hover:bg-emerald-100 rounded-lg text-emerald-600 transition-all"
+                      className="p-0.5 hover:text-emerald-600"
                     >
-                      <Pencil size={14} />
+                      <SquarePen size={12} />
                     </button>
                     <button
                       onClick={(e) => {
                         e.stopPropagation();
                         handleRemoveValue(index);
                       }}
-                      className="p-1 hover:bg-red-100 rounded-lg text-red-500 transition-all"
+                      className="p-0.5 hover:text-red-500"
                     >
-                      <X size={14} />
+                      <X size={12} />
                     </button>
                   </div>
                 </div>
@@ -333,14 +339,14 @@ export default function Culture() {
         </div>
       </div>
 
-      {/* Resumo da Cultura - SOMBRAS CORRIGIDAS */}
-      <div className="bg-white p-10 rounded-2xl border border-gray-100 shadow-sm space-y-10 px-2 mx-2">
+      {/* Resumo */}
+      <div className="bg-white p-10 rounded-2xl border border-gray-100 shadow-sm space-y-10">
         <div className="flex items-center gap-4">
           <div className="p-3 bg-emerald-50 text-emerald-500 rounded-2xl shadow-sm">
             <Sparkles size={22} />
           </div>
-          <div>
-            <h3 className="text-lg font-black text-gray-800 tracking-tight leading-none mb-1">
+          <div className="text-left">
+            <h3 className="text-lg font-black text-gray-800 leading-tight">
               Resumo da Cultura
             </h3>
             <p className="text-[11px] text-gray-400 font-bold uppercase tracking-[0.2em] leading-none">
@@ -361,7 +367,7 @@ export default function Culture() {
           ].map((item, idx) => (
             <div
               key={`sum-${idx}`}
-              className="bg-gray-50/50 border border-gray-100 rounded-2xl p-8 flex flex-col items-center justify-center space-y-5 group hover:bg-white hover:shadow-md transition-all duration-300"
+              className="bg-gray-50/50 border border-gray-100 rounded-2xl p-8 flex flex-col items-center justify-center space-y-5 transition-all hover:bg-white hover:shadow-md"
             >
               {item.count !== undefined ? (
                 <span
@@ -370,9 +376,7 @@ export default function Culture() {
                   {item.count}
                 </span>
               ) : (
-                <div
-                  className={`h-2 w-12 rounded-full ${item.color} shadow-sm shadow-black/10`}
-                />
+                <div className={`h-1.5 w-10 rounded-full ${item.color}`} />
               )}
               <span className="text-[10px] font-black text-gray-400 uppercase tracking-[0.25em]">
                 {item.label}
