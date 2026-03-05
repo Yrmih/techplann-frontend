@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { NewProjectForm } from "./NewProjectForm";
 import { motion, AnimatePresence } from "framer-motion";
 import { 
   Plus, 
@@ -18,6 +19,11 @@ import {
 export default function ProjectsPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [toast, setToast] = useState<{ message: string } | null>(null);
+  const [ showForm, setShowForm ] = useState(false);
+
+  if(showForm) {
+    return<NewProjectForm onBack = {() => setShowForm(false)} />;
+  }
 
   const showToast = (message: string) => {
     setToast({ message });
@@ -61,10 +67,10 @@ export default function ProjectsPage() {
           </div>
           
           <button 
-            onClick={() => showToast("Funcionalidade em desenvolvimento")}
+            onClick={() => setShowForm(true)}
             className="flex items-center gap-2 bg-[#059669] hover:bg-[#047857] text-white px-6 py-3 rounded-2xl font-black text-sm transition-all shadow-xl active:scale-95"
           >
-            <Plus size={18} strokeWidth={3} /> NOVO PROJETO
+            <Plus size={18} strokeWidth={3} /> Novo Projeto
           </button>
         </div>
       </div>

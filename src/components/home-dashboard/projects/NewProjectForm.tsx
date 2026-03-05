@@ -72,7 +72,7 @@ const CustomSelect = ({
 
 import { ChevronDown } from "lucide-react";
 
-export const NewProjectForm = () => {
+export const NewProjectForm = ({ onBack }: { onBack: () => void }) => {
   // Estados para Parceiros (Dual List)
   const [availPartners, setAvailPartners] = useState<string[]>([
     "mauricio de souza",
@@ -141,7 +141,10 @@ export const NewProjectForm = () => {
       <div className="flex items-center justify-between px-2 pt-4">
         <div className="flex items-center gap-5">
           <Link href="/dashboard/projects">
-            <button className="flex items-center gap-2 px-4 py-2 hover:bg-gray-100 rounded-xl transition-all text-gray-500 font-bold text-sm border border-gray-200 bg-white">
+            <button
+              onClick={onBack}
+              className="flex items-center gap-2 px-4 py-2 hover:bg-gray-100 rounded-xl transition-all text-gray-500 font-bold text-sm border border-gray-200 bg-white"
+            >
               <ArrowLeft size={18} /> Voltar
             </button>
           </Link>
