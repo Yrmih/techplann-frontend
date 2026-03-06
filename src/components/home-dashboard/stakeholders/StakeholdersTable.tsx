@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import {
   Printer,
   Search,
@@ -13,10 +13,10 @@ import {
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
-import { Dialog, DialogContent } from "@/components/ui/dialog";
 
-import { PartnerForm } from "./PartnerFormModal";
-import { DepartmentFormModal } from "./DepartmentFormModal";
+// Importação dos novos componentes integrados
+import { NewStakeholderForm } from "./NewStakeholderForm";
+import { NewDepartmentForm } from "./NewDepartmentForm";
 
 interface EmptyStateProps {
   description: string;
@@ -29,14 +29,14 @@ const EmptyState = ({
   description,
   buttonLabel,
   icon: Icon,
-  onAction
+  onAction,
 }: EmptyStateProps) => (
   <div className="flex flex-col items-center justify-center py-24 bg-white border border-gray-100 rounded-2xl shadow-sm">
     <div className="text-gray-300 mb-4">
       <Icon size={48} strokeWidth={1} />
     </div>
     <p className="text-sm font-medium text-gray-400 mb-6">{description}</p>
-    <button 
+    <button
       onClick={onAction}
       className="text-[#10b981] font-bold text-sm hover:underline transition-all"
     >
@@ -47,8 +47,10 @@ const EmptyState = ({
 
 export default function StakeholdersPage() {
   const [activeTab, setActiveTab] = useState("parceiros");
-  const [isPartnerModalOpen, setIsPartnerModalOpen] = useState(false);
-  const [isDeptModalOpen, setIsDeptModalOpen] = useState(false);
+
+  // Estados para controlar a exibição dos formulários integrados (sem modais)
+  const [showStakeholderForm, setShowStakeholderForm] = useState(false);
+  const [showDepartmentForm, setShowDepartmentForm] = useState(false);
 
   const getButtonLabel = () => {
     switch (activeTab) {
@@ -63,9 +65,9 @@ export default function StakeholdersPage() {
 
   const handleNewRegistration = () => {
     if (activeTab === "parceiros") {
-      setIsPartnerModalOpen(true);
+      setShowStakeholderForm(true);
     } else if (activeTab === "departamentos") {
-      setIsDeptModalOpen(true);
+      setShowDepartmentForm(true);
     }
   };
 
@@ -75,117 +77,141 @@ export default function StakeholdersPage() {
       animate={{ opacity: 1, y: 0 }}
       className="space-y-6 p-8 max-w-[1600px] mx-auto"
     >
-      {/* Header */}
-      <div className="flex justify-between items-start">
-        <div className="text-left">
-          <h1 className="text-3xl font-black text-gray-900 tracking-tight">
-            Stakeholders
-          </h1>
-          <p className="text-gray-500 font-medium mt-1">
-            Gerencie parceiros e departamentos internos
-          </p>
-        </div>
-
-        <div className="flex gap-3">
-          <button className="flex items-center gap-2 px-5 py-2.5 bg-white border border-gray-200 rounded-xl text-xs font-bold text-gray-600 hover:bg-gray-50 transition-all shadow-sm">
-            <Printer size={16} /> Imprimir
-          </button>
-
-          <button 
-            onClick={handleNewRegistration}
-            className="flex items-center gap-2 px-5 py-2.5 bg-[#10b981] text-white rounded-xl text-xs font-bold hover:bg-[#0da673] transition-all shadow-md shadow-emerald-100 active:scale-95"
+      <AnimatePresence mode="wait">
+        {/* RENDERIZAÇÃO CONDICIONAL: NOVO STAKEHOLDER */}
+        {showStakeholderForm ? (
+          <motion.div
+            key="stakeholder-form"
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: -20 }}
           >
-            <Plus size={16} /> {getButtonLabel()}
-          </button>
-        </div>
-      </div>
+            <NewStakeholderForm onBack={() => setShowStakeholderForm(false)} />
+          </motion.div>
+        ) : showDepartmentForm ? (
+          /* RENDERIZAÇÃO CONDICIONAL: NOVO DEPARTAMENTO */
+          <motion.div
+            key="dept-form"
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: -20 }}
+          >
+            <NewDepartmentForm onBack={() => setShowDepartmentForm(false)} />
+          </motion.div>
+        ) : (
+          /* LISTAGEM PRINCIPAL */
+          <motion.div
+            key="list"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="space-y-6"
+          >
+            {/* Header */}
+            <div className="flex justify-between items-start">
+              <div className="text-left">
+                <h1 className="text-3xl font-black text-gray-900 tracking-tight">
+                  Stakeholders
+                </h1>
+                <p className="text-gray-500 font-medium mt-1">
+                  Gerencie parceiros e departamentos internos
+                </p>
+              </div>
 
-      <Tabs 
-        defaultValue="parceiros" 
-        className="w-full" 
-        onValueChange={(value) => setActiveTab(value)}
-      >
-        <div className="flex items-center justify-between mb-8">
-          <TabsList className="bg-gray-100/60 p-1.5 rounded-2xl border border-gray-100 h-13">
-            <TabsTrigger
-              value="parceiros"
-              className="flex items-center gap-2 px-8 py-3 rounded-xl data-[state=active]:bg-white data-[state=active]:shadow-md data-[state=active]:text-gray-900 text-gray-500 font-bold text-xs h-full"
+              <div className="flex gap-3">
+                <button className="flex items-center gap-2 px-5 py-2.5 bg-white border border-gray-200 rounded-xl text-xs font-bold text-gray-600 hover:bg-gray-50 transition-all shadow-sm">
+                  <Printer size={16} /> Imprimir
+                </button>
+
+                <button
+                  onClick={handleNewRegistration}
+                  className="flex items-center gap-2 px-5 py-2.5 bg-[#10b981] text-white rounded-xl text-xs font-bold hover:bg-[#0da673] transition-all shadow-md shadow-emerald-100 active:scale-95"
+                >
+                  <Plus size={16} /> {getButtonLabel()}
+                </button>
+              </div>
+            </div>
+
+            <Tabs
+              defaultValue="parceiros"
+              className="w-full"
+              onValueChange={(value) => setActiveTab(value)}
             >
-              <Handshake size={16} /> Parceiros
-            </TabsTrigger>
-            <TabsTrigger
-              value="departamentos"
-              className="flex items-center gap-2 px-8 py-3 rounded-xl data-[state=active]:bg-white data-[state=active]:shadow-md data-[state=active]:text-gray-900 text-gray-500 font-bold text-xs h-full"
-            >
-              <Users size={16} /> Departamentos
-            </TabsTrigger>
-          </TabsList>
+              <div className="flex items-center justify-between mb-8">
+                <TabsList className="bg-gray-100/60 p-1.5 rounded-2xl border border-gray-100 h-13">
+                  <TabsTrigger
+                    value="parceiros"
+                    className="flex items-center gap-2 px-8 py-3 rounded-xl data-[state=active]:bg-white data-[state=active]:shadow-md data-[state=active]:text-gray-900 text-gray-500 font-bold text-xs h-full"
+                  >
+                    <Handshake size={16} /> Parceiros
+                  </TabsTrigger>
+                  <TabsTrigger
+                    value="departamentos"
+                    className="flex items-center gap-2 px-8 py-3 rounded-xl data-[state=active]:bg-white data-[state=active]:shadow-md data-[state=active]:text-gray-900 text-gray-500 font-bold text-xs h-full"
+                  >
+                    <Users size={16} /> Departamentos
+                  </TabsTrigger>
+                </TabsList>
 
-          <div className="relative w-80">
-            <Search
-              className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"
-              size={16}
-            />
-            <Input
-              placeholder={`Buscar ${activeTab}...`}
-              className="pl-11 h-12 bg-gray-50 border-gray-200 rounded-2xl text-xs font-medium focus:ring-[#10b981]"
-            />
-          </div>
-        </div>
+                <div className="relative w-80">
+                  <Search
+                    className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"
+                    size={16}
+                  />
+                  <Input
+                    placeholder={`Buscar ${activeTab}...`}
+                    className="pl-11 h-12 bg-gray-50 border-gray-200 rounded-2xl text-xs font-medium focus:ring-[#10b981]"
+                  />
+                </div>
+              </div>
 
-        {/* Conteúdo Parceiros */}
-        <TabsContent value="parceiros" className="mt-0 focus-visible:outline-none">
-          <div className="bg-white border border-gray-100 rounded-3xl shadow-sm overflow-hidden text-left">
-            <div className="p-7 border-b border-gray-50 bg-gray-50/30">
-              <h2 className="font-bold text-gray-900 text-sm tracking-tight">
-                Lista de Parceiros
-              </h2>
-            </div>
-            <div className="min-h-[450px] flex flex-col justify-center px-6">
-              <EmptyState
-                description="Nenhum parceiro cadastrado"
-                buttonLabel="Cadastrar primeiro parceiro"
-                icon={Handshake}
-                onAction={() => setIsPartnerModalOpen(true)}
-              />
-            </div>
-          </div>
-        </TabsContent>
+              {/* Conteúdo Parceiros */}
+              <TabsContent
+                value="parceiros"
+                className="mt-0 focus-visible:outline-none"
+              >
+                <div className="bg-white border border-gray-100 rounded-3xl shadow-sm overflow-hidden text-left">
+                  <div className="p-7 border-b border-gray-50 bg-gray-50/30">
+                    <h2 className="font-bold text-gray-900 text-sm tracking-tight">
+                      Lista de Parceiros
+                    </h2>
+                  </div>
+                  <div className="min-h-[450px] flex flex-col justify-center px-6">
+                    <EmptyState
+                      description="Nenhum parceiro cadastrado"
+                      buttonLabel="Cadastrar primeiro parceiro"
+                      icon={Handshake}
+                      onAction={() => setShowStakeholderForm(true)}
+                    />
+                  </div>
+                </div>
+              </TabsContent>
 
-        {/* Conteúdo Departamentos */}
-        <TabsContent value="departamentos" className="mt-0 focus-visible:outline-none">
-          <div className="bg-white border border-gray-100 rounded-3xl shadow-sm overflow-hidden text-left">
-            <div className="p-7 border-b border-gray-50 bg-gray-50/30">
-              <h2 className="font-bold text-gray-900 text-sm tracking-tight">
-                Lista de Departamentos
-              </h2>
-            </div>
-            <div className="min-h-[450px] flex flex-col justify-center px-6">
-              <EmptyState
-                description="Nenhum departamento cadastrado"
-                buttonLabel="Cadastrar primeiro departamento"
-                icon={Users}
-                onAction={() => setIsDeptModalOpen(true)}
-              />
-            </div>
-          </div>
-        </TabsContent>
-      </Tabs>
-
-      {/* Modal Parceiro */}
-      <Dialog open={isPartnerModalOpen} onOpenChange={setIsPartnerModalOpen}>
-        <DialogContent className="max-w-2xl p-0 bg-transparent border-none shadow-none overflow-visible">
-          <PartnerForm onCancel={() => setIsPartnerModalOpen(false)} />
-        </DialogContent>
-      </Dialog>
-
-      {/* Modal Departamento */}
-      <Dialog open={isDeptModalOpen} onOpenChange={setIsDeptModalOpen}>
-        <DialogContent className="max-w-2xl p-0 bg-transparent border-none shadow-none overflow-visible">
-          <DepartmentFormModal onCancel={() => setIsDeptModalOpen(false)} />
-        </DialogContent>
-      </Dialog>
-
+              {/* Conteúdo Departamentos */}
+              <TabsContent
+                value="departamentos"
+                className="mt-0 focus-visible:outline-none"
+              >
+                <div className="bg-white border border-gray-100 rounded-3xl shadow-sm overflow-hidden text-left">
+                  <div className="p-7 border-b border-gray-50 bg-gray-50/30">
+                    <h2 className="font-bold text-gray-900 text-sm tracking-tight">
+                      Lista de Departamentos
+                    </h2>
+                  </div>
+                  <div className="min-h-[450px] flex flex-col justify-center px-6">
+                    <EmptyState
+                      description="Nenhum departamento cadastrado"
+                      buttonLabel="Cadastrar primeiro departamento"
+                      icon={Users}
+                      onAction={() => setShowDepartmentForm(true)}
+                    />
+                  </div>
+                </div>
+              </TabsContent>
+            </Tabs>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </motion.div>
   );
 }
