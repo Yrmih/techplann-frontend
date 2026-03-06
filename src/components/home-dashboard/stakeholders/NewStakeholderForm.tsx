@@ -12,7 +12,7 @@ interface NewStakeholderFormProps {
 export const NewStakeholderForm = ({ onBack }: NewStakeholderFormProps) => {
   return (
     <div className="w-full max-w-4xl mx-auto animate-in fade-in slide-in-from-bottom-4 duration-500">
-      {/* Cabeçalho do Formulário conforme o MVP */}
+      {/* Cabeçalho do Formulário */}
       <header className="flex items-start gap-4 mb-8">
         <button
           onClick={onBack}
