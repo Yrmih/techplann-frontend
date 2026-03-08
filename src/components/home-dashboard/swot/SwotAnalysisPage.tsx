@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import { useState } from "react";
 import {
   Plus,
   Pencil,
@@ -8,13 +8,14 @@ import {
   LucideIcon,
   Calendar,
   Zap,
-  Crosshair,
-  RefreshCw,
   ShieldCheck,
   Shield,
   AlertTriangle,
   FileText,
   BarChart3,
+  Swords,
+  Lightbulb,
+  Target,
 } from "lucide-react";
 import { AnimatePresence, motion } from "framer-motion";
 
@@ -24,7 +25,6 @@ import { SwotItemModal } from "./SwotItemModal";
 import { SwotRadarChart } from "./SwotRadarChart";
 import { SwotCreateValues } from "@/lib/validators/swot.schema";
 import { cn } from "@/lib/utils/utils";
-
 
 type SwotTipo = "Força" | "Fraqueza" | "Oportunidade" | "Ameaça";
 
@@ -40,6 +40,8 @@ interface SwotCardProps {
   items: SwotItem[];
   total?: number;
   onAdd: () => void;
+  emptyText?: string;
+  emptyActionText?: string;
 }
 
 export const SwotAnalysisPage = () => {
@@ -66,7 +68,7 @@ export const SwotAnalysisPage = () => {
 
   return (
     <div className="space-y-10 p-10 max-w-[1600px] mx-auto min-h-screen bg-[#f8fafc]">
-      {/* 1. HEADER */}
+      {/* 1. HEADER INTEGRADO */}
       <div className="flex justify-between items-start px-1">
         <div className="text-left">
           <h1 className="text-[32px] font-black text-gray-900 tracking-tight uppercase leading-none">
@@ -189,7 +191,7 @@ export const SwotAnalysisPage = () => {
               </h2>
             </div>
 
-            {/* GRID DE CARDS SWOT */}
+            {/* MATRIZ SWOT */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
               {!isCruzada ? (
                 <>
@@ -225,30 +227,30 @@ export const SwotAnalysisPage = () => {
               ) : (
                 <>
                   <SwotCard
-                    title="Estratégia Ofensiva (F + O)"
+                    title="FO – Ofensivas"
                     corKey="emerald"
-                    icon={Zap}
+                    icon={Swords}
                     items={[]}
                     onAdd={() => {}}
                   />
                   <SwotCard
-                    title="Estratégia de Confronto (F + A)"
-                    corKey="amber"
-                    icon={Crosshair}
-                    items={[]}
-                    onAdd={() => {}}
-                  />
-                  <SwotCard
-                    title="Estratégia de Reforço (W + O)"
+                    title="FA – Defensivas"
                     corKey="blue"
-                    icon={RefreshCw}
+                    icon={ShieldCheck}
                     items={[]}
                     onAdd={() => {}}
                   />
                   <SwotCard
-                    title="Estratégia Defensiva (W + A)"
+                    title="WO – Melhoria"
+                    corKey="amber"
+                    icon={Lightbulb}
+                    items={[]}
+                    onAdd={() => {}}
+                  />
+                  <SwotCard
+                    title="WT – Sobrevivência"
                     corKey="rose"
-                    icon={ShieldCheck}
+                    icon={Target}
                     items={[]}
                     onAdd={() => {}}
                   />
@@ -364,6 +366,7 @@ export const SwotAnalysisPage = () => {
   );
 };
 
+/* COMPONENTE DE CARD SWOT */
 const SwotCard = ({
   title,
   corKey,
@@ -432,10 +435,10 @@ const SwotCard = ({
 
       <div className="p-8 space-y-5 flex-1 min-h-[220px]">
         {items.length === 0 ? (
-          <div className="h-full flex flex-col items-center justify-center gap-3 py-10 rounded-md">
+          <div className="h-full flex flex-col items-center justify-center gap-3 py-10 rounded-md bg-white/40">
             <Icon
               size={48}
-              strokeWidth={1.5}
+              strokeWidth={2}
               stroke={current.stroke}
               fill="none"
               className="opacity-100"
@@ -471,7 +474,7 @@ const SwotCard = ({
         )}
       </div>
 
-      <div className="p-5 bg-white/40 border-t border-gray-200/50 flex justify-between text-[10px] font-black uppercase text-gray-400 tracking-widest">
+      <div className="p-5 bg-white/60 border-t border-gray-200/50 flex justify-between text-[10px] font-black uppercase text-gray-400 tracking-widest">
         <span>Impacto Estratégico:</span>
         <span className={cn("font-black", current.text)}>{total || 0} pts</span>
       </div>
