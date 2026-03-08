@@ -7,9 +7,13 @@ export const swotCreateSchema = z.object({
 });
 
 // Schema para Itens das Matrizes (Forças, Fraquezas, etc)
+// ATUALIZADO: Agora inclui os fatores de cálculo para bater com a UI
 export const swotItemSchema = z.object({
   descricao: z.string().min(5, "Descreva o item com mais detalhes"),
-  pontuacaao: z.number().min(1).max(100),
+  importancia: z.string(),
+  intensidade: z.string(),
+  tendencia: z.string(),
+  pontuacaao: z.number().min(1).max(125), // 5 * 5 * 5 = 125
 });
 
 export type SwotCreateValues = z.infer<typeof swotCreateSchema>;
