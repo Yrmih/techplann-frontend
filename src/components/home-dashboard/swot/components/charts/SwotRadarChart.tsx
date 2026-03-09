@@ -21,7 +21,7 @@ interface SwotRadarChartProps {
 
 export const SwotRadarChart = ({ data }: SwotRadarChartProps) => {
   return (
-    /* Card com fundo branco e bordas ponteagudas (md) conforme o MVP */
+    /* Card com fundo branco e bordas ponteagudas (md */
     <div className="bg-white p-8 rounded-md border border-gray-100 shadow-sm text-left h-full flex flex-col">
       
       {/* Título idêntico à imagem de referência */}
