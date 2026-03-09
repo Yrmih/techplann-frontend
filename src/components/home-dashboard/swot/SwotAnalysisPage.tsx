@@ -8,8 +8,6 @@ import {
   LucideIcon,
   Calendar,
   Zap,
-  Crosshair,
-  RefreshCw,
   ShieldCheck,
   Shield,
   AlertTriangle,
@@ -24,7 +22,7 @@ import { CustomSelect } from "@/components/ui/custom/CustomSelect";
 import { SwotCreateModal } from "./components/modal/SwotCreateModal";
 import { SwotItemModal } from "./components/modal/SwotItemModal";
 
-// Novos componentes separados (Certifique-se de que os nomes dos arquivos batem)
+// Novos componentes separados de dashboard
 import { SwotResumo } from "./components/charts/SwotResumo";
 import { SwotRadarChart } from "./components/charts/SwotRadarChart";
 import { SwotComparativo } from "./components/charts/SwotComparativo";
@@ -72,12 +70,20 @@ export const SwotAnalysisPage = () => {
     setShowItemModal(true);
   };
 
-  // Dados para o componente Radar (calculados ou mockados)
+  // 1. Dados para o componente Radar (Escala 0-100)
   const radarData = [
     { subject: "FORÇAS", A: 0, fullMark: 100 },
     { subject: "FRAQUEZAS", A: 0, fullMark: 100 },
     { subject: "OPORTUNIDADES", A: 0, fullMark: 100 },
     { subject: "AMEAÇAS", A: 0, fullMark: 100 },
+  ];
+
+  // 2. Dados para o componente Comparativo (Escala métrica 0-4)
+  const comparativoData = [
+    { category: "Forças", value: 0 },
+    { category: "Fraquezas", value: 0 },
+    { category: "Oportunidades", value: 0 },
+    { category: "Ameaças", value: 0 },
   ];
 
   return (
@@ -288,7 +294,7 @@ export const SwotAnalysisPage = () => {
               <SwotRadarChart data={radarData} />
 
               {/* 3. COMPARATIVO DE IMPACTO */}
-              <SwotComparativo interno={0} externo={0} />
+              <SwotComparativo data={comparativoData} />
             </div>
           </motion.div>
         )}
@@ -308,7 +314,7 @@ export const SwotAnalysisPage = () => {
   );
 };
 
-/* COMPONENTE DE CARD SWOT (Sólido e Fiel ao MVP) */
+/* COMPONENTE DE CARD SWOT */
 const SwotCard = ({
   title,
   corKey,
