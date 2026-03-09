@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import React, { useState } from "react";
 import {
   Plus,
   Pencil,
@@ -8,11 +8,12 @@ import {
   LucideIcon,
   Calendar,
   Zap,
+  Crosshair,
+  RefreshCw,
   ShieldCheck,
   Shield,
   AlertTriangle,
   FileText,
-  BarChart3,
   Swords,
   Lightbulb,
   Target,
@@ -20,9 +21,14 @@ import {
 import { AnimatePresence, motion } from "framer-motion";
 
 import { CustomSelect } from "@/components/ui/custom/CustomSelect";
-import { SwotCreateModal } from "./SwotCreateModal";
-import { SwotItemModal } from "./SwotItemModal";
-import { SwotRadarChart } from "./SwotRadarChart";
+import { SwotCreateModal } from "./components/modal/SwotCreateModal";
+import { SwotItemModal } from "./components/modal/SwotItemModal";
+
+// Novos componentes separados (Certifique-se de que os nomes dos arquivos batem)
+import { SwotResumo } from "./components/charts/SwotResumo";
+import { SwotRadarChart } from "./components/charts/SwotRadarChart";
+import { SwotComparativo } from "./components/charts/SwotComparativo";
+
 import { SwotCreateValues } from "@/lib/validators/swot.schema";
 import { cn } from "@/lib/utils/utils";
 
@@ -65,6 +71,14 @@ export const SwotAnalysisPage = () => {
     setCurrentTipo(tipo);
     setShowItemModal(true);
   };
+
+  // Dados para o componente Radar (calculados ou mockados)
+  const radarData = [
+    { subject: "FORÇAS", A: 0, fullMark: 100 },
+    { subject: "FRAQUEZAS", A: 0, fullMark: 100 },
+    { subject: "OPORTUNIDADES", A: 0, fullMark: 100 },
+    { subject: "AMEAÇAS", A: 0, fullMark: 100 },
+  ];
 
   return (
     <div className="space-y-10 p-10 max-w-[1600px] mx-auto min-h-screen bg-[#f8fafc]">
@@ -191,7 +205,7 @@ export const SwotAnalysisPage = () => {
               </h2>
             </div>
 
-            {/* MATRIZ SWOT */}
+            {/* GRID DE CARDS SWOT */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
               {!isCruzada ? (
                 <>
@@ -258,95 +272,23 @@ export const SwotAnalysisPage = () => {
               )}
             </div>
 
-            {/* SEÇÃO DE DASHBOARDS */}
+            {/* SEÇÃO DE DASHBOARDS (COM COMPONENTES SEPARADOS) */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8 pt-8 border-t border-gray-100">
-              <div className="bg-white p-8 rounded-md border border-gray-100 shadow-sm text-left flex flex-col justify-between">
-                <div>
-                  <h3 className="font-black text-gray-900 mb-6 flex items-center gap-2 uppercase text-xs tracking-wider">
-                    <BarChart3 size={18} className="text-[#10b981]" /> Resumo
-                    SWOT
-                  </h3>
-                  <div className="space-y-3">
-                    {[
-                      {
-                        label: "Forças",
-                        color: "text-emerald-500",
-                        bg: "bg-emerald-50/50",
-                      },
-                      {
-                        label: "Fraquezas",
-                        color: "text-rose-500",
-                        bg: "bg-rose-50/50",
-                      },
-                      {
-                        label: "Oportunidades",
-                        color: "text-blue-500",
-                        bg: "bg-blue-50/50",
-                      },
-                      {
-                        label: "Ameaças",
-                        color: "text-amber-500",
-                        bg: "bg-amber-50/50",
-                      },
-                    ].map((stat, i) => (
-                      <div
-                        key={i}
-                        className={cn(
-                          "flex justify-between items-center p-3 rounded-md",
-                          stat.bg,
-                        )}
-                      >
-                        <span
-                          className={cn(
-                            "text-[10px] font-black uppercase tracking-tight",
-                            stat.color,
-                          )}
-                        >
-                          {stat.label}
-                        </span>
-                        <span className={cn("text-lg font-black", stat.color)}>
-                          0
-                        </span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </div>
+              {/* 1. RESUMO SWOT */}
+              <SwotResumo
+                data={{
+                  forcas: 0,
+                  fraquezas: 0,
+                  oportunidades: 0,
+                  ameacas: 0,
+                }}
+              />
 
-              <div className="md:col-span-1">
-                <SwotRadarChart
-                  data={[
-                    { subject: "Forças", A: 0, fullMark: 100 },
-                    { subject: "Fraquezas", A: 0, fullMark: 100 },
-                    { subject: "Oportunidades", A: 0, fullMark: 100 },
-                    { subject: "Ameaças", A: 0, fullMark: 100 },
-                  ]}
-                />
-              </div>
+              {/* 2. GRÁFICO RADAR SWOT */}
+              <SwotRadarChart data={radarData} />
 
-              <div className="bg-white p-8 rounded-md border border-gray-100 shadow-sm text-left">
-                <h3 className="font-black text-gray-900 mb-6 uppercase text-xs tracking-wider">
-                  Comparativo
-                </h3>
-                <div className="space-y-6">
-                  {[
-                    { label: "Interno", val: 0, color: "bg-[#10b981]" },
-                    { label: "Externo", val: 0, color: "bg-blue-400" },
-                  ].map((bar, i) => (
-                    <div key={i} className="space-y-2">
-                      <div className="flex justify-between text-[10px] font-black text-gray-400 uppercase">
-                        <span>{bar.label}</span>
-                        <span>{bar.val}%</span>
-                      </div>
-                      <div className="w-full h-2 bg-gray-100 rounded-full overflow-hidden">
-                        <div
-                          className={cn("h-full rounded-full w-0", bar.color)}
-                        />
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
+              {/* 3. COMPARATIVO DE IMPACTO */}
+              <SwotComparativo interno={0} externo={0} />
             </div>
           </motion.div>
         )}
@@ -366,7 +308,7 @@ export const SwotAnalysisPage = () => {
   );
 };
 
-/* COMPONENTE DE CARD SWOT */
+/* COMPONENTE DE CARD SWOT (Sólido e Fiel ao MVP) */
 const SwotCard = ({
   title,
   corKey,
