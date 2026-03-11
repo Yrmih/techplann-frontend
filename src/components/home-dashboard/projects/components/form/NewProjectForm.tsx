@@ -33,8 +33,8 @@ export const NewProjectForm = ({
   // --- ESTADOS DAS LISTAS PARALELAS ---
   const [availPartners, setAvailPartners] = useState<string[]>([
     "Lucas Almeida Ferreira",
-    "RENATO BORDALO",
-    "FRANK PEREIRA CARDOSO",
+    "Renato Bordalo",
+    "Frank Pereira Cardoso",
   ]);
   const [selectedPartners, setSelectedPartners] = useState<string[]>([]);
 
