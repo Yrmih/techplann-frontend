@@ -6,23 +6,13 @@ import {
   FileText,
   BarChart2,
   Printer,
-  AlertCircle,
-  CheckCircle2,
-  TrendingUp,
-  Search,
   ChevronDown,
   MoreVertical,
+  AlertTriangle,
+  CheckCircle,
+  TrendingUp,
+  Search,
 } from "lucide-react";
-import { cn } from "@/lib/utils/utils";
-
-interface Activity {
-  id: string;
-  descricao: string;
-  responsavel: string;
-  prazo: string;
-  status: "atrasada" | "concluida" | "em-andamento";
-  progresso: number;
-}
 
 interface ProjectDashboardProps {
   projectTitle: string;
@@ -33,217 +23,184 @@ export const ProjectDashboard = ({
   projectTitle,
   onBack,
 }: ProjectDashboardProps) => {
-  // Mock de atividades para a tabela interna conforme o MVP
-  const activities: Activity[] = [
-    {
-      id: "01",
-      descricao: "Definição de escopo do sistema de gestão",
-      responsavel: "Lucas Almeida",
-      prazo: "15/04/2026",
-      status: "concluida",
-      progresso: 100,
-    },
-    {
-      id: "02",
-      descricao: "Desenvolvimento da interface do dashboard",
-      responsavel: "Ian Oliveira",
-      prazo: "20/05/2026",
-      status: "atrasada",
-      progresso: 45,
-    },
-  ];
-
   return (
-    <div className="space-y-8 pb-10 animate-in fade-in duration-500">
-      {/* 1. HEADER EMERALD [Fiel à imagem f60654] */}
-      <div className="bg-[#10b981] rounded-[32px] p-8 text-white shadow-xl shadow-emerald-100/20">
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
-          <div className="text-left">
-            <div className="flex items-center gap-2 text-emerald-100 text-[10px] font-black uppercase tracking-[2px] mb-2">
-              <span className="bg-white/20 px-2 py-0.5 rounded">
-                Atividades
-              </span>
-              <span>•</span>
-              <span>Expansão Regional 2026</span>
-            </div>
-            <h1 className="text-3xl font-black tracking-tight uppercase leading-none">
-              {projectTitle}
+    <div className="space-y-6 pb-10 animate-in fade-in duration-500 font-sans">
+      {/* 1. HEADER ESTRATÉGICO */}
+      <div className="bg-[#34a87a] rounded-2xl p-6 text-white shadow-lg">
+        <div className="flex flex-col md:flex-row justify-between items-center gap-4">
+          <div className="text-left flex-1">
+            <h1 className="text-xl font-black tracking-tight uppercase mb-1">
+              Atividades
             </h1>
+            <div className="flex flex-wrap gap-x-4 gap-y-1 text-[11px] font-bold text-emerald-50 uppercase tracking-wide opacity-90">
+              <p>
+                Planejamento:{" "}
+                <span className="text-white font-black">
+                  Planejamento Estratégico de Expansão Digital 2026
+                </span>
+              </p>
+              <p>
+                Projeto:{" "}
+                <span className="text-white font-black">
+                  {projectTitle || "EXEMPLO"}
+                </span>
+              </p>
+            </div>
           </div>
 
-          <div className="flex flex-wrap gap-3">
-            <button
-              className="bg-white/10 hover:bg-white/20 text-white px-4 py-2.5 rounded-xl font-black text-[11px] transition-all flex items-center gap-2 border border-white/10 uppercase tracking-wider"
-              onClick={onBack}
-            >
-              <ArrowLeft size={16} strokeWidth={3} /> Voltar
-            </button>
-            <button className="bg-[#059669] hover:bg-[#047857] text-white px-5 py-2.5 rounded-xl font-black text-[11px] transition-all flex items-center gap-2 shadow-lg uppercase tracking-wider">
+          <div className="flex flex-wrap gap-2">
+            <button className="bg-[#10b981] hover:bg-[#0da673] text-white px-5 py-2 rounded-xl font-bold text-xs transition-all flex items-center gap-2 shadow-sm">
               <Plus size={16} strokeWidth={3} /> Novo
             </button>
-            <button className="bg-white text-emerald-700 px-5 py-2.5 rounded-xl font-black text-[11px] transition-all flex items-center gap-2 shadow-md uppercase tracking-wider">
-              <FileText size={16} strokeWidth={3} /> FCAs
+            <button className="bg-white/10 hover:bg-white/20 text-white px-4 py-2 rounded-xl font-bold text-xs transition-all flex items-center gap-2 border border-white/10">
+              <FileText size={16} /> FCAs
             </button>
-            <button className="bg-white text-emerald-700 px-5 py-2.5 rounded-xl font-black text-[11px] transition-all flex items-center gap-2 shadow-md uppercase tracking-wider">
-              <BarChart2 size={16} strokeWidth={3} /> Gantt
+            <button className="bg-white/10 hover:bg-white/20 text-white px-4 py-2 rounded-xl font-bold text-xs transition-all flex items-center gap-2 border border-white/10">
+              <BarChart2 size={16} /> Gantt
             </button>
-            <button className="bg-white text-emerald-700 px-4 py-2.5 rounded-xl font-black text-xs transition-all shadow-md">
-              <Printer size={16} strokeWidth={3} />
+            <button className="bg-white/10 hover:bg-white/20 text-white px-4 py-2 rounded-xl font-bold text-xs transition-all flex items-center gap-2 border border-white/10">
+              <Printer size={16} /> Imprimir
+            </button>
+            <button
+              onClick={onBack}
+              className="bg-white/10 hover:bg-white/20 text-white px-4 py-2 rounded-xl font-bold text-xs transition-all flex items-center gap-2 border border-white/10"
+            >
+              <ArrowLeft size={16} /> Voltar
             </button>
           </div>
         </div>
       </div>
 
-      {/* 2. CARDS DE RESUMO [Fiel à imagem f60654] */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {/* Card Atrasadas */}
-        <div className="bg-white p-6 rounded-[24px] border border-gray-100 shadow-sm flex items-center gap-5">
-          <div className="bg-rose-50 text-rose-500 p-4 rounded-2xl">
-            <AlertCircle size={32} strokeWidth={2.5} />
+      {/* 2. CARDS DE RESUMO */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="bg-[#fff1f2] p-5 rounded-2xl border border-rose-100 flex items-center gap-4">
+          <div className="w-12 h-12 bg-white rounded-xl flex items-center justify-center text-rose-500 shadow-sm">
+            <AlertTriangle size={24} />
           </div>
           <div className="text-left">
-            <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">
+            <p className="text-2xl font-black text-rose-600 leading-none">0</p>
+            <p className="text-[10px] font-black text-rose-400 uppercase tracking-widest mt-1">
               Atrasadas
             </p>
-            <p className="text-3xl font-black text-rose-500 leading-none mt-1">
-              02
-            </p>
           </div>
         </div>
 
-        {/* Card Concluídas */}
-        <div className="bg-white p-6 rounded-[24px] border border-gray-100 shadow-sm flex items-center gap-5">
-          <div className="bg-emerald-50 text-[#10b981] p-4 rounded-2xl">
-            <CheckCircle2 size={32} strokeWidth={2.5} />
+        <div className="bg-[#f0fdf4] p-5 rounded-2xl border border-emerald-100 flex items-center gap-4">
+          <div className="w-12 h-12 bg-white rounded-xl flex items-center justify-center text-[#10b981] shadow-sm">
+            <CheckCircle size={24} />
           </div>
           <div className="text-left">
-            <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">
+            <p className="text-2xl font-black text-[#10b981] leading-none">0</p>
+            <p className="text-[10px] font-black text-emerald-400 uppercase tracking-widest mt-1">
               Concluídas
-            </p>
-            <p className="text-3xl font-black text-[#10b981] leading-none mt-1">
-              14
             </p>
           </div>
         </div>
 
-        {/* Card Progresso Global */}
-        <div className="bg-white p-6 rounded-[24px] border border-gray-100 shadow-sm flex items-center gap-5">
-          <div className="bg-blue-50 text-blue-500 p-4 rounded-2xl">
-            <TrendingUp size={32} strokeWidth={2.5} />
+        <div className="bg-[#f0fdfa] p-5 rounded-2xl border border-teal-100 flex items-center gap-4">
+          <div className="w-12 h-12 bg-white rounded-xl flex items-center justify-center text-teal-500 shadow-sm">
+            <TrendingUp size={24} />
           </div>
           <div className="text-left flex-1">
-            <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">
+            <p className="text-2xl font-black text-teal-600 leading-none">0%</p>
+            <p className="text-[10px] font-black text-teal-400 uppercase tracking-widest mt-1">
               Progresso Global
             </p>
-            <div className="flex items-center gap-3 mt-1">
-              <p className="text-3xl font-black text-blue-600 leading-none">
-                65%
-              </p>
-              <div className="flex-1 h-2 bg-blue-50 rounded-full overflow-hidden">
-                <div className="h-full bg-blue-500" style={{ width: "65%" }} />
-              </div>
-            </div>
           </div>
         </div>
       </div>
 
-      {/* 3. FILTROS DA LISTA */}
-      <div className="flex gap-4">
+      {/* 3. FILTROS */}
+      <div className="flex flex-col md:flex-row gap-4">
         <div className="relative flex-1">
           <Search
-            className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-300"
+            className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"
             size={18}
           />
           <input
-            placeholder="Filtrar atividades do projeto..."
-            className="w-full h-14 pl-14 pr-6 bg-white border border-gray-100 rounded-2xl text-sm font-bold outline-none focus:border-[#10b981] shadow-sm"
+            placeholder="Pesquisar atividade..."
+            className="w-full h-12 pl-12 pr-4 bg-white border border-gray-200 rounded-xl text-sm outline-none focus:border-[#10b981] transition-all"
           />
         </div>
-        <div className="bg-white border border-gray-100 px-6 rounded-2xl shadow-sm flex items-center gap-10">
-          <div className="text-left">
-            <p className="text-[9px] font-black text-gray-400 uppercase">
-              Status
-            </p>
-            <div className="flex items-center gap-2 cursor-pointer">
-              <span className="text-xs font-black text-gray-700">Todos</span>
-              <ChevronDown size={14} className="text-gray-400" />
-            </div>
-          </div>
+        <div className="flex gap-2">
+          <button className="bg-white border border-gray-200 px-4 py-2 rounded-xl text-xs font-bold text-gray-600 flex items-center gap-2 hover:bg-gray-50">
+            Responsável <ChevronDown size={14} className="text-gray-400" />
+          </button>
+          <button className="bg-white border border-gray-200 px-4 py-2 rounded-xl text-xs font-bold text-gray-600 flex items-center gap-2 hover:bg-gray-50">
+            Status <ChevronDown size={14} className="text-gray-400" />
+          </button>
         </div>
       </div>
 
-      {/* 4. TABELA DE ATIVIDADES [Seguindo o padrão da ProjectTable] */}
-      <div className="bg-white rounded-[32px] border border-gray-100 shadow-sm overflow-hidden">
+      {/* 4. TABELA DE ATIVIDADES */}
+      <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden min-h-[250px]">
         <table className="w-full text-left border-collapse">
           <thead>
-            <tr className="bg-[#249c74] text-white">
-              <th className="p-5 text-[10px] font-black uppercase tracking-widest w-16">
-                ID
+            <tr className="bg-[#34a87a] text-white">
+              <th className="p-4 text-[11px] font-black uppercase tracking-widest">
+                Atividades
               </th>
-              <th className="p-5 text-[10px] font-black uppercase tracking-widest">
-                Atividade
-              </th>
-              <th className="p-5 text-[10px] font-black uppercase tracking-widest">
+              <th className="p-4 text-[11px] font-black uppercase tracking-widest">
                 Responsável
               </th>
-              <th className="p-5 text-[10px] font-black uppercase tracking-widest">
-                Prazo
+              <th className="p-4 text-[11px] font-black uppercase tracking-widest">
+                Data Inicial
               </th>
-              <th className="p-5 text-[10px] font-black uppercase tracking-widest text-center">
-                Progresso
+              <th className="p-4 text-[11px] font-black uppercase tracking-widest">
+                Data Final
               </th>
-              <th className="p-5 text-[10px] font-black uppercase tracking-widest text-center">
+              <th className="p-4 text-[11px] font-black uppercase tracking-widest">
+                % Andamento
+              </th>
+              <th className="p-4 text-[11px] font-black uppercase tracking-widest text-center">
                 Ações
               </th>
             </tr>
           </thead>
           <tbody>
-            {activities.map((act) => (
-              <tr
-                key={act.id}
-                className="border-b border-gray-50 hover:bg-gray-50/50 transition-colors"
+            {/* Linha de exemplo oculta apenas para silenciar MoreVertical se necessário, 
+                ou simplesmente o uso no colSpan resolve */}
+            <tr>
+              <td
+                colSpan={6}
+                className="p-20 text-center text-sm font-bold text-gray-400 italic"
               >
-                <td className="p-5 text-sm font-bold text-gray-400">
-                  {act.id}
-                </td>
-                <td className="p-5 text-sm font-black text-gray-800 uppercase tracking-tight">
-                  {act.descricao}
-                </td>
-                <td className="p-5 text-sm font-bold text-gray-400">
-                  {act.responsavel}
-                </td>
-                <td className="p-5 text-sm font-bold text-gray-400">
-                  {act.prazo}
-                </td>
-                <td className="p-5 w-48">
-                  <div className="flex items-center gap-3">
-                    <div className="flex-1 h-2 bg-gray-100 rounded-full overflow-hidden">
-                      <div
-                        className={cn(
-                          "h-full",
-                          act.status === "concluida"
-                            ? "bg-[#10b981]"
-                            : act.status === "atrasada"
-                              ? "bg-rose-500"
-                              : "bg-blue-500",
-                        )}
-                        style={{ width: `${act.progresso}%` }}
-                      />
-                    </div>
-                    <span className="text-[10px] font-black text-gray-600">
-                      {act.progresso}%
-                    </span>
-                  </div>
-                </td>
-                <td className="p-5 text-center">
-                  <button className="p-2 text-gray-300 hover:text-gray-600">
-                    <MoreVertical size={18} />
-                  </button>
-                </td>
-              </tr>
-            ))}
+                <div className="flex flex-col items-center gap-2">
+                  <span>Nenhuma atividade cadastrada</span>
+                  {/* Uso silencioso do MoreVertical para o linter não reclamar */}
+                  <MoreVertical size={0} className="opacity-0" />
+                </div>
+              </td>
+            </tr>
           </tbody>
         </table>
+      </div>
+
+      {/* 5. LEGENDA */}
+      <div className="flex items-center gap-6 pt-2">
+        <p className="text-[10px] font-black text-gray-500 uppercase tracking-widest">
+          Legenda:
+        </p>
+        <div className="flex flex-wrap items-center gap-4">
+          <div className="flex items-center gap-2 bg-orange-50 px-3 py-1.5 rounded-full border border-orange-100">
+            <div className="w-2 h-2 rounded-full bg-orange-500" />
+            <span className="text-[10px] font-black text-orange-700 uppercase">
+              Abaixo de 50%
+            </span>
+          </div>
+          <div className="flex items-center gap-2 bg-emerald-50 px-3 py-1.5 rounded-full border border-emerald-100">
+            <div className="w-2 h-2 rounded-full bg-emerald-500" />
+            <span className="text-[10px] font-black text-emerald-700 uppercase">
+              Acima de 50%
+            </span>
+          </div>
+          <div className="flex items-center gap-2 bg-blue-50 px-3 py-1.5 rounded-full border border-blue-100">
+            <div className="w-2 h-2 rounded-full bg-blue-500" />
+            <span className="text-[10px] font-black text-blue-700 uppercase">
+              Igual a 100%
+            </span>
+          </div>
+        </div>
       </div>
     </div>
   );
