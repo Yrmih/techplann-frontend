@@ -15,7 +15,7 @@ import {
   FolderKanban,
 } from "lucide-react";
 
-// Importações dos seus componentes conforme a estrutura de pastas
+// Importações dos componentes
 import { NewProjectForm } from "./components/form/NewProjectForm";
 import { ProjectTable } from "./components/table/ProjectTable";
 import { ProjectDashboard } from "./components/dashboard/ProjectDashboard";
@@ -23,18 +23,37 @@ import { IProject } from "@/types/project.interface";
 
 export default function ProjectsPage() {
   const [searchTerm, setSearchTerm] = useState("");
-  const [toast, setToast] = useState<{ message: string } | null>(null);
+  const [toast, setToast] = useState<{
+    message: string;
+    type: "success" | "error";
+  } | null>(null);
 
-  // Controle de estados de visualização
+  // Controle de estados de visualização e edição
   const [showForm, setShowForm] = useState(false);
+  const [projectToEdit, setProjectToEdit] = useState<IProject | null>(null);
   const [viewingProject, setViewingProject] = useState<IProject | null>(null);
 
-  // Lista de projetos (Inicia vazia para mostrar o estado inicial)
+  // Lista de projetos persistida localmente no estado
   const [projects, setProjects] = useState<IProject[]>([]);
 
-  const showToast = (message: string) => {
-    setToast({ message });
+  const showToast = (
+    message: string,
+    type: "success" | "error" = "success",
+  ) => {
+    setToast({ message, type });
     setTimeout(() => setToast(null), 3000);
+  };
+
+  // Função para Deletar Projeto
+  const handleDeleteProject = (projectId: string) => {
+    setProjects((prev) => prev.filter((p) => p.id !== projectId));
+    showToast("Projeto excluído com sucesso!");
+  };
+
+  // Função para Editar Projeto (Abre o form com dados)
+  const handleEditProject = (project: IProject) => {
+    setProjectToEdit(project);
+    setShowForm(true);
   };
 
   // 1. ESTADO: Visualizando Dashboard de um projeto específico
@@ -47,35 +66,51 @@ export default function ProjectsPage() {
     );
   }
 
-  // 2. ESTADO: Criando novo projeto
+  // 2. ESTADO: Formulário (Criação ou Edição)
   if (showForm) {
     return (
       <NewProjectForm
-        onBack={() => setShowForm(false)}
-        onSubmitSuccess={(newProject) => {
-          setProjects([...projects, newProject]);
+        initialData={projectToEdit}
+        onBack={() => {
           setShowForm(false);
-          showToast("Projeto criado com sucesso!");
+          setProjectToEdit(null);
+        }}
+        onSubmitSuccess={(data) => {
+          if (projectToEdit) {
+            setProjects((prev) =>
+              prev.map((p) => (p.id === data.id ? data : p)),
+            );
+            showToast("Projeto atualizado com sucesso!");
+          } else {
+            setProjects([...projects, data]);
+            showToast("Projeto criado com sucesso!");
+          }
+          setShowForm(false);
+          setProjectToEdit(null);
         }}
       />
     );
   }
 
-  // 3. ESTADO: Listagem (Vazia ou Tabela)
+  const filteredProjects = projects.filter((p) =>
+    p.titulo.toLowerCase().includes(searchTerm.toLowerCase()),
+  );
+
+  // 3. ESTADO: Listagem (Principal)
   return (
-    <div className="space-y-8 pb-10 relative min-h-screen bg-gray-50/30">
+    <div className="space-y-8 pb-10 relative min-h-screen bg-gray-50/30 font-sans px-4">
       {/* Toast Notification */}
       <AnimatePresence>
         {toast && (
           <motion.div
-            initial={{ opacity: 0, x: 50 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: 50 }}
-            className="fixed bottom-10 right-10 z-[100] bg-[#050b18] border border-slate-800 text-white px-5 py-4 rounded-xl shadow-2xl flex items-center gap-4 min-w-[300px] justify-between"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 20 }}
+            className="fixed bottom-10 right-10 z-[100] bg-white border border-gray-100 text-gray-900 px-6 py-4 rounded-2xl shadow-2xl flex items-center gap-4 min-w-[320px] justify-between border-l-4 border-l-[#10b981]"
           >
             <div className="flex items-center gap-3">
-              <div className="bg-[#10b981] rounded-full p-1.5 flex items-center justify-center">
-                <Check size={14} className="text-white stroke-[3px]" />
+              <div className="bg-emerald-50 rounded-full p-2 flex items-center justify-center text-[#10b981]">
+                <Check size={18} strokeWidth={3} />
               </div>
               <span className="text-sm font-bold tracking-tight">
                 {toast.message}
@@ -83,7 +118,7 @@ export default function ProjectsPage() {
             </div>
             <button
               onClick={() => setToast(null)}
-              className="text-slate-500 hover:text-white transition-colors"
+              className="text-gray-400 hover:text-gray-600"
             >
               <X size={18} />
             </button>
@@ -92,108 +127,121 @@ export default function ProjectsPage() {
       </AnimatePresence>
 
       {/* Banner Superior */}
-      <div className="relative w-full h-48 bg-gradient-to-r from-[#10b981] via-[#10b981] to-[#3b82f6] rounded-3xl p-10 flex flex-col justify-between shadow-lg overflow-hidden">
+      <div className="relative w-full h-44 bg-gradient-to-r from-[#34a87a] via-[#10b981] to-[#3b82f6] rounded-[32px] p-10 flex flex-col justify-center shadow-lg overflow-hidden mt-4">
         <div className="absolute top-0 right-0 w-96 h-96 bg-white/10 rounded-full blur-3xl -mr-20 -mt-20 pointer-events-none" />
-
-        <div className="flex justify-between items-start relative z-10">
+        <div className="flex justify-between items-center relative z-10">
           <div className="text-left text-white">
-            <h1 className="text-4xl font-black tracking-tight leading-none mb-2">
+            <h1 className="text-4xl font-black tracking-tight leading-none mb-2 text-left">
               Projetos
             </h1>
-            <p className="text-sm font-medium opacity-90 tracking-tight">
+            <p className="text-sm font-medium opacity-90 tracking-tight text-left">
               Gerencie projetos, atividades e sub-atividades com foco total em
               resultados
             </p>
           </div>
-
           <button
-            onClick={() => setShowForm(true)}
-            className="flex items-center gap-2 bg-[#059669] hover:bg-[#047857] text-white px-6 py-3 rounded-2xl font-black text-sm transition-all shadow-xl active:scale-95"
+            onClick={() => {
+              setProjectToEdit(null);
+              setShowForm(true);
+            }}
+            className="flex items-center gap-2 bg-[#059669] hover:bg-[#047857] text-white px-8 py-3.5 rounded-2xl font-black text-sm transition-all shadow-xl active:scale-95 uppercase tracking-widest"
           >
-            <Plus size={18} strokeWidth={3} /> Novo Projeto
+            <Plus size={20} strokeWidth={3} /> Novo Projeto
           </button>
         </div>
       </div>
 
-      <div className="px-2 space-y-6">
-        {/* Filtros e Busca */}
-        <div className="flex flex-col md:flex-row items-center gap-4">
-          <div className="flex items-center bg-white border border-gray-100 p-1.5 rounded-2xl shadow-sm min-w-[280px]">
-            <div className="text-[#10b981] pl-2">
-              <ClipboardList size={22} strokeWidth={2.5} />
+      <div className="space-y-6">
+        {/* FILTROS EMPILHADOS */}
+        <div className="flex flex-col items-start gap-4">
+          {/* 1. Seletor de Planejamento (Topo) */}
+          <div className="flex items-center bg-white border border-gray-100 p-2 rounded-2xl shadow-sm min-w-[320px]">
+            <div className="text-[#10b981] pl-3">
+              <ClipboardList size={20} strokeWidth={2.5} />
             </div>
-            <div className="flex flex-col flex-1 px-4 text-left">
-              <span className="text-sm font-black text-gray-700">
-                Expansão Regional 2026
+            <div className="flex-1 px-4 text-left">
+              <span className="text-sm font-black text-gray-700 truncate block">
+                Planejamento Estratégico de...
               </span>
             </div>
-            <ChevronDown size={18} className="text-gray-300 px-2" />
+            <ChevronDown size={18} className="text-gray-300 mr-2" />
           </div>
 
-          <div className="relative flex-1 group">
+          {/* 2. Barra de Busca (Baixo - ocupando largura conforme layout) */}
+          <div className="relative w-full max-w-xl group">
             <Search
-              className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-300 group-focus-within:text-[#10b981] transition-colors"
-              size={18}
+              className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-[#10b981] transition-colors"
+              size={20}
             />
             <input
               type="text"
-              placeholder="Buscar projetos pela descrição ou nome..."
+              placeholder="Pesquisar projetos..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full h-14 pl-14 pr-6 bg-white border border-gray-100 rounded-2xl text-sm font-bold text-gray-600 outline-none focus:border-[#10b981] transition-all shadow-sm"
+              className="w-full h-12 pl-14 pr-6 bg-[#ebf2ff] border-transparent rounded-2xl text-sm font-bold text-gray-600 outline-none focus:bg-white focus:border-[#10b981] transition-all shadow-sm"
             />
           </div>
         </div>
 
         {/* LÓGICA DINÂMICA: ESTADO VAZIO OU TABELA */}
         {projects.length === 0 ? (
-          <div className="bg-white rounded-[40px] border border-gray-100/50 p-24 flex flex-col items-center justify-center space-y-6 text-center shadow-sm">
-            <div className="bg-gray-50 p-6 rounded-[32px]">
-              <FolderKanban size={56} className="text-gray-200" />
+          <div className="bg-white rounded-[40px] border border-gray-100 p-24 flex flex-col items-center justify-center space-y-6 text-center shadow-sm">
+            <div className="bg-gray-50 p-8 rounded-[40px]">
+              <FolderKanban
+                size={64}
+                strokeWidth={1.5}
+                className="text-gray-200"
+              />
             </div>
             <div className="space-y-1">
-              <h3 className="text-lg font-black text-gray-400 tracking-tight">
+              <h3 className="text-xl font-black text-gray-400 tracking-tight">
                 Nenhum projeto encontrado
               </h3>
-              <p className="text-xs text-gray-300 font-bold uppercase tracking-widest">
+              <p className="text-[11px] text-gray-300 font-black uppercase tracking-[0.2em]">
                 Crie o primeiro projeto para começar!
               </p>
             </div>
           </div>
         ) : (
-          <ProjectTable
-            projects={projects}
-            onViewDetails={(p) => setViewingProject(p)}
-          />
+          <div className="space-y-6">
+            <ProjectTable
+              projects={filteredProjects}
+              onViewDetails={(p) => setViewingProject(p)}
+              onEdit={handleEditProject}
+              onDelete={handleDeleteProject}
+            />
+
+            {/* Legenda */}
+            <div className="flex items-center gap-6 px-4">
+              <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest text-left">
+                Legenda:
+              </span>
+              <div className="flex items-center gap-4">
+                <div className="flex items-center gap-2 bg-amber-50 px-3 py-1.5 rounded-full border border-amber-100">
+                  <div className="w-2 h-2 rounded-full bg-amber-500" />
+                  <span className="text-[10px] font-black text-amber-700 uppercase">
+                    Abaixo de 50%
+                  </span>
+                </div>
+                <div className="flex items-center gap-2 bg-emerald-50 px-3 py-1.5 rounded-full border border-emerald-100">
+                  <div className="w-2 h-2 rounded-full bg-emerald-500" />
+                  <span className="text-[10px] font-black text-emerald-700 uppercase tracking-tighter">
+                    Acima de 50%
+                  </span>
+                </div>
+                <div className="flex items-center gap-2 bg-blue-50 px-3 py-1.5 rounded-full border border-blue-100">
+                  <div className="w-2 h-2 rounded-full bg-blue-500" />
+                  <span className="text-[10px] font-black text-blue-700 uppercase tracking-tighter">
+                    Igual a 100%
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
         )}
 
-        {/* Legenda */}
-        <div className="flex items-center gap-6 px-4">
-          <span className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">
-            Legenda:
-          </span>
-          <div className="flex items-center gap-1.5">
-            <div className="w-2.5 h-2.5 rounded-full bg-[#f59e0b]" />
-            <span className="text-[10px] font-bold text-gray-500 bg-[#fef3c7] px-3 py-1 rounded-full border border-[#fef3c7]">
-              Abaixo de 50%
-            </span>
-          </div>
-          <div className="flex items-center gap-1.5">
-            <div className="w-2.5 h-2.5 rounded-full bg-[#10b981]" />
-            <span className="text-[10px] font-bold text-gray-500 bg-[#dcfce7] px-3 py-1 rounded-full border border-[#dcfce7]">
-              Acima de 50%
-            </span>
-          </div>
-          <div className="flex items-center gap-1.5">
-            <div className="w-2.5 h-2.5 rounded-full bg-[#3b82f6]" />
-            <span className="text-[10px] font-bold text-gray-500 bg-[#dbeafe] px-3 py-1 rounded-full border border-[#dbeafe]">
-              Igual a 100%
-            </span>
-          </div>
-        </div>
-
-        {/* Cards de Entidades na parte inferior */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        {/* Cards de Entidades */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-8">
           <EntityCard
             icon={<FolderOpen size={18} />}
             title="Projetos"
@@ -226,22 +274,22 @@ function EntityCard({
   count: number;
 }) {
   return (
-    <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden flex flex-col min-h-[160px]">
-      <div className="p-4 border-b border-gray-50 flex items-center gap-3">
-        <div className="p-2 bg-emerald-50 text-[#10b981] rounded-lg">
+    <div className="bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden flex flex-col min-h-[140px] text-left">
+      <div className="p-4 border-b border-gray-50 flex items-center gap-3 text-left">
+        <div className="p-2 bg-emerald-50 text-[#10b981] rounded-xl">
           {icon}
         </div>
-        <span className="text-sm font-black text-gray-700 tracking-tight">
+        <span className="text-sm font-black text-gray-800 tracking-tight uppercase text-left">
           {title}
         </span>
       </div>
       <div className="flex-1 flex items-center justify-center p-6 italic">
         {count > 0 ? (
-          <span className="text-2xl font-black text-[#10b981]">{count}</span>
+          <span className="text-3xl font-black text-[#10b981]">{count}</span>
         ) : (
-          <span className="text-[11px] text-gray-300 font-bold tracking-tight">
-            Nenhum item encontrado
-          </span>
+          <p className="text-[11px] text-gray-300 font-bold uppercase tracking-widest text-center">
+            Nenhum item
+          </p>
         )}
       </div>
     </div>
