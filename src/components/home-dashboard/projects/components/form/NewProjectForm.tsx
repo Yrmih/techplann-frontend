@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import { useEffect } from "react";
 import { useForm, Controller, SubmitHandler } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
@@ -24,32 +24,36 @@ import { IProject } from "@/types/project.interface";
 interface NewProjectFormProps {
   onBack: () => void;
   onSubmitSuccess: (data: IProject) => void;
+  initialData?: IProject | null;
 }
 
 export const NewProjectForm = ({
   onBack,
   onSubmitSuccess,
+  initialData,
 }: NewProjectFormProps) => {
-  // --- ESTADOS DAS LISTAS PARALELAS ---
-  const [availPartners, setAvailPartners] = useState<string[]>([
+  const isEditing = !!initialData;
+
+  // Listas Mestras (Opções fixas do sistema)
+  const masterPartners = [
     "Lucas Almeida Ferreira",
     "Renato Bordalo",
     "Frank Pereira Cardoso",
-  ]);
-  const [selectedPartners, setSelectedPartners] = useState<string[]>([]);
+  ];
 
-  const [availSwot, setAvailSwot] = useState<string[]>([
+  const masterSwot = [
     "Ameaça Concorrência",
     "Fraqueza no TI",
     "Oportunidade de Mercado",
-  ]);
-  const [selectedSwot, setSelectedSwot] = useState<string[]>([]);
+  ];
 
-  // Hook Form com Zod
   const {
     register,
     handleSubmit,
     control,
+    reset,
+    watch,
+    setValue,
     formState: { errors },
   } = useForm<ProjectFormValues>({
     resolver: zodResolver(projectSchema),
@@ -61,49 +65,86 @@ export const NewProjectForm = ({
       dataInicio: "",
       dataFinal: "",
       situacao: "nao-iniciado",
+      parceiros: [],
+      swot: [],
     },
   });
 
-  const moveItem = (
+  // Observa os valores em tempo real para as Dual Lists
+  const selectedPartners = watch("parceiros") || [];
+  const selectedSwot = watch("swot") || [];
+
+  // Filtra o que está disponível baseando-se no que já foi selecionado
+  const availPartners = masterPartners.filter(
+    (p) => !selectedPartners.includes(p),
+  );
+  const availSwot = masterSwot.filter((s) => !selectedSwot.includes(s));
+
+  // Efeito para carregar dados de edição (Mata o erro de cascading renders)
+  useEffect(() => {
+    if (initialData) {
+      reset({
+        titulo: initialData.titulo,
+        descricao: initialData.descricao,
+        responsavelId: initialData.responsavelId,
+        departamentoId: initialData.departamentoId,
+        dataInicio: initialData.dataInicio,
+        dataFinal: initialData.dataFinal,
+        situacao: initialData.situacao,
+        parceiros: initialData.parceiros || [],
+        swot: initialData.swot || [],
+      });
+    }
+  }, [initialData, reset]);
+
+  // Funções de movimentação via Hook Form (Performático)
+  const handleMove = (
     item: string,
-    from: string[],
-    setFrom: React.Dispatch<React.SetStateAction<string[]>>,
-    to: string[],
-    setTo: React.Dispatch<React.SetStateAction<string[]>>,
+    field: "parceiros" | "swot",
+    action: "add" | "remove",
   ) => {
-    setFrom(from.filter((i) => i !== item));
-    setTo([...to, item]);
+    const current = watch(field);
+    if (action === "add") {
+      setValue(field, [...current, item]);
+    } else {
+      setValue(
+        field,
+        current.filter((i) => i !== item),
+      );
+    }
   };
 
-  const moveAll = (
-    from: string[],
-    setFrom: React.Dispatch<React.SetStateAction<string[]>>,
-    to: string[],
-    setTo: React.Dispatch<React.SetStateAction<string[]>>,
+  const handleMoveAll = (
+    field: "parceiros" | "swot",
+    action: "add" | "remove",
   ) => {
-    setTo((prev) => [...prev, ...from]);
-    setFrom([]);
+    if (action === "add") {
+      setValue(field, field === "parceiros" ? masterPartners : masterSwot);
+    } else {
+      setValue(field, []);
+    }
   };
 
   const onSubmit: SubmitHandler<ProjectFormValues> = (data) => {
-    const timestampId = String(new Date().getTime());
+    const timestampId = initialData?.id || String(new Date().getTime());
 
     const finalProject: IProject = {
+      ...initialData,
       id: timestampId,
       titulo: data.titulo,
-      descricao: data.descricao || "",
+      descricao: data.descricao,
       responsavelId: data.responsavelId,
       departamentoId: data.departamentoId,
       responsavelNome:
         data.responsavelId === "1" ? "Lucas Almeida Ferreira" : "Responsável",
       dataInicio: data.dataInicio,
       dataFinal: data.dataFinal,
-      atividades: 0,
-      subAtividades: 0,
-      progresso: 0,
       situacao: data.situacao,
-      parceiros: selectedPartners,
-      swot: selectedSwot,
+      parceiros: data.parceiros,
+      swot: data.swot,
+      atividades: initialData?.atividades || 0,
+      subAtividades: initialData?.subAtividades || 0,
+      progresso: initialData?.progresso || 0,
     };
     onSubmitSuccess(finalProject);
   };
@@ -115,32 +156,34 @@ export const NewProjectForm = ({
       className="space-y-8 pb-10 max-w-[1200px] mx-auto px-4"
     >
       {/* Header */}
-      <div className="flex items-center gap-5 pt-4">
+      <div className="flex items-center gap-5 pt-4 text-left">
         <button
           onClick={onBack}
-          className="p-2.5 hover:bg-gray-100 rounded-full transition-all text-gray-400 hover:text-gray-900 border border-transparent hover:border-gray-200"
+          className="p-2.5 hover:bg-gray-100 rounded-full border border-transparent hover:border-gray-200 transition-all text-gray-400 hover:text-gray-900"
         >
           <ArrowLeft size={22} />
         </button>
         <div className="text-left">
-          <h1 className="text-2xl font-black text-gray-900 tracking-tight">
-            Novo Projeto
+          <h1 className="text-2xl font-black text-gray-900 tracking-tight uppercase">
+            {isEditing ? "Editar Projeto" : "Novo Projeto"}
           </h1>
-          <p className="text-sm text-gray-500 font-medium">
-            Configure os parâmetros do novo projeto do ciclo estratégico.
+          <p className="text-sm text-gray-500 font-medium text-left">
+            {isEditing
+              ? "Atualize as informações do seu projeto estratégico."
+              : "Configure os parâmetros do novo projeto do ciclo estratégico."}
           </p>
         </div>
       </div>
 
       <div className="bg-white p-10 rounded-[32px] border border-gray-200 shadow-xl space-y-10">
-        {/* Título do Projeto */}
+        {/* 1. Título do Projeto */}
         <div className="space-y-2 text-left">
           <label className="text-xs font-bold text-gray-700 ml-1 uppercase tracking-widest">
             Título do Projeto *
           </label>
           <input
             {...register("titulo")}
-            placeholder="Digite o título do projeto"
+            placeholder="Digite o título"
             className={cn(
               "w-full p-4 bg-gray-50 border rounded-xl text-sm outline-none focus:border-[#10b981] transition-all",
               errors.titulo ? "border-red-500" : "border-gray-200",
@@ -148,19 +191,19 @@ export const NewProjectForm = ({
           />
         </div>
 
-        {/* Descrição do Projeto */}
+        {/* 2. Descrição do Projeto */}
         <div className="space-y-2 text-left">
           <label className="text-xs font-bold text-gray-700 ml-1 uppercase tracking-widest">
-            Descrição do Projeto
+            Descrição
           </label>
           <textarea
             {...register("descricao")}
-            placeholder="Descreva os objetivos do projeto..."
+            placeholder="Descreva os objetivos..."
             className="w-full h-32 p-4 bg-gray-50 border border-gray-200 rounded-xl text-sm outline-none focus:border-[#10b981] resize-none transition-all"
           />
         </div>
 
-        {/* Responsável e Departamento */}
+        {/* 3. Responsável e Departamento */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 text-left">
           <Controller
             name="responsavelId"
@@ -184,7 +227,7 @@ export const NewProjectForm = ({
                 label="Departamento *"
                 placeholder="Selecione o departamento"
                 options={[
-                  { value: "1", label: "TI" },
+                  { value: "1", label: "Núcleo Criativo Orion" },
                   { value: "2", label: "Comercial" },
                 ]}
                 value={field.value}
@@ -195,21 +238,21 @@ export const NewProjectForm = ({
           />
         </div>
 
-        {/* Datas e Situação */}
+        {/* 4. Datas e Situação */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 text-left">
           <div className="space-y-2">
             <label className="text-xs font-bold text-gray-700 ml-1 uppercase tracking-widest">
-              Data de Início *
+              Data Início *
             </label>
             <div className="relative">
               <input
                 {...register("dataInicio")}
                 type="date"
-                className="w-full p-4 bg-gray-50 border border-gray-200 rounded-xl text-sm outline-none focus:border-[#10b981]"
+                className="w-full p-4 bg-gray-50 border border-gray-200 rounded-xl text-sm"
               />
               <CalendarIcon
                 size={18}
-                className="absolute right-4 top-4 text-gray-400 pointer-events-none"
+                className="absolute right-4 top-4 text-gray-400"
               />
             </div>
           </div>
@@ -221,11 +264,11 @@ export const NewProjectForm = ({
               <input
                 {...register("dataFinal")}
                 type="date"
-                className="w-full p-4 bg-gray-50 border border-gray-200 rounded-xl text-sm outline-none focus:border-[#10b981]"
+                className="w-full p-4 bg-gray-50 border border-gray-200 rounded-xl text-sm"
               />
               <CalendarIcon
                 size={18}
-                className="absolute right-4 top-4 text-gray-400 pointer-events-none"
+                className="absolute right-4 top-4 text-gray-400"
               />
             </div>
           </div>
@@ -234,14 +277,13 @@ export const NewProjectForm = ({
             control={control}
             render={({ field }) => (
               <CustomSelect
-                label="Situação do Projeto *"
-                placeholder="Não Iniciado"
+                label="Situação *"
+                placeholder="Selecione"
                 options={[
                   { value: "nao-iniciado", label: "Não Iniciado" },
                   { value: "em-andamento", label: "Em Andamento" },
                   { value: "atrasado", label: "Atrasado" },
                   { value: "concluido", label: "Concluído" },
-                  { value: "cancelado", label: "Cancelado" },
                 ]}
                 value={field.value}
                 onValueChange={field.onChange}
@@ -250,31 +292,22 @@ export const NewProjectForm = ({
           />
         </div>
 
-        {/* 5. Parceiros (Dual List) */}
-        <div className="space-y-4 text-left pt-6 border-t border-gray-100">
-          <label className="text-xs font-black text-gray-800 block uppercase tracking-widest ml-1">
+        {/* 5. Parceiros (Dual List Corrigida) */}
+        <div className="space-y-4 pt-6 border-t border-gray-100">
+          <label className="text-xs font-black text-gray-800 uppercase tracking-widest text-left block">
             Parceiros
           </label>
           <div className="flex gap-4 items-center h-64">
-            {/* Disponíveis */}
-            <div className="flex-1 border border-gray-200 rounded-2xl h-full overflow-hidden bg-white shadow-sm flex flex-col">
-              <div className="p-3 bg-gray-100 text-[10px] font-bold text-gray-500 border-b border-gray-200 uppercase tracking-tighter">
+            <div className="flex-1 border border-gray-200 rounded-2xl h-full overflow-hidden bg-white shadow-sm flex flex-col text-left">
+              <div className="p-3 bg-gray-50 text-[10px] font-bold text-gray-500 border-b uppercase tracking-tighter">
                 Disponíveis ({availPartners.length})
               </div>
-              <div className="flex-1 overflow-y-auto p-2 custom-scrollbar">
+              <div className="flex-1 overflow-y-auto p-2">
                 {availPartners.map((p) => (
                   <div
                     key={p}
-                    onClick={() =>
-                      moveItem(
-                        p,
-                        availPartners,
-                        setAvailPartners,
-                        selectedPartners,
-                        setSelectedPartners,
-                      )
-                    }
-                    className="p-3 text-[11px] font-medium text-gray-600 hover:bg-emerald-50 hover:text-[#10b981] rounded-xl cursor-pointer transition-all mb-0.5"
+                    onClick={() => handleMove(p, "parceiros", "add")}
+                    className="p-3 text-[11px] font-medium text-gray-600 hover:bg-emerald-50 hover:text-[#10b981] rounded-xl cursor-pointer transition-all mb-0.5 text-left"
                   >
                     {p}
                   </div>
@@ -282,19 +315,11 @@ export const NewProjectForm = ({
               </div>
             </div>
 
-            {/* Setas Centrais */}
             <div className="flex flex-col gap-2">
               <button
                 type="button"
-                onClick={() =>
-                  moveAll(
-                    availPartners,
-                    setAvailPartners,
-                    selectedPartners,
-                    setSelectedPartners,
-                  )
-                }
-                className="p-2.5 border border-gray-200 rounded-xl bg-white shadow-sm hover:border-[#10b981] hover:text-[#10b981] transition-all active:scale-95"
+                onClick={() => handleMoveAll("parceiros", "add")}
+                className="p-2.5 border border-gray-200 rounded-xl bg-white shadow-sm hover:text-[#10b981] transition-all"
               >
                 <ChevronsRight size={16} />
               </button>
@@ -312,23 +337,15 @@ export const NewProjectForm = ({
               </button>
               <button
                 type="button"
-                onClick={() =>
-                  moveAll(
-                    selectedPartners,
-                    setSelectedPartners,
-                    availPartners,
-                    setAvailPartners,
-                  )
-                }
-                className="p-2.5 border border-gray-200 rounded-xl bg-white shadow-sm hover:border-[#10b981] hover:text-[#10b981] transition-all active:scale-95"
+                onClick={() => handleMoveAll("parceiros", "remove")}
+                className="p-2.5 border border-gray-200 rounded-xl bg-white shadow-sm hover:text-[#10b981] transition-all"
               >
                 <ChevronsLeft size={16} />
               </button>
             </div>
 
-            {/* Selecionados */}
-            <div className="flex-1 border-2 border-emerald-100 rounded-2xl h-full overflow-hidden bg-emerald-50/10 shadow-sm flex flex-col">
-              <div className="p-3 bg-emerald-100/50 text-[10px] font-bold text-emerald-700 border-b border-emerald-200 uppercase tracking-tighter">
+            <div className="flex-1 border-2 border-emerald-100 rounded-2xl h-full overflow-hidden bg-emerald-50/10 flex flex-col text-left">
+              <div className="p-3 bg-emerald-100/50 text-[10px] font-bold text-emerald-700 border-b uppercase tracking-tighter">
                 Selecionados ({selectedPartners.length})
               </div>
               <div className="flex-1 overflow-y-auto p-2">
@@ -336,16 +353,8 @@ export const NewProjectForm = ({
                   selectedPartners.map((p) => (
                     <div
                       key={p}
-                      onClick={() =>
-                        moveItem(
-                          p,
-                          selectedPartners,
-                          setSelectedPartners,
-                          availPartners,
-                          setAvailPartners,
-                        )
-                      }
-                      className="p-3 text-[11px] font-black text-emerald-800 bg-white border border-emerald-200 rounded-xl mb-1.5 shadow-sm cursor-pointer"
+                      onClick={() => handleMove(p, "parceiros", "remove")}
+                      className="p-3 text-[11px] font-black text-emerald-800 bg-white border border-emerald-200 rounded-xl mb-1.5 shadow-sm cursor-pointer text-left"
                     >
                       {p}
                     </div>
@@ -360,31 +369,22 @@ export const NewProjectForm = ({
           </div>
         </div>
 
-        {/* 6. SWOT (Dual List com as mesmas setas de cima) */}
-        <div className="space-y-4 pt-6 border-t border-gray-50 text-left">
-          <label className="text-xs font-black text-gray-800 block uppercase tracking-widest ml-1">
+        {/* 6. SWOT (Dual List Corrigida) */}
+        <div className="space-y-4 pt-6 border-t border-gray-100">
+          <label className="text-xs font-black text-gray-800 uppercase tracking-widest text-left block">
             SWOT
           </label>
           <div className="flex gap-4 items-center h-64">
-            {/* Disponíveis SWOT */}
-            <div className="flex-1 border border-gray-200 rounded-2xl h-full overflow-hidden bg-white shadow-sm flex flex-col">
-              <div className="p-3 bg-gray-100 text-[10px] font-bold text-gray-500 border-b border-gray-200 uppercase tracking-tighter">
+            <div className="flex-1 border border-gray-200 rounded-2xl h-full overflow-hidden bg-white shadow-sm flex flex-col text-left">
+              <div className="p-3 bg-gray-50 text-[10px] font-bold text-gray-500 border-b uppercase tracking-tighter">
                 Disponíveis ({availSwot.length})
               </div>
-              <div className="flex-1 overflow-y-auto p-2 custom-scrollbar">
+              <div className="flex-1 overflow-y-auto p-2">
                 {availSwot.map((s) => (
                   <div
                     key={s}
-                    onClick={() =>
-                      moveItem(
-                        s,
-                        availSwot,
-                        setAvailSwot,
-                        selectedSwot,
-                        setSelectedSwot,
-                      )
-                    }
-                    className="p-3 text-[11px] font-medium text-gray-600 hover:bg-emerald-50 hover:text-[#10b981] rounded-xl cursor-pointer transition-all mb-0.5"
+                    onClick={() => handleMove(s, "swot", "add")}
+                    className="p-3 text-[11px] font-medium text-gray-600 hover:bg-emerald-50 hover:text-[#10b981] rounded-xl cursor-pointer text-left"
                   >
                     {s}
                   </div>
@@ -392,19 +392,11 @@ export const NewProjectForm = ({
               </div>
             </div>
 
-            {/* Setas Centrais SWOT (Agora igual à seção de Parceiros) */}
             <div className="flex flex-col gap-2">
               <button
                 type="button"
-                onClick={() =>
-                  moveAll(
-                    availSwot,
-                    setAvailSwot,
-                    selectedSwot,
-                    setSelectedSwot,
-                  )
-                }
-                className="p-2.5 border border-gray-200 rounded-xl bg-white shadow-sm hover:border-[#10b981] hover:text-[#10b981] transition-all active:scale-95"
+                onClick={() => handleMoveAll("swot", "add")}
+                className="p-2.5 border border-gray-200 rounded-xl bg-white shadow-sm hover:text-[#10b981] transition-all"
               >
                 <ChevronsRight size={16} />
               </button>
@@ -422,23 +414,15 @@ export const NewProjectForm = ({
               </button>
               <button
                 type="button"
-                onClick={() =>
-                  moveAll(
-                    selectedSwot,
-                    setSelectedSwot,
-                    availSwot,
-                    setAvailSwot,
-                  )
-                }
-                className="p-2.5 border border-gray-200 rounded-xl bg-white shadow-sm hover:border-[#10b981] hover:text-[#10b981] transition-all active:scale-95"
+                onClick={() => handleMoveAll("swot", "remove")}
+                className="p-2.5 border border-gray-200 rounded-xl bg-white shadow-sm hover:text-[#10b981] transition-all"
               >
                 <ChevronsLeft size={16} />
               </button>
             </div>
 
-            {/* Selecionados SWOT (Agora como Lista igual à de Parceiros conforme solicitado) */}
-            <div className="flex-1 border-2 border-emerald-100 rounded-2xl h-full overflow-hidden bg-emerald-50/10 shadow-sm flex flex-col">
-              <div className="p-3 bg-emerald-100/50 text-[10px] font-bold text-emerald-700 border-b border-emerald-200 uppercase tracking-tighter">
+            <div className="flex-1 border border-gray-200 rounded-2xl h-full overflow-hidden bg-white shadow-sm flex flex-col text-left">
+              <div className="p-3 bg-gray-100 text-[10px] font-bold text-gray-500 border-b uppercase tracking-tighter">
                 Selecionados ({selectedSwot.length})
               </div>
               <div className="flex-1 overflow-y-auto p-2">
@@ -446,16 +430,8 @@ export const NewProjectForm = ({
                   selectedSwot.map((s) => (
                     <div
                       key={s}
-                      onClick={() =>
-                        moveItem(
-                          s,
-                          selectedSwot,
-                          setSelectedSwot,
-                          availSwot,
-                          setAvailSwot,
-                        )
-                      }
-                      className="p-3 text-[11px] font-black text-emerald-800 bg-white border border-emerald-200 rounded-xl mb-1.5 shadow-sm cursor-pointer"
+                      onClick={() => handleMove(s, "swot", "remove")}
+                      className="p-3 text-[11px] font-black text-emerald-800 bg-white border border-emerald-200 rounded-xl mb-1.5 shadow-sm cursor-pointer text-left"
                     >
                       {s}
                     </div>
@@ -475,15 +451,15 @@ export const NewProjectForm = ({
           <button
             type="button"
             onClick={onBack}
-            className="px-8 py-2.5 bg-white border border-gray-300 rounded-xl text-xs font-bold text-gray-600 hover:bg-gray-50 transition-all shadow-sm"
+            className="px-8 py-3 bg-white border border-gray-300 rounded-xl text-xs font-bold text-gray-600 hover:bg-gray-50 transition-all shadow-sm"
           >
             Cancelar
           </button>
           <button
             onClick={handleSubmit(onSubmit)}
-            className="px-12 py-2.5 bg-[#10b981] text-white rounded-xl text-xs font-black hover:bg-[#0da673] shadow-lg shadow-emerald-100/50 transition-all active:scale-95 uppercase tracking-widest"
+            className="px-12 py-3 bg-[#10b981] text-white rounded-xl text-xs font-black hover:bg-[#0da673] shadow-lg shadow-emerald-100/50 transition-all active:scale-95 uppercase tracking-widest"
           >
-            SALVAR
+            {isEditing ? "SALVAR ALTERAÇÕES" : "SALVAR PROJETO"}
           </button>
         </div>
       </div>
