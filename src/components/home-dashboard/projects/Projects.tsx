@@ -19,6 +19,7 @@ import {
 import { NewProjectForm } from "./components/form/NewProjectForm";
 import { ProjectTable } from "./components/table/ProjectTable";
 import { ProjectDashboard } from "./components/dashboard/ProjectDashboard";
+import { DeleteProjectModal } from "./components/modal/DeleteProjectModal"; // Certifique-se do caminho correto
 import { IProject } from "@/types/project.interface";
 
 export default function ProjectsPage() {
@@ -28,10 +29,11 @@ export default function ProjectsPage() {
     type: "success" | "error";
   } | null>(null);
 
-  // Controle de estados de visualização e edição
+  // Controle de estados de visualização, edição e exclusão
   const [showForm, setShowForm] = useState(false);
   const [projectToEdit, setProjectToEdit] = useState<IProject | null>(null);
   const [viewingProject, setViewingProject] = useState<IProject | null>(null);
+  const [projectToDelete, setProjectToDelete] = useState<IProject | null>(null);
 
   // Lista de projetos persistida localmente no estado
   const [projects, setProjects] = useState<IProject[]>([]);
@@ -44,10 +46,14 @@ export default function ProjectsPage() {
     setTimeout(() => setToast(null), 3000);
   };
 
-  // Função para Deletar Projeto
-  const handleDeleteProject = (projectId: string) => {
-    setProjects((prev) => prev.filter((p) => p.id !== projectId));
-    showToast("Projeto excluído com sucesso!");
+  // Função disparada após confirmar a senha no Modal
+  const confirmDeleteProject = (password: string) => {
+    // Aqui você validaria a senha com o backend
+    if (projectToDelete) {
+      setProjects((prev) => prev.filter((p) => p.id !== projectToDelete.id));
+      setProjectToDelete(null);
+      showToast("Projeto excluído com sucesso!");
+    }
   };
 
   // Função para Editar Projeto (Abre o form com dados)
@@ -99,6 +105,14 @@ export default function ProjectsPage() {
   // 3. ESTADO: Listagem (Principal)
   return (
     <div className="space-y-8 pb-10 relative min-h-screen bg-gray-50/30 font-sans px-4">
+      {/* Modal de Exclusão - A UI É LEI */}
+      <DeleteProjectModal
+        isOpen={!!projectToDelete}
+        projectName={projectToDelete?.titulo || ""}
+        onClose={() => setProjectToDelete(null)}
+        onConfirm={confirmDeleteProject}
+      />
+
       {/* Toast Notification */}
       <AnimatePresence>
         {toast && (
@@ -154,7 +168,6 @@ export default function ProjectsPage() {
       <div className="space-y-6">
         {/* FILTROS EMPILHADOS */}
         <div className="flex flex-col items-start gap-4">
-          {/* 1. Seletor de Planejamento (Topo) */}
           <div className="flex items-center bg-white border border-gray-100 p-2 rounded-2xl shadow-sm min-w-[320px]">
             <div className="text-[#10b981] pl-3">
               <ClipboardList size={20} strokeWidth={2.5} />
@@ -167,7 +180,6 @@ export default function ProjectsPage() {
             <ChevronDown size={18} className="text-gray-300 mr-2" />
           </div>
 
-          {/* 2. Barra de Busca (Baixo - ocupando largura conforme layout) */}
           <div className="relative w-full max-w-xl group">
             <Search
               className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-[#10b981] transition-colors"
@@ -208,29 +220,31 @@ export default function ProjectsPage() {
               projects={filteredProjects}
               onViewDetails={(p) => setViewingProject(p)}
               onEdit={handleEditProject}
-              onDelete={handleDeleteProject}
+              onDelete={(projectId) => {
+                const project = projects.find((p) => p.id === projectId);
+                if (project) setProjectToDelete(project);
+              }}
             />
 
-            {/* Legenda */}
             <div className="flex items-center gap-6 px-4">
               <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest text-left">
                 Legenda:
               </span>
               <div className="flex items-center gap-4">
                 <div className="flex items-center gap-2 bg-amber-50 px-3 py-1.5 rounded-full border border-amber-100">
-                  <div className="w-2 h-2 rounded-full bg-amber-500" />
+                  <div className="w-2.5 h-2.5 rounded-full bg-amber-500" />
                   <span className="text-[10px] font-black text-amber-700 uppercase">
                     Abaixo de 50%
                   </span>
                 </div>
                 <div className="flex items-center gap-2 bg-emerald-50 px-3 py-1.5 rounded-full border border-emerald-100">
-                  <div className="w-2 h-2 rounded-full bg-emerald-500" />
+                  <div className="w-2.5 h-2.5 rounded-full bg-emerald-500" />
                   <span className="text-[10px] font-black text-emerald-700 uppercase tracking-tighter">
                     Acima de 50%
                   </span>
                 </div>
                 <div className="flex items-center gap-2 bg-blue-50 px-3 py-1.5 rounded-full border border-blue-100">
-                  <div className="w-2 h-2 rounded-full bg-blue-500" />
+                  <div className="w-2.5 h-2.5 rounded-full bg-blue-500" />
                   <span className="text-[10px] font-black text-blue-700 uppercase tracking-tighter">
                     Igual a 100%
                   </span>
@@ -240,7 +254,6 @@ export default function ProjectsPage() {
           </div>
         )}
 
-        {/* Cards de Entidades */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-8">
           <EntityCard
             icon={<FolderOpen size={18} />}
@@ -263,7 +276,6 @@ export default function ProjectsPage() {
   );
 }
 
-// Componente auxiliar para os cards inferiores
 function EntityCard({
   icon,
   title,
