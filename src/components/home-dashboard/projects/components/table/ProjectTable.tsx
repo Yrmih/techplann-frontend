@@ -9,7 +9,7 @@ interface ProjectTableProps {
   projects: IProject[];
   onViewDetails: (project: IProject) => void;
   onEdit: (project: IProject) => void;
-  onDelete: (projectId: string) => void; // Adicionado para fechar o ciclo de CRUD
+  onDelete: (projectId: string) => void;
 }
 
 export const ProjectTable = ({
@@ -19,11 +19,12 @@ export const ProjectTable = ({
   onDelete,
 }: ProjectTableProps) => {
   return (
-    <div className="bg-white rounded-[32px] border border-gray-100 shadow-sm overflow-hidden animate-in fade-in slide-in-from-bottom-4 duration-500 font-sans">
+    /* Removido overflow-hidden para o tooltip não ser cortado */
+    <div className="bg-white rounded-[32px] border border-gray-100 shadow-sm animate-in fade-in slide-in-from-bottom-4 duration-500 font-sans">
       <table className="w-full text-left border-collapse">
         <thead>
           <tr className="bg-[#249c74] text-white">
-            <th className="p-5 text-[10px] font-black uppercase tracking-widest">
+            <th className="p-5 text-[10px] font-black uppercase tracking-widest rounded-tl-[32px]">
               Código
             </th>
             <th className="p-5 text-[10px] font-black uppercase tracking-widest">
@@ -47,7 +48,7 @@ export const ProjectTable = ({
             <th className="p-5 text-[10px] font-black uppercase tracking-widest">
               % Andamento
             </th>
-            <th className="p-5 text-[10px] font-black uppercase tracking-widest text-center">
+            <th className="p-5 text-[10px] font-black uppercase tracking-widest text-center rounded-tr-[32px]">
               Ações
             </th>
           </tr>
@@ -115,28 +116,45 @@ export const ProjectTable = ({
               </td>
 
               <td className="p-5">
-                <div className="flex items-center justify-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                  <button
-                    onClick={() => onViewDetails(proj)}
-                    className="p-2 hover:bg-emerald-50 text-gray-400 hover:text-[#10b981] rounded-lg transition-all border border-transparent hover:border-emerald-100"
-                    title="Visualizar Detalhes"
-                  >
-                    <Eye size={18} />
-                  </button>
-                  <button
-                    onClick={() => onEdit(proj)}
-                    className="p-2 hover:bg-emerald-50 text-gray-400 hover:text-[#10b981] rounded-lg transition-all border border-transparent hover:border-emerald-100"
-                    title="Editar"
-                  >
-                    <Pencil size={18} />
-                  </button>
-                  <button
-                    onClick={() => onDelete(proj.id)}
-                    className="p-2 hover:bg-rose-50 text-gray-400 hover:text-rose-500 rounded-lg transition-all border border-transparent hover:border-rose-100"
-                    title="Excluir"
-                  >
-                    <Trash2 size={18} />
-                  </button>
+                <div className="flex items-center justify-center gap-3">
+                  {/* Botão Visualizar - Preto por padrão, Verde no Hover */}
+                  <div className="relative group/tooltip">
+                    <button
+                      onClick={() => onViewDetails(proj)}
+                      className="p-2.5 bg-gray-50 text-gray-900 rounded-xl hover:bg-emerald-50 hover:text-[#10b981] transition-all shadow-sm border border-gray-100"
+                    >
+                      <Eye size={18} strokeWidth={2.5} />
+                    </button>
+                    <span className="absolute -top-10 left-1/2 -translate-x-1/2 bg-gray-900 text-white text-[10px] font-black px-2.5 py-1.5 rounded-lg shadow-xl whitespace-nowrap opacity-0 group-hover/tooltip:opacity-100 transition-all z-[100] pointer-events-none uppercase tracking-widest border border-white/10">
+                      Ver atividades
+                    </span>
+                  </div>
+
+                  {/* Botão Editar - Preto por padrão, Verde no Hover */}
+                  <div className="relative group/tooltip">
+                    <button
+                      onClick={() => onEdit(proj)}
+                      className="p-2.5 bg-gray-50 text-gray-900 rounded-xl hover:bg-emerald-50 hover:text-[#10b981] transition-all shadow-sm border border-gray-100"
+                    >
+                      <Pencil size={18} strokeWidth={2.5} />
+                    </button>
+                    <span className="absolute -top-10 left-1/2 -translate-x-1/2 bg-gray-900 text-white text-[10px] font-black px-2.5 py-1.5 rounded-lg shadow-xl whitespace-nowrap opacity-0 group-hover/tooltip:opacity-100 transition-all z-[100] pointer-events-none uppercase tracking-widest border border-white/10">
+                      Editar projeto
+                    </span>
+                  </div>
+
+                  {/* Botão Excluir - Sempre Vermelho */}
+                  <div className="relative group/tooltip">
+                    <button
+                      onClick={() => onDelete(proj.id)}
+                      className="p-2.5 bg-rose-50 text-rose-500 rounded-xl hover:bg-rose-100 transition-all shadow-sm border border-rose-100"
+                    >
+                      <Trash2 size={18} strokeWidth={2.5} />
+                    </button>
+                    <span className="absolute -top-10 left-1/2 -translate-x-1/2 bg-rose-600 text-white text-[10px] font-black px-2.5 py-1.5 rounded-lg shadow-xl whitespace-nowrap opacity-0 group-hover/tooltip:opacity-100 transition-all z-[100] pointer-events-none uppercase tracking-widest">
+                      Excluir
+                    </span>
+                  </div>
                 </div>
               </td>
             </tr>
