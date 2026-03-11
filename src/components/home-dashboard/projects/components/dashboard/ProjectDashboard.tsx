@@ -25,8 +25,8 @@ export const ProjectDashboard = ({
 }: ProjectDashboardProps) => {
   return (
     <div className="space-y-6 pb-10 animate-in fade-in duration-500 font-sans">
-      {/* 1. HEADER ESTRATÉGICO */}
-      <div className="bg-[#34a87a] rounded-2xl p-6 text-white shadow-lg">
+      {/* 1. HEADER ESTRATÉGICO COM GRADIENTE */}
+      <div className="bg-gradient-to-r from-[#34a87a] to-[#248c64] rounded-2xl p-6 text-white shadow-lg">
         <div className="flex flex-col md:flex-row justify-between items-center gap-4">
           <div className="text-left flex-1">
             <h1 className="text-xl font-black tracking-tight uppercase mb-1">
@@ -42,28 +42,28 @@ export const ProjectDashboard = ({
               <p>
                 Projeto:{" "}
                 <span className="text-white font-black">
-                  {projectTitle || "EXEMPLO"}
+                  {projectTitle || "EXEMPLO DE PROJETO"}
                 </span>
               </p>
             </div>
           </div>
 
           <div className="flex flex-wrap gap-2">
-            <button className="bg-[#10b981] hover:bg-[#0da673] text-white px-5 py-2 rounded-xl font-bold text-xs transition-all flex items-center gap-2 shadow-sm">
+            <button className="bg-[#10b981] hover:bg-[#0da673] text-white px-5 py-2 rounded-xl font-bold text-xs transition-all flex items-center gap-2 shadow-sm uppercase tracking-wider">
               <Plus size={16} strokeWidth={3} /> Novo
             </button>
-            <button className="bg-white/10 hover:bg-white/20 text-white px-4 py-2 rounded-xl font-bold text-xs transition-all flex items-center gap-2 border border-white/10">
+            <button className="bg-white/10 hover:bg-white/20 text-white px-4 py-2 rounded-xl font-bold text-xs transition-all flex items-center gap-2 border border-white/10 uppercase tracking-wider">
               <FileText size={16} /> FCAs
             </button>
-            <button className="bg-white/10 hover:bg-white/20 text-white px-4 py-2 rounded-xl font-bold text-xs transition-all flex items-center gap-2 border border-white/10">
+            <button className="bg-white/10 hover:bg-white/20 text-white px-4 py-2 rounded-xl font-bold text-xs transition-all flex items-center gap-2 border border-white/10 uppercase tracking-wider">
               <BarChart2 size={16} /> Gantt
             </button>
-            <button className="bg-white/10 hover:bg-white/20 text-white px-4 py-2 rounded-xl font-bold text-xs transition-all flex items-center gap-2 border border-white/10">
+            <button className="bg-white/10 hover:bg-white/20 text-white px-4 py-2 rounded-xl font-bold text-xs transition-all flex items-center gap-2 border border-white/10 uppercase tracking-wider">
               <Printer size={16} /> Imprimir
             </button>
             <button
               onClick={onBack}
-              className="bg-white/10 hover:bg-white/20 text-white px-4 py-2 rounded-xl font-bold text-xs transition-all flex items-center gap-2 border border-white/10"
+              className="bg-white/10 hover:bg-white/20 text-white px-4 py-2 rounded-xl font-bold text-xs transition-all flex items-center gap-2 border border-white/10 uppercase tracking-wider"
             >
               <ArrowLeft size={16} /> Voltar
             </button>
@@ -73,6 +73,7 @@ export const ProjectDashboard = ({
 
       {/* 2. CARDS DE RESUMO */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        {/* Atrasadas */}
         <div className="bg-[#fff1f2] p-5 rounded-2xl border border-rose-100 flex items-center gap-4">
           <div className="w-12 h-12 bg-white rounded-xl flex items-center justify-center text-rose-500 shadow-sm">
             <AlertTriangle size={24} />
@@ -85,6 +86,7 @@ export const ProjectDashboard = ({
           </div>
         </div>
 
+        {/* Concluídas */}
         <div className="bg-[#f0fdf4] p-5 rounded-2xl border border-emerald-100 flex items-center gap-4">
           <div className="w-12 h-12 bg-white rounded-xl flex items-center justify-center text-[#10b981] shadow-sm">
             <CheckCircle size={24} />
@@ -97,6 +99,7 @@ export const ProjectDashboard = ({
           </div>
         </div>
 
+        {/* Progresso Global */}
         <div className="bg-[#f0fdfa] p-5 rounded-2xl border border-teal-100 flex items-center gap-4">
           <div className="w-12 h-12 bg-white rounded-xl flex items-center justify-center text-teal-500 shadow-sm">
             <TrendingUp size={24} />
@@ -110,7 +113,7 @@ export const ProjectDashboard = ({
         </div>
       </div>
 
-      {/* 3. FILTROS */}
+      {/* 3. FILTROS DA LISTA */}
       <div className="flex flex-col md:flex-row gap-4">
         <div className="relative flex-1">
           <Search
@@ -119,14 +122,14 @@ export const ProjectDashboard = ({
           />
           <input
             placeholder="Pesquisar atividade..."
-            className="w-full h-12 pl-12 pr-4 bg-white border border-gray-200 rounded-xl text-sm outline-none focus:border-[#10b981] transition-all"
+            className="w-full h-12 pl-12 pr-4 bg-white border border-gray-200 rounded-xl text-sm outline-none focus:border-[#10b981] transition-all font-medium"
           />
         </div>
         <div className="flex gap-2">
-          <button className="bg-white border border-gray-200 px-4 py-2 rounded-xl text-xs font-bold text-gray-600 flex items-center gap-2 hover:bg-gray-50">
+          <button className="bg-white border border-gray-200 px-4 py-2 rounded-xl text-xs font-bold text-gray-600 flex items-center gap-2 hover:bg-gray-50 transition-all">
             Responsável <ChevronDown size={14} className="text-gray-400" />
           </button>
-          <button className="bg-white border border-gray-200 px-4 py-2 rounded-xl text-xs font-bold text-gray-600 flex items-center gap-2 hover:bg-gray-50">
+          <button className="bg-white border border-gray-200 px-4 py-2 rounded-xl text-xs font-bold text-gray-600 flex items-center gap-2 hover:bg-gray-50 transition-all">
             Status <ChevronDown size={14} className="text-gray-400" />
           </button>
         </div>
@@ -158,8 +161,6 @@ export const ProjectDashboard = ({
             </tr>
           </thead>
           <tbody>
-            {/* Linha de exemplo oculta apenas para silenciar MoreVertical se necessário, 
-                ou simplesmente o uso no colSpan resolve */}
             <tr>
               <td
                 colSpan={6}
@@ -167,7 +168,6 @@ export const ProjectDashboard = ({
               >
                 <div className="flex flex-col items-center gap-2">
                   <span>Nenhuma atividade cadastrada</span>
-                  {/* Uso silencioso do MoreVertical para o linter não reclamar */}
                   <MoreVertical size={0} className="opacity-0" />
                 </div>
               </td>
