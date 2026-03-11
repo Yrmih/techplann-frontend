@@ -13,12 +13,13 @@ import {
   Target,
   LayoutGrid,
   Zap,
-  BarChart,
+  BarChart2,
   FolderKanban,
   ShieldCheck,
   Settings,
   LogOut,
   Building,
+  Sparkles,
 } from "lucide-react";
 
 import { useAuth } from "@/contexts/AuthContext";
@@ -29,8 +30,8 @@ export const Sidebar = () => {
   const { user, logout } = useAuth();
 
   /**
-   * Dashboard, Stakeholders, Planejamentos, SWOT, Canvas, Cultura, Projetos, BSC e Segurança.
-   * Ícones corrigidos: SWOT (Target) e Cultura (Users).
+   * Ordem Reorganizada conforme imagem:
+   * Dashboard, Stakeholders, Planejamentos, SWOT, Canvas, Cultura, BSC, Projetos e TechPlann AI.
    */
   const menuItems = [
     { name: "Dashboard", icon: <Home size={22} />, href: "/dashboard" },
@@ -60,14 +61,20 @@ export const Sidebar = () => {
       href: "/dashboard/culture",
     },
     {
+      name: "BSC",
+      icon: <BarChart2 size={22} />,
+      href: "/dashboard/bsc",
+    },
+    {
       name: "Projetos",
       icon: <FolderKanban size={22} />,
       href: "/dashboard/projects",
     },
     {
-      name: "BSC",
-      icon: <BarChart size={22} />,
-      href: "/dashboard/bsc",
+      name: "TechPlann AI",
+      icon: <Sparkles size={22} />,
+      href: "/dashboard/ai",
+      isPro: true,
     },
     {
       name: "Segurança",
@@ -94,7 +101,6 @@ export const Sidebar = () => {
           )}
         </Link>
 
-        {/* ChevronLeft para recolher */}
         {!isCollapsed && (
           <button
             onClick={() => setIsCollapsed(true)}
@@ -104,7 +110,6 @@ export const Sidebar = () => {
           </button>
         )}
 
-        {/* ChevronRight para expandir quando estiver colapsado */}
         {isCollapsed && (
           <button
             onClick={() => setIsCollapsed(false)}
@@ -134,7 +139,16 @@ export const Sidebar = () => {
                   {item.icon}
                 </div>
                 {!isCollapsed && (
-                  <span className="text-[14px] font-semibold">{item.name}</span>
+                  <div className="flex-1 flex items-center justify-between">
+                    <span className="text-[14px] font-semibold">
+                      {item.name}
+                    </span>
+                    {item.isPro && (
+                      <span className="bg-orange-500 text-[9px] font-black text-white px-1.5 py-0.5 rounded-md uppercase tracking-tighter shadow-sm">
+                        PRO
+                      </span>
+                    )}
+                  </div>
                 )}
               </div>
             </Link>
@@ -144,9 +158,8 @@ export const Sidebar = () => {
 
       {/* Footer Identity */}
       <div className="p-4 border-t border-slate-800/50 bg-[#050b18]">
-        {!isCollapsed ? (
+        {!isCollapsed && (
           <div className="space-y-2 mb-4">
-            {/* Card da Empresa */}
             <div className="flex items-center gap-3 p-3 rounded-xl bg-[#0a1122] border border-slate-800/40">
               <div className="min-w-[32px] h-8 rounded-lg bg-emerald-500/10 flex items-center justify-center text-[#10b981]">
                 <Building size={16} />
@@ -155,13 +168,12 @@ export const Sidebar = () => {
                 <p className="text-[12px] font-bold text-slate-100 truncate leading-tight">
                   {user?.organization?.name || "Exemplo Tech"}
                 </p>
-                <p className="text-[10px] text-slate-500 truncate mt-0.5">
+                <p className="text-[10px] text-slate-500 truncate mt-0.5 font-light italic">
                   CNPJ: 12.345.678/0001-99
                 </p>
               </div>
             </div>
 
-            {/* Card do Usuário */}
             <div className="flex items-center gap-3 p-3 rounded-xl bg-[#0a1122] border border-slate-800/40">
               <div className="min-w-[32px] h-8 rounded-full bg-slate-800/50 flex items-center justify-center text-[10px] font-bold text-[#10b981] border border-emerald-500/10">
                 {user?.nome?.substring(0, 2).toUpperCase() || "CH"}
@@ -170,13 +182,15 @@ export const Sidebar = () => {
                 <p className="text-[12px] font-bold text-slate-100 truncate leading-tight">
                   {user?.nome || "Carlos Henrique Almeida"}
                 </p>
-                <p className="text-[10px] text-slate-500 truncate mt-0.5 font-light opacity-60">
+                <p className="text-[10px] text-slate-500 truncate mt-0.5 font-light opacity-60 italic">
                   {user?.email || "carlos.souza@exemplotech.com"}
                 </p>
               </div>
             </div>
           </div>
-        ) : (
+        )}
+
+        {isCollapsed && (
           <div className="flex flex-col items-center gap-3 mb-4">
             <div className="w-8 h-8 rounded-full bg-slate-800/50 flex items-center justify-center text-[10px] font-bold text-[#10b981] border border-emerald-500/10">
               {user?.nome?.substring(0, 2).toUpperCase() || "CH"}
