@@ -3,22 +3,25 @@
 import React from "react";
 import { Eye, Pencil, Trash2 } from "lucide-react";
 import { IProject } from "@/types/project.interface";
-import { cn } from "@/lib/utils/utils"; // Adicionada a importação necessária
+import { cn } from "@/lib/utils/utils";
 
 interface ProjectTableProps {
   projects: IProject[];
   onViewDetails: (project: IProject) => void;
+  onEdit: (project: IProject) => void;
+  onDelete: (projectId: string) => void; // Adicionado para fechar o ciclo de CRUD
 }
 
 export const ProjectTable = ({
   projects,
   onViewDetails,
+  onEdit,
+  onDelete,
 }: ProjectTableProps) => {
   return (
-    <div className="bg-white rounded-[32px] border border-gray-100 shadow-sm overflow-hidden animate-in fade-in slide-in-from-bottom-4 duration-500">
+    <div className="bg-white rounded-[32px] border border-gray-100 shadow-sm overflow-hidden animate-in fade-in slide-in-from-bottom-4 duration-500 font-sans">
       <table className="w-full text-left border-collapse">
         <thead>
-          {/* Cabeçalho Verde Esmeralda conforme o MVP */}
           <tr className="bg-[#249c74] text-white">
             <th className="p-5 text-[10px] font-black uppercase tracking-widest">
               Código
@@ -69,21 +72,18 @@ export const ProjectTable = ({
                 {proj.dataFinal}
               </td>
 
-              {/* Badge de Atividades */}
               <td className="p-5 text-center">
                 <span className="bg-[#dcfce7] text-[#10b981] px-3 py-1 rounded-full text-xs font-black">
                   {proj.atividades}
                 </span>
               </td>
 
-              {/* Badge de Sub-Atividades */}
               <td className="p-5 text-center">
                 <span className="bg-gray-100 text-gray-400 px-3 py-1 rounded-full text-xs font-black">
                   {proj.subAtividades}
                 </span>
               </td>
 
-              {/* Barra de Progresso com cor dinâmica conforme legenda */}
               <td className="p-5 w-40">
                 <div className="flex items-center gap-2">
                   <div className="flex-1 h-3 bg-gray-100 rounded-full overflow-hidden">
@@ -114,7 +114,6 @@ export const ProjectTable = ({
                 </div>
               </td>
 
-              {/* Ícones de Ação */}
               <td className="p-5">
                 <div className="flex items-center justify-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
                   <button
@@ -125,13 +124,15 @@ export const ProjectTable = ({
                     <Eye size={18} />
                   </button>
                   <button
-                    className="p-2 hover:bg-emerald-50 text-gray-400 hover:text-[#10b981] rounded-lg transition-all"
+                    onClick={() => onEdit(proj)}
+                    className="p-2 hover:bg-emerald-50 text-gray-400 hover:text-[#10b981] rounded-lg transition-all border border-transparent hover:border-emerald-100"
                     title="Editar"
                   >
                     <Pencil size={18} />
                   </button>
                   <button
-                    className="p-2 hover:bg-rose-50 text-gray-400 hover:text-rose-500 rounded-lg transition-all"
+                    onClick={() => onDelete(proj.id)}
+                    className="p-2 hover:bg-rose-50 text-gray-400 hover:text-rose-500 rounded-lg transition-all border border-transparent hover:border-rose-100"
                     title="Excluir"
                   >
                     <Trash2 size={18} />
