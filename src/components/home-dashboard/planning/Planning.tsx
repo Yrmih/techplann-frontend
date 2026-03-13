@@ -2,9 +2,9 @@
 
 import { useState } from "react";
 import { Plus, FileText, Search } from "lucide-react";
-import { PlanningTable } from "./PlanningTable";
+import { PlanningTable } from "./components/table/PlanningTable";
 import { EmptyPlanning } from "./EmptyPlanning";
-import { NewPlanningForm } from "./NewPlanningForm";
+import { NewPlanningForm } from "./components/form/NewPlanningForm";
 import { IPlanning } from "@/types/interfaces/planning.interface";
 
 export default function Planning() {
@@ -86,20 +86,20 @@ export default function Planning() {
             Planejamentos
           </h1>
           <p className="text-gray-500 font-medium mt-1 text-left text-sm">
-            Gerencie os planejamentos estratégicos da organização
+            Gerencie os planejamentos estratégicos
           </p>
         </div>
 
         <div className="flex items-center gap-3">
-          <button className="flex items-center gap-2 px-5 py-2.5 bg-white border border-gray-200 rounded-xl text-xs font-bold text-gray-600 hover:bg-gray-50 shadow-sm transition-all uppercase tracking-wider">
-            <FileText size={16} /> Relatório Gerencial
+          <button className="flex items-center gap-2 px-5 py-2.5 bg-white border border-gray-200 rounded-xl text-xs font-bold text-gray-600 hover:bg-gray-50 shadow-sm transition-all tracking-wider">
+            <FileText size={16} /> Relatório
           </button>
           <button
             onClick={() => {
               setEditingPlanning(null);
               setView("form");
             }}
-            className="flex items-center gap-2 px-6 py-2.5 bg-[#10b981] text-white rounded-xl text-xs font-black hover:bg-[#0da673] shadow-lg shadow-emerald-100 transition-all uppercase tracking-widest active:scale-95"
+            className="flex items-center gap-2 px-6 py-2.5 bg-[#10b981] text-white rounded-xl text-xs font-black hover:bg-[#0da673] shadow-lg shadow-emerald-100 transition-all tracking-widest active:scale-95"
           >
             <Plus size={16} strokeWidth={3} /> Novo Planejamento
           </button>
@@ -111,8 +111,8 @@ export default function Planning() {
         {plannings.length > 0 ? (
           <>
             <div className="p-8 border-b border-gray-50 flex justify-between items-center bg-gray-50/20">
-              <h3 className="font-black text-gray-900 text-[10px] uppercase tracking-[2px]">
-                Lista de Registros ({filteredPlannings.length})
+              <h3 className="font-black text-gray-900 text-[16px]  tracking-[2px]">
+                Lista de Planejamentos ({filteredPlannings.length})
               </h3>
               <div className="relative w-80 group">
                 <Search

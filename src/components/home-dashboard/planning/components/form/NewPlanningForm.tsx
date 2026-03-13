@@ -10,7 +10,7 @@ import {
   ChevronRight,
   ChevronLeft,
   ChevronsLeft,
-  CheckCircle2,
+  Save,
 } from "lucide-react";
 import { motion } from "framer-motion";
 
@@ -68,7 +68,7 @@ export const NewPlanningForm = ({
     },
   });
 
-  // Efeito para carregar dados na Edição (Evita o erro de renderização do React)
+  // Efeito para carregar dados na Edição
   useEffect(() => {
     if (initialData) {
       reset({
@@ -111,7 +111,7 @@ export const NewPlanningForm = ({
       animate={{ opacity: 1 }}
       className="space-y-8 pb-10 max-w-[1400px] mx-auto font-sans"
     >
-      {/* Header com Título Dinâmico */}
+      {/* Header com botões ajustados conforme image_7910a2.png e image_01c29b.png */}
       <div className="flex items-center justify-between px-2">
         <div className="flex items-center gap-5">
           <button
@@ -126,26 +126,27 @@ export const NewPlanningForm = ({
             </h1>
             <p className="text-sm text-gray-500 font-medium">
               {isEditing
-                ? "Atualize os parâmetros deste ciclo estratégico."
-                : "Configure os parâmetros do novo ciclo estratégico."}
+                ? "Atualize os dados do planejamento"
+                : "Preencha os dados para criar um novo registro"}
             </p>
           </div>
         </div>
 
         <div className="flex items-center gap-3">
+          {/* Botão Cancelar idêntico ao print image_7910a2.png */}
           <button
             onClick={onBack}
             type="button"
-            className="px-6 py-2.5 bg-white border border-gray-300 rounded-xl text-xs font-bold text-gray-600 hover:bg-gray-50 transition-all shadow-sm"
+            className="px-8 py-2.5 bg-white border border-gray-200 rounded-xl text-xs font-bold text-gray-600 hover:bg-gray-50 transition-all shadow-sm"
           >
             Cancelar
           </button>
+          {/* Botão Salvar com ícone de disquete idêntico ao print image_01c29b.png */}
           <button
             onClick={handleSubmit(onSubmit)}
-            className="flex items-center gap-2 px-6 py-2.5 bg-[#10b981] text-white rounded-xl text-xs font-black hover:bg-[#0da673] shadow-lg shadow-emerald-100/50 transition-all active:scale-95 uppercase tracking-widest"
+            className="flex items-center gap-2 px-8 py-2.5 bg-[#10b981] text-white rounded-xl text-xs font-black hover:bg-[#0da673] shadow-lg shadow-emerald-100/50 transition-all active:scale-95 uppercase tracking-widest"
           >
-            <CheckCircle2 size={16} />{" "}
-            {isEditing ? "Salvar Alterações" : "Salvar Planejamento"}
+            <Save size={16} strokeWidth={2.5} /> Salvar
           </button>
         </div>
       </div>
@@ -159,11 +160,11 @@ export const NewPlanningForm = ({
             <input
               {...register("titulo")}
               placeholder="Digite o nome do planejamento"
-              className={`w-full p-4 bg-gray-50 border ${errors.titulo ? "border-red-500" : "border-gray-300"} rounded-2xl text-sm outline-none focus:border-[#10b981] transition-all`}
+              className={`w-full p-4 bg-[#f1f4f9] border ${errors.titulo ? "border-red-500" : "border-gray-200"} rounded-2xl text-sm outline-none focus:border-[#10b981] transition-all placeholder:text-gray-400`}
             />
           </div>
 
-          <div className="flex items-end gap-3">
+          <div className="flex items-end gap-3 text-left">
             <div className="flex-1">
               <Controller
                 name="parceiroId"
@@ -197,31 +198,41 @@ export const NewPlanningForm = ({
           </label>
           <textarea
             placeholder="Descreva o escopo do planejamento..."
-            className="w-full h-36 p-5 bg-gray-50 border border-gray-300 rounded-2xl text-sm outline-none focus:border-[#10b981] resize-none transition-all placeholder:text-gray-400"
+            className="w-full h-36 p-5 bg-[#f1f4f9] border border-gray-200 rounded-2xl text-sm outline-none focus:border-[#10b981] resize-none transition-all placeholder:text-gray-400"
           />
         </div>
 
+        {/* Select de Situação atualizado conforme image_788695.png */}
         <div className="w-1/3 text-left">
           <CustomSelect
             label="Situação"
-            placeholder="Ativo"
+            placeholder="Selecionar"
             options={[
               { value: "ativo", label: "Ativo" },
-              { value: "inativo", label: "Inativo" },
+              { value: "pausado", label: "Pausado" },
+              { value: "concluido", label: "Concluído" },
+              { value: "cancelado", label: "Cancelado" },
             ]}
+            value={
+              isEditing
+                ? initialData?.status.toLowerCase() === "ativo"
+                  ? "ativo"
+                  : "concluido"
+                : "ativo"
+            }
             onValueChange={() => {}}
           />
         </div>
 
-        <div className="grid grid-cols-2 gap-16 border-t border-gray-100 pt-10">
+        <div className="grid grid-cols-2 gap-16 border-t border-gray-100 pt-10 text-left">
           {/* Seção Parceiros */}
           <div className="space-y-5">
             <label className="text-xs font-black text-gray-800 block text-left uppercase tracking-widest ml-1">
               Parceiros <span className="text-red-500">*</span>
             </label>
             <div className="flex gap-5 items-center h-64">
-              <div className="flex-1 border border-gray-300 rounded-2xl h-full overflow-hidden flex flex-col bg-white">
-                <div className="p-3 bg-gray-100 text-[10px] font-bold text-gray-500 border-b uppercase tracking-tighter text-left">
+              <div className="flex-1 border border-gray-200 rounded-2xl h-full overflow-hidden flex flex-col bg-white">
+                <div className="p-3 bg-gray-50 text-[10px] font-bold text-gray-500 border-b uppercase tracking-tighter text-left">
                   DISPONÍVEIS ({availPartners.length})
                 </div>
                 <div className="flex-1 overflow-y-auto p-1.5 custom-scrollbar">
@@ -256,21 +267,23 @@ export const NewPlanningForm = ({
                       setSelectedPartners,
                     )
                   }
-                  className="p-2.5 border border-gray-300 rounded-xl bg-white shadow-sm hover:text-[#10b981] transition-all"
+                  className="p-2 border border-gray-200 rounded-lg bg-white shadow-sm hover:text-[#10b981] transition-all"
                 >
-                  <ChevronsRight size={16} />
+                  <ChevronsRight size={14} />
                 </button>
                 <button
                   type="button"
-                  className="p-2.5 border border-gray-300 rounded-xl bg-white shadow-sm hover:text-[#10b981] transition-all"
+                  onClick={() => {}}
+                  className="p-2 border border-gray-200 rounded-lg bg-white shadow-sm hover:text-[#10b981] transition-all"
                 >
-                  <ChevronRight size={16} />
+                  <ChevronRight size={14} />
                 </button>
                 <button
                   type="button"
-                  className="p-2.5 border border-gray-300 rounded-xl bg-white shadow-sm hover:text-[#10b981] transition-all"
+                  onClick={() => {}}
+                  className="p-2 border border-gray-200 rounded-lg bg-white shadow-sm hover:text-[#10b981] transition-all"
                 >
-                  <ChevronLeft size={16} />
+                  <ChevronLeft size={14} />
                 </button>
                 <button
                   type="button"
@@ -282,13 +295,13 @@ export const NewPlanningForm = ({
                       setAvailPartners,
                     )
                   }
-                  className="p-2.5 border border-gray-300 rounded-xl bg-white shadow-sm hover:text-[#10b981] transition-all"
+                  className="p-2 border border-gray-200 rounded-lg bg-white shadow-sm hover:text-[#10b981] transition-all"
                 >
-                  <ChevronsLeft size={16} />
+                  <ChevronsLeft size={14} />
                 </button>
               </div>
 
-              <div className="flex-1 border-2 border-emerald-100 rounded-2xl h-full overflow-hidden flex flex-col bg-emerald-50/20 shadow-sm">
+              <div className="flex-1 border-2 border-emerald-100 rounded-2xl h-full overflow-hidden flex flex-col bg-emerald-50/10 shadow-sm">
                 <div className="p-3 bg-emerald-100/50 text-[10px] font-bold text-emerald-700 border-b uppercase tracking-tighter text-left">
                   SELECIONADOS ({selectedPartners.length})
                 </div>
@@ -321,8 +334,8 @@ export const NewPlanningForm = ({
               Departamentos <span className="text-red-500">*</span>
             </label>
             <div className="flex gap-5 items-center h-64">
-              <div className="flex-1 border border-gray-300 rounded-2xl h-full overflow-hidden flex flex-col bg-white">
-                <div className="p-3 bg-gray-100 text-[10px] font-bold text-gray-500 border-b uppercase tracking-tighter text-left">
+              <div className="flex-1 border border-gray-200 rounded-2xl h-full overflow-hidden flex flex-col bg-white">
+                <div className="p-3 bg-gray-50 text-[10px] font-bold text-gray-500 border-b uppercase tracking-tighter text-left">
                   DISPONÍVEIS ({availDeps.length})
                 </div>
                 <div className="flex-1 overflow-y-auto p-1.5 custom-scrollbar">
@@ -357,21 +370,23 @@ export const NewPlanningForm = ({
                       setSelectedDeps,
                     )
                   }
-                  className="p-2.5 border border-gray-300 rounded-xl bg-white shadow-sm hover:text-[#10b981] transition-all"
+                  className="p-2 border border-gray-200 rounded-lg bg-white shadow-sm hover:text-[#10b981] transition-all"
                 >
-                  <ChevronsRight size={16} />
+                  <ChevronsRight size={14} />
                 </button>
                 <button
                   type="button"
-                  className="p-2.5 border border-gray-300 rounded-xl bg-white shadow-sm hover:text-[#10b981] transition-all"
+                  onClick={() => {}}
+                  className="p-2 border border-gray-200 rounded-lg bg-white shadow-sm hover:text-[#10b981] transition-all"
                 >
-                  <ChevronRight size={16} />
+                  <ChevronRight size={14} />
                 </button>
                 <button
                   type="button"
-                  className="p-2.5 border border-gray-300 rounded-xl bg-white shadow-sm hover:text-[#10b981] transition-all"
+                  onClick={() => {}}
+                  className="p-2 border border-gray-200 rounded-lg bg-white shadow-sm hover:text-[#10b981] transition-all"
                 >
-                  <ChevronLeft size={16} />
+                  <ChevronLeft size={14} />
                 </button>
                 <button
                   type="button"
@@ -383,9 +398,9 @@ export const NewPlanningForm = ({
                       setAvailDeps,
                     )
                   }
-                  className="p-2.5 border border-gray-300 rounded-xl bg-white shadow-sm hover:text-[#10b981] transition-all"
+                  className="p-2 border border-gray-200 rounded-lg bg-white shadow-sm hover:text-[#10b981] transition-all"
                 >
-                  <ChevronsLeft size={16} />
+                  <ChevronsLeft size={14} />
                 </button>
               </div>
 
