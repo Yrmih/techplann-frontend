@@ -19,7 +19,7 @@ import {
 import { NewProjectForm } from "./components/form/NewProjectForm";
 import { ProjectTable } from "./components/table/ProjectTable";
 import { ProjectDashboard } from "./components/dashboard/ProjectDashboard";
-import { DeleteProjectModal } from "./components/modal/DeleteProjectModal"; // Certifique-se do caminho correto
+import { DeleteProjectModal } from "./components/modal/DeleteProjectModal";
 import { IProject } from "@/types/project.interface";
 
 export default function ProjectsPage() {
@@ -29,8 +29,8 @@ export default function ProjectsPage() {
     type: "success" | "error";
   } | null>(null);
 
-  // Controle de estados de visualização, edição e exclusão
-  const [showForm, setShowForm] = useState(false);
+  // Controle de estados de visualização e edição
+  const [view, setView] = useState<"list" | "form" | "dashboard">("list");
   const [projectToEdit, setProjectToEdit] = useState<IProject | null>(null);
   const [viewingProject, setViewingProject] = useState<IProject | null>(null);
   const [projectToDelete, setProjectToDelete] = useState<IProject | null>(null);
@@ -46,9 +46,34 @@ export default function ProjectsPage() {
     setTimeout(() => setToast(null), 3000);
   };
 
-  // Função disparada após confirmar a senha no Modal
+  // Função centralizada para Salvar (Novo ou Edição) - A CHAVE DO PROBLEMA
+  const handleFormSubmit = (updatedProject: IProject) => {
+    setProjects((prev) => {
+      const exists = prev.find((p) => p.id === updatedProject.id);
+
+      if (exists) {
+        // Se já existe, atualiza o item na lista mantendo a ordem
+        return prev.map((p) =>
+          p.id === updatedProject.id ? updatedProject : p,
+        );
+      } else {
+        // Se é novo, adiciona no início do array
+        return [updatedProject, ...prev];
+      }
+    });
+
+    // Feedback visual e retorno para a lista
+    showToast(
+      projectToEdit
+        ? "Projeto atualizado com sucesso!"
+        : "Projeto criado com sucesso!",
+    );
+    setView("list");
+    setProjectToEdit(null);
+  };
+
+  // Função para deletar projeto após confirmação
   const confirmDeleteProject = (password: string) => {
-    // Aqui você validaria a senha com o backend
     if (projectToDelete) {
       setProjects((prev) => prev.filter((p) => p.id !== projectToDelete.id));
       setProjectToDelete(null);
@@ -56,13 +81,7 @@ export default function ProjectsPage() {
     }
   };
 
-  // Função para Editar Projeto (Abre o form com dados)
-  const handleEditProject = (project: IProject) => {
-    setProjectToEdit(project);
-    setShowForm(true);
-  };
-
-  // 1. ESTADO: Visualizando Dashboard de um projeto específico
+  // 1. ESTADO: Visualizando Dashboard
   if (viewingProject) {
     return (
       <ProjectDashboard
@@ -73,27 +92,15 @@ export default function ProjectsPage() {
   }
 
   // 2. ESTADO: Formulário (Criação ou Edição)
-  if (showForm) {
+  if (view === "form") {
     return (
       <NewProjectForm
         initialData={projectToEdit}
         onBack={() => {
-          setShowForm(false);
+          setView("list");
           setProjectToEdit(null);
         }}
-        onSubmitSuccess={(data) => {
-          if (projectToEdit) {
-            setProjects((prev) =>
-              prev.map((p) => (p.id === data.id ? data : p)),
-            );
-            showToast("Projeto atualizado com sucesso!");
-          } else {
-            setProjects([...projects, data]);
-            showToast("Projeto criado com sucesso!");
-          }
-          setShowForm(false);
-          setProjectToEdit(null);
-        }}
+        onSubmitSuccess={handleFormSubmit}
       />
     );
   }
@@ -105,7 +112,7 @@ export default function ProjectsPage() {
   // 3. ESTADO: Listagem (Principal)
   return (
     <div className="space-y-8 pb-10 relative min-h-screen bg-gray-50/30 font-sans px-4">
-      {/* Modal de Exclusão - A UI É LEI */}
+      {/* Modal de Exclusão */}
       <DeleteProjectModal
         isOpen={!!projectToDelete}
         projectName={projectToDelete?.titulo || ""}
@@ -156,7 +163,7 @@ export default function ProjectsPage() {
           <button
             onClick={() => {
               setProjectToEdit(null);
-              setShowForm(true);
+              setView("form");
             }}
             className="flex items-center gap-2 bg-[#059669] hover:bg-[#047857] text-white px-8 py-3.5 rounded-2xl font-black text-sm transition-all shadow-xl active:scale-95 uppercase tracking-widest"
           >
@@ -166,7 +173,6 @@ export default function ProjectsPage() {
       </div>
 
       <div className="space-y-6">
-        {/* FILTROS EMPILHADOS */}
         <div className="flex flex-col items-start gap-4">
           <div className="flex items-center bg-white border border-gray-100 p-2 rounded-2xl shadow-sm min-w-[320px]">
             <div className="text-[#10b981] pl-3">
@@ -195,7 +201,6 @@ export default function ProjectsPage() {
           </div>
         </div>
 
-        {/* LÓGICA DINÂMICA: ESTADO VAZIO OU TABELA */}
         {projects.length === 0 ? (
           <div className="bg-white rounded-[40px] border border-gray-100 p-24 flex flex-col items-center justify-center space-y-6 text-center shadow-sm">
             <div className="bg-gray-50 p-8 rounded-[40px]">
@@ -219,7 +224,10 @@ export default function ProjectsPage() {
             <ProjectTable
               projects={filteredProjects}
               onViewDetails={(p) => setViewingProject(p)}
-              onEdit={handleEditProject}
+              onEdit={(p) => {
+                setProjectToEdit(p);
+                setView("form");
+              }}
               onDelete={(projectId) => {
                 const project = projects.find((p) => p.id === projectId);
                 if (project) setProjectToDelete(project);
@@ -238,7 +246,7 @@ export default function ProjectsPage() {
                   </span>
                 </div>
                 <div className="flex items-center gap-2 bg-emerald-50 px-3 py-1.5 rounded-full border border-emerald-100">
-                  <div className="w-2.5 h-2.5 rounded-full bg-emerald-500" />
+                  <div className="w-2.5 h-2.5 rounded-full bg-[#10b981]" />
                   <span className="text-[10px] font-black text-emerald-700 uppercase tracking-tighter">
                     Acima de 50%
                   </span>
@@ -263,12 +271,18 @@ export default function ProjectsPage() {
           <EntityCard
             icon={<ListTodo size={18} />}
             title="Atividades"
-            count={0}
+            count={projects.reduce(
+              (acc, curr) => acc + (curr.atividades || 0),
+              0,
+            )}
           />
           <EntityCard
             icon={<FileStack size={18} />}
             title="Sub Atividades"
-            count={0}
+            count={projects.reduce(
+              (acc, curr) => acc + (curr.subAtividades || 0),
+              0,
+            )}
           />
         </div>
       </div>

@@ -23,33 +23,46 @@ import { IPlanning } from "@/types/interfaces/planning.interface";
 
 interface NewPlanningFormProps {
   onBack: () => void;
+  onSubmitSuccess: (data: IPlanning) => void;
   initialData?: IPlanning | null;
 }
 
 export const NewPlanningForm = ({
   onBack,
+  onSubmitSuccess,
   initialData,
 }: NewPlanningFormProps) => {
   const isEditing = !!initialData;
 
-  // Listas em Title Case conforme a nova regra visual
-  const [availPartners, setAvailPartners] = useState([
+  // Listas Mestras de Opções
+  const masterPartners = [
     "Frank Pereira Cardoso",
     "Renato Bordalo",
     "Maria Silva",
     "João Santos",
-  ]);
-  const [selectedPartners, setSelectedPartners] = useState<string[]>([]);
+  ];
 
-  const [availDeps, setAvailDeps] = useState([
+  const masterDeps = [
     "Comercial",
     "Contabilidade",
     "Departamento Pessoal",
     "Estoque",
     "Ti",
     "Rh",
-  ]);
+  ];
+
+  // INICIALIZAÇÃO INTELIGENTE DO ESTADO: Evita cascading renders no useEffect
+  const [selectedPartners, setSelectedPartners] = useState<string[]>(() => {
+    return initialData?.cliente ? [initialData.cliente] : [];
+  });
+
   const [selectedDeps, setSelectedDeps] = useState<string[]>([]);
+
+  // Filtros dinâmicos para as listas de "Disponíveis"
+  const availPartners = masterPartners.filter(
+    (p) => !selectedPartners.includes(p),
+  );
+  const availDeps = masterDeps.filter((d) => !selectedDeps.includes(d));
 
   const {
     register,
@@ -60,58 +73,70 @@ export const NewPlanningForm = ({
   } = useForm<PlanningFormValues>({
     resolver: zodResolver(planningSchema),
     defaultValues: {
-      titulo: "",
-      parceiroId: "",
+      titulo: initialData?.nome || "",
+      parceiroId: initialData ? "1" : "",
       departamentoId: "",
       responsaveisIds: [],
-      status: true,
+      status: initialData?.status === "Ativo",
     },
   });
 
-  // Efeito para carregar dados na Edição
+  // O useEffect agora cuida APENAS do reset do formulário (que é uma API externa)
   useEffect(() => {
     if (initialData) {
       reset({
         titulo: initialData.nome,
-        parceiroId: "1", // Exemplo de ID vinculado ao cliente
-        status: initialData.status === "ATIVO",
+        parceiroId: "1",
+        status: initialData.status === "Ativo",
       });
     }
   }, [initialData, reset]);
 
   const moveItem = (
     item: string,
-    from: string[],
-    setFrom: React.Dispatch<React.SetStateAction<string[]>>,
-    to: string[],
-    setTo: React.Dispatch<React.SetStateAction<string[]>>,
+    action: "add" | "remove",
+    type: "partners" | "deps",
   ) => {
-    setFrom(from.filter((i) => i !== item));
-    setTo([...to, item]);
+    if (type === "partners") {
+      setSelectedPartners((prev) =>
+        action === "add" ? [...prev, item] : prev.filter((i) => i !== item),
+      );
+    } else {
+      setSelectedDeps((prev) =>
+        action === "add" ? [...prev, item] : prev.filter((i) => i !== item),
+      );
+    }
   };
 
-  const moveAll = (
-    from: string[],
-    setFrom: React.Dispatch<React.SetStateAction<string[]>>,
-    to: string[],
-    setTo: React.Dispatch<React.SetStateAction<string[]>>,
-  ) => {
-    setTo((prev) => [...prev, ...from]);
-    setFrom([]);
+  const moveAll = (action: "add" | "remove", type: "partners" | "deps") => {
+    if (type === "partners") {
+      setSelectedPartners(action === "add" ? [...masterPartners] : []);
+    } else {
+      setSelectedDeps(action === "add" ? [...masterDeps] : []);
+    }
   };
 
   const onSubmit: SubmitHandler<PlanningFormValues> = (data) => {
-    console.log("Dados salvos:", data);
-    onBack();
+    const finalId = initialData?.id || String(new Date().getTime());
+
+    const finalPlanning: IPlanning = {
+      ...initialData,
+      id: finalId,
+      nome: data.titulo,
+      cliente: selectedPartners[0] || "BC Development S/S LTDA",
+      projetos: initialData?.projetos ?? 0,
+      status: data.status ? "Ativo" : "Concluído",
+    };
+
+    onSubmitSuccess(finalPlanning);
   };
 
   return (
     <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
-      className="space-y-8 pb-10 max-w-[1400px] mx-auto font-sans"
+      className="space-y-8 pb-10 max-w-[1400px] mx-auto font-sans text-left"
     >
-      {/* Header com botões ajustados conforme image_7910a2.png e image_01c29b.png */}
       <div className="flex items-center justify-between px-2">
         <div className="flex items-center gap-5">
           <button
@@ -133,7 +158,6 @@ export const NewPlanningForm = ({
         </div>
 
         <div className="flex items-center gap-3">
-          {/* Botão Cancelar idêntico ao print image_7910a2.png */}
           <button
             onClick={onBack}
             type="button"
@@ -141,7 +165,6 @@ export const NewPlanningForm = ({
           >
             Cancelar
           </button>
-          {/* Botão Salvar com ícone de disquete idêntico ao print image_01c29b.png */}
           <button
             onClick={handleSubmit(onSubmit)}
             className="flex items-center gap-2 px-8 py-2.5 bg-[#10b981] text-white rounded-xl text-xs font-black hover:bg-[#0da673] shadow-lg shadow-emerald-100/50 transition-all active:scale-95 uppercase tracking-widest"
@@ -154,7 +177,7 @@ export const NewPlanningForm = ({
       <div className="bg-white p-10 rounded-3xl border border-gray-200 shadow-xl shadow-gray-200/50 space-y-12">
         <div className="grid grid-cols-2 gap-12 text-left">
           <div className="space-y-2.5">
-            <label className="text-xs font-bold text-gray-700 ml-1 uppercase tracking-widest">
+            <label className="text-xs font-bold text-gray-700 ml-1 uppercase tracking-widest text-left block">
               Nome do Planejamento <span className="text-red-500">*</span>
             </label>
             <input
@@ -164,7 +187,7 @@ export const NewPlanningForm = ({
             />
           </div>
 
-          <div className="flex items-end gap-3 text-left">
+          <div className="flex items-end gap-3">
             <div className="flex-1">
               <Controller
                 name="parceiroId"
@@ -193,7 +216,7 @@ export const NewPlanningForm = ({
         </div>
 
         <div className="space-y-2.5 text-left">
-          <label className="text-xs font-bold text-gray-700 ml-1 uppercase tracking-widest">
+          <label className="text-xs font-bold text-gray-700 ml-1 uppercase tracking-widest text-left block">
             Escopo do Planejamento
           </label>
           <textarea
@@ -202,23 +225,22 @@ export const NewPlanningForm = ({
           />
         </div>
 
-        {/* Select de Situação atualizado conforme image_788695.png */}
         <div className="w-1/3 text-left">
           <CustomSelect
             label="Situação"
             placeholder="Selecionar"
             options={[
-              { value: "ativo", label: "Ativo" },
-              { value: "pausado", label: "Pausado" },
-              { value: "concluido", label: "Concluído" },
-              { value: "cancelado", label: "Cancelado" },
+              { value: "Ativo", label: "Ativo" },
+              { value: "Pausado", label: "Pausado" },
+              { value: "Concluido", label: "Concluído" },
+              { value: "Cancelado", label: "Cancelado" },
             ]}
             value={
               isEditing
-                ? initialData?.status.toLowerCase() === "ativo"
-                  ? "ativo"
-                  : "concluido"
-                : "ativo"
+                ? initialData?.status === "Ativo"
+                  ? "Ativo"
+                  : "Concluido"
+                : "Ativo"
             }
             onValueChange={() => {}}
           />
@@ -226,28 +248,20 @@ export const NewPlanningForm = ({
 
         <div className="grid grid-cols-2 gap-16 border-t border-gray-100 pt-10 text-left">
           {/* Seção Parceiros */}
-          <div className="space-y-5">
-            <label className="text-xs font-black text-gray-800 block text-left uppercase tracking-widest ml-1">
+          <div className="space-y-5 text-left">
+            <label className="text-xs font-black text-gray-800 block uppercase tracking-widest ml-1">
               Parceiros <span className="text-red-500">*</span>
             </label>
             <div className="flex gap-5 items-center h-64">
               <div className="flex-1 border border-gray-200 rounded-2xl h-full overflow-hidden flex flex-col bg-white">
-                <div className="p-3 bg-gray-50 text-[10px] font-bold text-gray-500 border-b uppercase tracking-tighter text-left">
+                <div className="p-3 bg-gray-50 text-[10px] font-bold text-gray-500 border-b uppercase tracking-tighter">
                   DISPONÍVEIS ({availPartners.length})
                 </div>
                 <div className="flex-1 overflow-y-auto p-1.5 custom-scrollbar">
                   {availPartners.map((p) => (
                     <div
                       key={p}
-                      onClick={() =>
-                        moveItem(
-                          p,
-                          availPartners,
-                          setAvailPartners,
-                          selectedPartners,
-                          setSelectedPartners,
-                        )
-                      }
+                      onClick={() => moveItem(p, "add", "partners")}
                       className="p-3 text-[11px] font-medium text-gray-600 hover:bg-emerald-50 hover:text-[#10b981] rounded-xl cursor-pointer transition-all text-left mb-0.5"
                     >
                       {p}
@@ -255,69 +269,43 @@ export const NewPlanningForm = ({
                   ))}
                 </div>
               </div>
-
               <div className="flex flex-col gap-2.5">
                 <button
                   type="button"
-                  onClick={() =>
-                    moveAll(
-                      availPartners,
-                      setAvailPartners,
-                      selectedPartners,
-                      setSelectedPartners,
-                    )
-                  }
+                  onClick={() => moveAll("add", "partners")}
                   className="p-2 border border-gray-200 rounded-lg bg-white shadow-sm hover:text-[#10b981] transition-all"
                 >
                   <ChevronsRight size={14} />
                 </button>
                 <button
                   type="button"
-                  onClick={() => {}}
-                  className="p-2 border border-gray-200 rounded-lg bg-white shadow-sm hover:text-[#10b981] transition-all"
+                  className="p-2 border border-gray-200 rounded-lg bg-white shadow-sm opacity-20 cursor-not-allowed"
                 >
                   <ChevronRight size={14} />
                 </button>
                 <button
                   type="button"
-                  onClick={() => {}}
-                  className="p-2 border border-gray-200 rounded-lg bg-white shadow-sm hover:text-[#10b981] transition-all"
+                  className="p-2 border border-gray-200 rounded-lg bg-white shadow-sm opacity-20 cursor-not-allowed"
                 >
                   <ChevronLeft size={14} />
                 </button>
                 <button
                   type="button"
-                  onClick={() =>
-                    moveAll(
-                      selectedPartners,
-                      setSelectedPartners,
-                      availPartners,
-                      setAvailPartners,
-                    )
-                  }
+                  onClick={() => moveAll("remove", "partners")}
                   className="p-2 border border-gray-200 rounded-lg bg-white shadow-sm hover:text-[#10b981] transition-all"
                 >
                   <ChevronsLeft size={14} />
                 </button>
               </div>
-
               <div className="flex-1 border-2 border-emerald-100 rounded-2xl h-full overflow-hidden flex flex-col bg-emerald-50/10 shadow-sm">
-                <div className="p-3 bg-emerald-100/50 text-[10px] font-bold text-emerald-700 border-b uppercase tracking-tighter text-left">
+                <div className="p-3 bg-emerald-100/50 text-[10px] font-bold text-emerald-700 border-b uppercase tracking-tighter">
                   SELECIONADOS ({selectedPartners.length})
                 </div>
                 <div className="flex-1 overflow-y-auto p-2">
                   {selectedPartners.map((p) => (
                     <div
                       key={p}
-                      onClick={() =>
-                        moveItem(
-                          p,
-                          selectedPartners,
-                          setSelectedPartners,
-                          availPartners,
-                          setAvailPartners,
-                        )
-                      }
+                      onClick={() => moveItem(p, "remove", "partners")}
                       className="p-3 text-[11px] font-bold text-emerald-800 bg-white border border-emerald-200 rounded-xl mb-1.5 shadow-sm cursor-pointer text-left"
                     >
                       {p}
@@ -329,98 +317,64 @@ export const NewPlanningForm = ({
           </div>
 
           {/* Seção Departamentos */}
-          <div className="space-y-5">
-            <label className="text-xs font-black text-gray-800 block text-left uppercase tracking-widest ml-1">
+          <div className="space-y-5 text-left">
+            <label className="text-xs font-black text-gray-800 block uppercase tracking-widest ml-1">
               Departamentos <span className="text-red-500">*</span>
             </label>
             <div className="flex gap-5 items-center h-64">
               <div className="flex-1 border border-gray-200 rounded-2xl h-full overflow-hidden flex flex-col bg-white">
-                <div className="p-3 bg-gray-50 text-[10px] font-bold text-gray-500 border-b uppercase tracking-tighter text-left">
+                <div className="p-3 bg-gray-50 text-[10px] font-bold text-gray-500 border-b uppercase tracking-tighter">
                   DISPONÍVEIS ({availDeps.length})
                 </div>
                 <div className="flex-1 overflow-y-auto p-1.5 custom-scrollbar">
                   {availDeps.map((d) => (
                     <div
                       key={d}
-                      onClick={() =>
-                        moveItem(
-                          d,
-                          availDeps,
-                          setAvailDeps,
-                          selectedDeps,
-                          setSelectedDeps,
-                        )
-                      }
-                      className="p-3 text-[11px] font-medium text-gray-600 hover:bg-emerald-50 hover:text-[#10b981] rounded-xl cursor-pointer transition-all text-left mb-0.5"
+                      onClick={() => moveItem(d, "add", "deps")}
+                      className="p-3 text-[11px] font-medium text-gray-600 hover:bg-emerald-50 hover:text-[#10b981] rounded-xl cursor-pointer transition-all mb-0.5 text-left"
                     >
                       {d}
                     </div>
                   ))}
                 </div>
               </div>
-
               <div className="flex flex-col gap-2.5">
                 <button
                   type="button"
-                  onClick={() =>
-                    moveAll(
-                      availDeps,
-                      setAvailDeps,
-                      selectedDeps,
-                      setSelectedDeps,
-                    )
-                  }
+                  onClick={() => moveAll("add", "deps")}
                   className="p-2 border border-gray-200 rounded-lg bg-white shadow-sm hover:text-[#10b981] transition-all"
                 >
                   <ChevronsRight size={14} />
                 </button>
                 <button
                   type="button"
-                  onClick={() => {}}
-                  className="p-2 border border-gray-200 rounded-lg bg-white shadow-sm hover:text-[#10b981] transition-all"
+                  className="p-2 border border-gray-200 rounded-lg bg-white shadow-sm opacity-20 cursor-not-allowed"
                 >
                   <ChevronRight size={14} />
                 </button>
                 <button
                   type="button"
-                  onClick={() => {}}
-                  className="p-2 border border-gray-200 rounded-lg bg-white shadow-sm hover:text-[#10b981] transition-all"
+                  className="p-2 border border-gray-200 rounded-lg bg-white shadow-sm opacity-20 cursor-not-allowed"
                 >
                   <ChevronLeft size={14} />
                 </button>
                 <button
                   type="button"
-                  onClick={() =>
-                    moveAll(
-                      selectedDeps,
-                      setSelectedDeps,
-                      availDeps,
-                      setAvailDeps,
-                    )
-                  }
+                  onClick={() => moveAll("remove", "deps")}
                   className="p-2 border border-gray-200 rounded-lg bg-white shadow-sm hover:text-[#10b981] transition-all"
                 >
                   <ChevronsLeft size={14} />
                 </button>
               </div>
-
-              <div className="flex-1 border-2 border-emerald-100 rounded-2xl h-full overflow-hidden flex flex-col bg-emerald-50/20 shadow-sm">
-                <div className="p-3 bg-emerald-100/50 text-[10px] font-bold text-emerald-700 border-b uppercase tracking-tighter text-left">
+              <div className="flex-1 border-2 border-emerald-100 rounded-2xl h-full overflow-hidden flex flex-col bg-emerald-50/10 shadow-sm">
+                <div className="p-3 bg-emerald-100/50 text-[10px] font-bold text-emerald-700 border-b uppercase tracking-tighter">
                   SELECIONADOS ({selectedDeps.length})
                 </div>
                 <div className="flex-1 overflow-y-auto p-2">
                   {selectedDeps.map((d) => (
                     <div
                       key={d}
-                      onClick={() =>
-                        moveItem(
-                          d,
-                          selectedDeps,
-                          setSelectedDeps,
-                          availDeps,
-                          setAvailDeps,
-                        )
-                      }
+                      onClick={() => moveItem(d, "remove", "deps")}
                       className="p-3 text-[11px] font-bold text-emerald-800 bg-white border border-emerald-200 rounded-xl mb-1.5 shadow-sm cursor-pointer text-left"
                     >
                       {d}

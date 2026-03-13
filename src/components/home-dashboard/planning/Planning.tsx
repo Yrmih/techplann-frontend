@@ -16,30 +16,50 @@ export default function Planning() {
     null,
   );
 
-  // Dados iniciais formatados em Title Case conforme a nova regra
+  // Dados iniciais formatados em Title Case
   const [plannings, setPlannings] = useState<IPlanning[]>([
     {
       id: 1,
       nome: "Planejamento Estratégico de Expansão Digital 2026",
       cliente: "BC Development S/S LTDA",
       projetos: 4,
-      status: "ATIVO",
+      status: "Ativo",
     },
     {
       id: 2,
       nome: "Planejamento Comercial Q1",
       cliente: "Acme LTDA",
       projetos: 2,
-      status: "ATIVO",
+      status: "Ativo",
     },
     {
       id: 3,
       nome: "Planejamento Estratégico 2023-2025",
       cliente: "Delta LTDA",
       projetos: 8,
-      status: "CONCLUÍDO",
+      status: "Concluído",
     },
   ]);
+
+  // FUNÇÃO DE SALVAMENTO (A CHAVE DO SUCESSO)
+  const handleFormSubmit = (data: IPlanning) => {
+    setPlannings((prev) => {
+      // Verifica se estamos editando um registro existente
+      const exists = prev.find((p) => p.id === data.id);
+
+      if (exists) {
+        // Se existe, mapeia o array e substitui o objeto antigo pelo novo
+        return prev.map((p) => (p.id === data.id ? data : p));
+      } else {
+        // Se é um novo registro, adiciona no topo da lista
+        return [data, ...prev];
+      }
+    });
+
+    // Reset de estados e retorno para a lista
+    setView("list");
+    setEditingPlanning(null);
+  };
 
   const handleEdit = (item: IPlanning) => {
     setEditingPlanning(item);
@@ -47,7 +67,7 @@ export default function Planning() {
   };
 
   const handleDelete = (id: number | string) => {
-    // Mantendo o confirm nativo conforme solicitado até a aprovação do chefe
+    // Mantendo o confirm nativo conforme solicitado
     if (
       window.confirm(
         "Deseja realmente excluir este planejamento? Esta ação é irreversível.",
@@ -64,7 +84,7 @@ export default function Planning() {
       p.cliente.toLowerCase().includes(searchTerm.toLowerCase()),
   );
 
-  // Renderização condicional do formulário
+  // Renderização condicional do formulário (Corrigindo o erro de prop faltante)
   if (view === "form") {
     return (
       <NewPlanningForm
@@ -73,6 +93,7 @@ export default function Planning() {
           setView("list");
           setEditingPlanning(null);
         }}
+        onSubmitSuccess={handleFormSubmit} // <-- Prop obrigatória adicionada!
       />
     );
   }
@@ -111,7 +132,7 @@ export default function Planning() {
         {plannings.length > 0 ? (
           <>
             <div className="p-8 border-b border-gray-50 flex justify-between items-center bg-gray-50/20">
-              <h3 className="font-black text-gray-900 text-[16px]  tracking-[2px]">
+              <h3 className="font-black text-gray-900 text-[16px] tracking-[2px]">
                 Lista de Planejamentos ({filteredPlannings.length})
               </h3>
               <div className="relative w-80 group">
@@ -129,7 +150,7 @@ export default function Planning() {
               </div>
             </div>
             <PlanningTable
-              data={filteredPlannings} // Passando os dados filtrados
+              data={filteredPlannings}
               onEdit={handleEdit}
               onDelete={handleDelete}
             />
