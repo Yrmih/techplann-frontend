@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useForm, Controller, SubmitHandler } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
@@ -51,14 +51,14 @@ export const NewPlanningForm = ({
     "Rh",
   ];
 
-  // INICIALIZAÇÃO INTELIGENTE DO ESTADO: Evita cascading renders no useEffect
+  // INICIALIZAÇÃO INTELIGENTE DO ESTADO
   const [selectedPartners, setSelectedPartners] = useState<string[]>(() => {
     return initialData?.cliente ? [initialData.cliente] : [];
   });
 
   const [selectedDeps, setSelectedDeps] = useState<string[]>([]);
 
-  // Filtros dinâmicos para as listas de "Disponíveis"
+  // Filtros dinâmicos
   const availPartners = masterPartners.filter(
     (p) => !selectedPartners.includes(p),
   );
@@ -77,17 +77,16 @@ export const NewPlanningForm = ({
       parceiroId: initialData ? "1" : "",
       departamentoId: "",
       responsaveisIds: [],
-      status: initialData?.status === "Ativo",
+      situacao: initialData?.status || "Ativo",
     },
   });
 
-  // O useEffect agora cuida APENAS do reset do formulário (que é uma API externa)
   useEffect(() => {
     if (initialData) {
       reset({
         titulo: initialData.nome,
         parceiroId: "1",
-        status: initialData.status === "Ativo",
+        situacao: initialData.status,
       });
     }
   }, [initialData, reset]);
@@ -125,7 +124,8 @@ export const NewPlanningForm = ({
       nome: data.titulo,
       cliente: selectedPartners[0] || "BC Development S/S LTDA",
       projetos: initialData?.projetos ?? 0,
-      status: data.status ? "Ativo" : "Concluído",
+      // O status agora vem do valor selecionado no select (data.situacao)
+      status: data.situacao || "Ativo",
     };
 
     onSubmitSuccess(finalPlanning);
@@ -187,7 +187,7 @@ export const NewPlanningForm = ({
             />
           </div>
 
-          <div className="flex items-end gap-3">
+          <div className="flex items-end gap-3 text-left">
             <div className="flex-1">
               <Controller
                 name="parceiroId"
@@ -225,24 +225,25 @@ export const NewPlanningForm = ({
           />
         </div>
 
+        {/* Select de Situação com Controller */}
         <div className="w-1/3 text-left">
-          <CustomSelect
-            label="Situação"
-            placeholder="Selecionar"
-            options={[
-              { value: "Ativo", label: "Ativo" },
-              { value: "Pausado", label: "Pausado" },
-              { value: "Concluido", label: "Concluído" },
-              { value: "Cancelado", label: "Cancelado" },
-            ]}
-            value={
-              isEditing
-                ? initialData?.status === "Ativo"
-                  ? "Ativo"
-                  : "Concluido"
-                : "Ativo"
-            }
-            onValueChange={() => {}}
+          <Controller
+            name="situacao"
+            control={control}
+            render={({ field }) => (
+              <CustomSelect
+                label="Situação"
+                placeholder="Selecionar"
+                options={[
+                  { value: "Ativo", label: "Ativo" },
+                  { value: "Pausado", label: "Pausado" },
+                  { value: "Concluído", label: "Concluído" },
+                  { value: "Cancelado", label: "Cancelado" },
+                ]}
+                value={field.value}
+                onValueChange={field.onChange}
+              />
+            )}
           />
         </div>
 
@@ -367,7 +368,7 @@ export const NewPlanningForm = ({
                 </button>
               </div>
               <div className="flex-1 border-2 border-emerald-100 rounded-2xl h-full overflow-hidden flex flex-col bg-emerald-50/10 shadow-sm">
-                <div className="p-3 bg-emerald-100/50 text-[10px] font-bold text-emerald-700 border-b uppercase tracking-tighter">
+                <div className="p-3 bg-emerald-100/50 text-[10px] font-bold text-emerald-700 border-b uppercase tracking-tighter text-left">
                   SELECIONADOS ({selectedDeps.length})
                 </div>
                 <div className="flex-1 overflow-y-auto p-2">
