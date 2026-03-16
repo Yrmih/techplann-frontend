@@ -1,6 +1,5 @@
 "use client";
 
-import React from "react";
 import { Eye, Pencil, Trash2 } from "lucide-react";
 import { IProject } from "@/types/project.interface";
 import { cn } from "@/lib/utils/utils";
