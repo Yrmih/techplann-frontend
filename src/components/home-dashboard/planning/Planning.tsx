@@ -1,22 +1,21 @@
 "use client";
 
 import { useState } from "react";
-import { Plus, FileText, Search } from "lucide-react";
+import { Plus, Search, Printer } from "lucide-react";
 import { PlanningTable } from "./components/table/PlanningTable";
 import { EmptyPlanning } from "./EmptyPlanning";
 import { NewPlanningForm } from "./components/form/NewPlanningForm";
 import { IPlanning } from "@/types/interfaces/planning.interface";
+import { Input } from "@/components/ui/input";
 
 export default function Planning() {
   const [view, setView] = useState<"list" | "form">("list");
   const [searchTerm, setSearchTerm] = useState("");
 
-  // Estado tipado corretamente para evitar erros de compilação
   const [editingPlanning, setEditingPlanning] = useState<IPlanning | null>(
     null,
   );
 
-  // Dados iniciais formatados em Title Case
   const [plannings, setPlannings] = useState<IPlanning[]>([
     {
       id: 1,
@@ -41,22 +40,16 @@ export default function Planning() {
     },
   ]);
 
-  // FUNÇÃO DE SALVAMENTO (A CHAVE DO SUCESSO)
   const handleFormSubmit = (data: IPlanning) => {
     setPlannings((prev) => {
-      // Verifica se estamos editando um registro existente
       const exists = prev.find((p) => p.id === data.id);
-
       if (exists) {
-        // Se existe, mapeia o array e substitui o objeto antigo pelo novo
         return prev.map((p) => (p.id === data.id ? data : p));
       } else {
-        // Se é um novo registro, adiciona no topo da lista
         return [data, ...prev];
       }
     });
 
-    // Reset de estados e retorno para a lista
     setView("list");
     setEditingPlanning(null);
   };
@@ -67,7 +60,6 @@ export default function Planning() {
   };
 
   const handleDelete = (id: number | string) => {
-    // Mantendo o confirm nativo conforme solicitado
     if (
       window.confirm(
         "Deseja realmente excluir este planejamento? Esta ação é irreversível.",
@@ -77,14 +69,12 @@ export default function Planning() {
     }
   };
 
-  // Lógica de filtro para a busca
   const filteredPlannings = plannings.filter(
     (p) =>
       p.nome.toLowerCase().includes(searchTerm.toLowerCase()) ||
       p.cliente.toLowerCase().includes(searchTerm.toLowerCase()),
   );
 
-  // Renderização condicional do formulário (Corrigindo o erro de prop faltante)
   if (view === "form") {
     return (
       <NewPlanningForm
@@ -93,62 +83,63 @@ export default function Planning() {
           setView("list");
           setEditingPlanning(null);
         }}
-        onSubmitSuccess={handleFormSubmit} // <-- Prop obrigatória adicionada!
+        onSubmitSuccess={handleFormSubmit}
       />
     );
   }
 
   return (
-    <div className="space-y-8 p-8 max-w-[1600px] mx-auto animate-in fade-in slide-in-from-bottom-3 duration-500 font-sans">
-      {/* Header do Planejamento */}
-      <div className="flex justify-between items-start">
-        <div className="text-left">
-          <h1 className="text-3xl font-black text-gray-900 tracking-tight text-left">
+    <div className="space-y-8 p-8 max-w-[1600px] mx-auto animate-in fade-in slide-in-from-bottom-3 duration-500 font-sans text-left">
+      <header className="flex justify-between items-start">
+        <div>
+          <h1 className="text-3xl font-bold text-slate-900 tracking-tight">
             Planejamentos
           </h1>
-          <p className="text-gray-500 font-medium mt-1 text-left text-sm">
+          <p className="text-slate-500 font-medium mt-1 text-sm">
             Gerencie os planejamentos estratégicos
           </p>
         </div>
 
-        <div className="flex items-center gap-3">
-          <button className="flex items-center gap-2 px-5 py-2.5 bg-white border border-gray-200 rounded-xl text-xs font-bold text-gray-600 hover:bg-gray-50 shadow-sm transition-all tracking-wider">
-            <FileText size={16} /> Relatório
+        <div className="flex items-center gap-2.5">
+          <button className="flex items-center gap-2 px-4 py-2 bg-white border border-slate-200 rounded-lg text-sm font-semibold text-slate-700 hover:bg-slate-50 transition-colors shadow-sm">
+            <Printer size={18} className="text-slate-900" /> Relatório
           </button>
+
           <button
             onClick={() => {
               setEditingPlanning(null);
               setView("form");
             }}
-            className="flex items-center gap-2 px-6 py-2.5 bg-[#10b981] text-white rounded-xl text-xs font-black hover:bg-[#0da673] shadow-lg shadow-emerald-100 transition-all tracking-widest active:scale-95"
+            className="flex items-center gap-1.5 px-4 py-2 bg-[#10b981] text-white rounded-lg text-sm font-semibold hover:bg-[#0da673] transition-colors shadow-sm active:scale-95"
           >
-            <Plus size={16} strokeWidth={3} /> Novo Planejamento
+            <Plus size={18} strokeWidth={2.5} /> Novo Planejamento
           </button>
         </div>
-      </div>
+      </header>
 
-      {/* Área da Tabela ou Estado Vazio */}
       <div className="bg-white rounded-[32px] border border-gray-100 shadow-sm overflow-hidden min-h-[500px]">
         {plannings.length > 0 ? (
           <>
             <div className="p-8 border-b border-gray-50 flex justify-between items-center bg-gray-50/20">
-              <h3 className="font-black text-gray-900 text-[16px] tracking-[2px]">
+              <h3 className="font-bold text-slate-900 text-[16px] tracking-tight">
                 Lista de Planejamentos ({filteredPlannings.length})
               </h3>
+
               <div className="relative w-80 group">
                 <Search
                   size={16}
-                  className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-[#10b981] transition-colors"
+                  className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-[#10b981] transition-colors"
                 />
-                <input
+                <Input
                   type="text"
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  placeholder="Pesquisar por nome ou cliente..."
-                  className="w-full pl-12 pr-4 py-3 bg-white border border-gray-200 rounded-2xl text-xs font-medium outline-none focus:border-[#10b981] focus:ring-4 focus:ring-emerald-50 transition-all"
+                  placeholder="Pesquisar planejamentos..."
+                  className="w-full pl-10 pr-4 h-10 bg-white border-slate-200 rounded-lg text-sm font-medium focus:ring-2 focus:ring-emerald-50 focus:border-[#10b981] transition-all shadow-sm"
                 />
               </div>
             </div>
+
             <PlanningTable
               data={filteredPlannings}
               onEdit={handleEdit}
