@@ -47,13 +47,18 @@ export const CustomSelect = ({
           <SelectValue placeholder={placeholder} />
         </SelectTrigger>
 
-        <SelectContent className="rounded-xl border-gray-100 shadow-2xl p-1 animate-in fade-in zoom-in-95">
+        {/* CORREÇÃO: 
+          - Adicionado z-50 para ficar sobre qualquer outro elemento.
+          - Adicionado bg-white E bg-popover para garantir opacidade total.
+          - Mantido o estilo premium de sombra e borda do Lovable.
+        */}
+        <SelectContent className="z-50 min-w-[8rem] overflow-hidden rounded-xl border border-gray-100 bg-white bg-popover shadow-2xl p-1 animate-in fade-in zoom-in-95">
           {options.map((option) => (
             <SelectItem
               key={option.value}
               value={option.value}
               className={cn(
-                "text-sm cursor-pointer py-2.5 rounded-lg transition-colors",
+                "text-sm cursor-pointer py-2.5 rounded-lg transition-colors outline-none",
                 "data-[highlighted]:bg-[#10b981] data-[highlighted]:text-white",
                 "focus:bg-[#10b981] focus:text-white",
               )}
