@@ -20,11 +20,12 @@ import {
   PlanningFormValues,
 } from "@/lib/validators/planning.schema";
 import { IPlanning } from "@/types/interfaces/planning.interface";
+import { Planejamento } from "@/hooks/usePlanejamentos";
 
 interface NewPlanningFormProps {
   onBack: () => void;
   onSubmitSuccess: (data: IPlanning) => void;
-  initialData?: IPlanning | null;
+  initialData?: Planejamento | null;
 }
 
 export const NewPlanningForm = ({
@@ -51,9 +52,9 @@ export const NewPlanningForm = ({
     "Rh",
   ];
 
-  // INICIALIZAÇÃO INTELIGENTE DO ESTADO
+  // INICIALIZAÇÃO DO ESTADO
   const [selectedPartners, setSelectedPartners] = useState<string[]>(() => {
-    return initialData?.cliente ? [initialData.cliente] : [];
+    return initialData?.parceiros_nomes || [];
   });
 
   const [selectedDeps, setSelectedDeps] = useState<string[]>([]);
@@ -119,12 +120,13 @@ export const NewPlanningForm = ({
     const finalId = initialData?.id || String(new Date().getTime());
 
     const finalPlanning: IPlanning = {
-      ...initialData,
       id: finalId,
       nome: data.titulo,
-      cliente: selectedPartners[0] || "BC Development S/S LTDA",
-      projetos: initialData?.projetos ?? 0,
-      // O status agora vem do valor selecionado no select (data.situacao)
+      cliente:
+        selectedPartners.length > 0
+          ? selectedPartners.join(", ")
+          : "BC Development S/S LTDA",
+      projetos: 0,
       status: data.situacao || "Ativo",
     };
 
@@ -137,11 +139,12 @@ export const NewPlanningForm = ({
       animate={{ opacity: 1 }}
       className="space-y-8 pb-10 max-w-[1400px] mx-auto font-sans text-left"
     >
+      {/* HEADER COM BOTÕES MAIS RETANGULARES/QUADRICULADOS */}
       <div className="flex items-center justify-between px-2">
         <div className="flex items-center gap-5">
           <button
             onClick={onBack}
-            className="p-2.5 hover:bg-gray-100 rounded-full transition-all text-gray-400 hover:text-gray-900 border border-transparent hover:border-gray-200"
+            className="p-2.5 hover:bg-gray-100 rounded-full transition-all text-gray-400 hover:text-gray-900 border border-transparent"
           >
             <ArrowLeft size={22} />
           </button>
@@ -158,32 +161,37 @@ export const NewPlanningForm = ({
         </div>
 
         <div className="flex items-center gap-3">
+          {/* BOTÃO CANCELAR: Retangular, borda fina, texto escuro */}
           <button
             onClick={onBack}
             type="button"
-            className="px-8 py-2.5 bg-white border border-gray-200 rounded-xl text-xs font-bold text-gray-600 hover:bg-gray-50 transition-all shadow-sm"
+            className="px-8 py-2.5 bg-white border border-slate-200 rounded-lg text-sm font-bold text-slate-700 hover:bg-slate-50 transition-all shadow-sm"
           >
             Cancelar
           </button>
+          {/* BOTÃO SALVAR: Retangular, verde sólido, ícone à esquerda */}
           <button
             onClick={handleSubmit(onSubmit)}
-            className="flex items-center gap-2 px-8 py-2.5 bg-[#10b981] text-white rounded-xl text-xs font-black hover:bg-[#0da673] shadow-lg shadow-emerald-100/50 transition-all active:scale-95 uppercase tracking-widest"
+            className="flex items-center gap-2 px-8 py-2.5 bg-[#10b981] text-white rounded-lg text-sm font-bold hover:bg-[#0da673] transition-all shadow-sm active:scale-95 shadow-emerald-100"
           >
-            <Save size={16} strokeWidth={2.5} /> Salvar
+            <Save size={18} strokeWidth={2.5} /> Salvar
           </button>
         </div>
       </div>
 
-      <div className="bg-white p-10 rounded-3xl border border-gray-200 shadow-xl shadow-gray-200/50 space-y-12">
+      {/* CARD PRINCIPAL */}
+      <div className="bg-white p-10 rounded-[32px] border border-gray-100 shadow-sm space-y-12">
         <div className="grid grid-cols-2 gap-12 text-left">
-          <div className="space-y-2.5">
-            <label className="text-xs font-bold text-gray-700 ml-1 uppercase tracking-widest text-left block">
+          <div className="space-y-2.5 text-left">
+            <label className="text-xs font-bold text-slate-400 ml-1 uppercase tracking-widest block">
               Nome do Planejamento <span className="text-red-500">*</span>
             </label>
             <input
               {...register("titulo")}
               placeholder="Digite o nome do planejamento"
-              className={`w-full p-4 bg-[#f1f4f9] border ${errors.titulo ? "border-red-500" : "border-gray-200"} rounded-2xl text-sm outline-none focus:border-[#10b981] transition-all placeholder:text-gray-400`}
+              className={`w-full p-4 bg-slate-50 border ${
+                errors.titulo ? "border-red-500" : "border-slate-100"
+              } rounded-2xl text-sm outline-none focus:border-[#10b981] transition-all placeholder:text-slate-300 font-medium`}
             />
           </div>
 
@@ -205,27 +213,27 @@ export const NewPlanningForm = ({
             </div>
             <button
               type="button"
-              className="p-4 border border-gray-300 rounded-2xl bg-white hover:bg-gray-50 transition-all shadow-sm group"
+              className="p-4 border border-slate-200 rounded-2xl bg-white hover:bg-slate-50 transition-all shadow-sm group"
             >
               <Search
                 size={20}
-                className="text-gray-400 group-hover:text-[#10b981]"
+                className="text-slate-400 group-hover:text-[#10b981]"
               />
             </button>
           </div>
         </div>
 
         <div className="space-y-2.5 text-left">
-          <label className="text-xs font-bold text-gray-700 ml-1 uppercase tracking-widest text-left block">
+          <label className="text-xs font-bold text-slate-400 ml-1 uppercase tracking-widest block">
             Escopo do Planejamento
           </label>
           <textarea
             placeholder="Descreva o escopo do planejamento..."
-            className="w-full h-36 p-5 bg-[#f1f4f9] border border-gray-200 rounded-2xl text-sm outline-none focus:border-[#10b981] resize-none transition-all placeholder:text-gray-400"
+            defaultValue={initialData?.descricao || ""}
+            className="w-full h-36 p-5 bg-slate-50 border border-slate-100 rounded-2xl text-sm outline-none focus:border-[#10b981] resize-none transition-all placeholder:text-slate-300 font-medium"
           />
         </div>
 
-        {/* Select de Situação com Controller */}
         <div className="w-1/3 text-left">
           <Controller
             name="situacao"
@@ -247,15 +255,15 @@ export const NewPlanningForm = ({
           />
         </div>
 
-        <div className="grid grid-cols-2 gap-16 border-t border-gray-100 pt-10 text-left">
-          {/* Seção Parceiros */}
+        <div className="grid grid-cols-2 gap-16 border-t border-slate-50 pt-10 text-left">
+          {/* SEÇÃO PARCEIROS */}
           <div className="space-y-5 text-left">
-            <label className="text-xs font-black text-gray-800 block uppercase tracking-widest ml-1">
+            <label className="text-xs font-bold text-slate-500 block uppercase tracking-widest ml-1">
               Parceiros <span className="text-red-500">*</span>
             </label>
             <div className="flex gap-5 items-center h-64">
-              <div className="flex-1 border border-gray-200 rounded-2xl h-full overflow-hidden flex flex-col bg-white">
-                <div className="p-3 bg-gray-50 text-[10px] font-bold text-gray-500 border-b uppercase tracking-tighter">
+              <div className="flex-1 border border-slate-200 rounded-2xl h-full overflow-hidden flex flex-col bg-white">
+                <div className="p-3 bg-slate-50 text-[10px] font-bold text-slate-400 border-b uppercase tracking-widest text-left">
                   DISPONÍVEIS ({availPartners.length})
                 </div>
                 <div className="flex-1 overflow-y-auto p-1.5 custom-scrollbar">
@@ -263,7 +271,7 @@ export const NewPlanningForm = ({
                     <div
                       key={p}
                       onClick={() => moveItem(p, "add", "partners")}
-                      className="p-3 text-[11px] font-medium text-gray-600 hover:bg-emerald-50 hover:text-[#10b981] rounded-xl cursor-pointer transition-all text-left mb-0.5"
+                      className="p-3 text-[11px] font-bold text-slate-600 hover:bg-emerald-50 hover:text-[#10b981] rounded-xl cursor-pointer transition-all text-left mb-0.5"
                     >
                       {p}
                     </div>
@@ -274,35 +282,35 @@ export const NewPlanningForm = ({
                 <button
                   type="button"
                   onClick={() => moveAll("add", "partners")}
-                  className="p-2 border border-gray-200 rounded-lg bg-white shadow-sm hover:text-[#10b981] transition-all"
+                  className="p-2 border border-slate-200 rounded-lg bg-white shadow-sm hover:text-[#10b981] transition-all"
                 >
                   <ChevronsRight size={14} />
                 </button>
                 <button
                   type="button"
-                  className="p-2 border border-gray-200 rounded-lg bg-white shadow-sm opacity-20 cursor-not-allowed"
+                  className="p-2 border border-slate-200 rounded-lg bg-white shadow-sm opacity-20 cursor-not-allowed"
                 >
                   <ChevronRight size={14} />
                 </button>
                 <button
                   type="button"
-                  className="p-2 border border-gray-200 rounded-lg bg-white shadow-sm opacity-20 cursor-not-allowed"
+                  className="p-2 border border-slate-200 rounded-lg bg-white shadow-sm opacity-20 cursor-not-allowed"
                 >
                   <ChevronLeft size={14} />
                 </button>
                 <button
                   type="button"
                   onClick={() => moveAll("remove", "partners")}
-                  className="p-2 border border-gray-200 rounded-lg bg-white shadow-sm hover:text-[#10b981] transition-all"
+                  className="p-2 border border-slate-200 rounded-lg bg-white shadow-sm hover:text-[#10b981] transition-all"
                 >
                   <ChevronsLeft size={14} />
                 </button>
               </div>
               <div className="flex-1 border-2 border-emerald-100 rounded-2xl h-full overflow-hidden flex flex-col bg-emerald-50/10 shadow-sm">
-                <div className="p-3 bg-emerald-100/50 text-[10px] font-bold text-emerald-700 border-b uppercase tracking-tighter">
+                <div className="p-3 bg-emerald-100/50 text-[10px] font-bold text-emerald-700 border-b uppercase tracking-widest text-left">
                   SELECIONADOS ({selectedPartners.length})
                 </div>
-                <div className="flex-1 overflow-y-auto p-2">
+                <div className="flex-1 overflow-y-auto p-2 custom-scrollbar">
                   {selectedPartners.map((p) => (
                     <div
                       key={p}
@@ -317,14 +325,14 @@ export const NewPlanningForm = ({
             </div>
           </div>
 
-          {/* Seção Departamentos */}
+          {/* SEÇÃO DEPARTAMENTOS */}
           <div className="space-y-5 text-left">
-            <label className="text-xs font-black text-gray-800 block uppercase tracking-widest ml-1">
+            <label className="text-xs font-bold text-slate-500 block uppercase tracking-widest ml-1">
               Departamentos <span className="text-red-500">*</span>
             </label>
             <div className="flex gap-5 items-center h-64">
-              <div className="flex-1 border border-gray-200 rounded-2xl h-full overflow-hidden flex flex-col bg-white">
-                <div className="p-3 bg-gray-50 text-[10px] font-bold text-gray-500 border-b uppercase tracking-tighter">
+              <div className="flex-1 border border-slate-200 rounded-2xl h-full overflow-hidden flex flex-col bg-white">
+                <div className="p-3 bg-slate-50 text-[10px] font-bold text-slate-400 border-b uppercase tracking-widest text-left">
                   DISPONÍVEIS ({availDeps.length})
                 </div>
                 <div className="flex-1 overflow-y-auto p-1.5 custom-scrollbar">
@@ -332,7 +340,7 @@ export const NewPlanningForm = ({
                     <div
                       key={d}
                       onClick={() => moveItem(d, "add", "deps")}
-                      className="p-3 text-[11px] font-medium text-gray-600 hover:bg-emerald-50 hover:text-[#10b981] rounded-xl cursor-pointer transition-all mb-0.5 text-left"
+                      className="p-3 text-[11px] font-bold text-slate-600 hover:bg-emerald-50 hover:text-[#10b981] rounded-xl cursor-pointer transition-all mb-0.5 text-left"
                     >
                       {d}
                     </div>
@@ -343,35 +351,35 @@ export const NewPlanningForm = ({
                 <button
                   type="button"
                   onClick={() => moveAll("add", "deps")}
-                  className="p-2 border border-gray-200 rounded-lg bg-white shadow-sm hover:text-[#10b981] transition-all"
+                  className="p-2 border border-slate-200 rounded-lg bg-white shadow-sm hover:text-[#10b981] transition-all"
                 >
                   <ChevronsRight size={14} />
                 </button>
                 <button
                   type="button"
-                  className="p-2 border border-gray-200 rounded-lg bg-white shadow-sm opacity-20 cursor-not-allowed"
+                  className="p-2 border border-slate-200 rounded-lg bg-white shadow-sm opacity-20 cursor-not-allowed"
                 >
                   <ChevronRight size={14} />
                 </button>
                 <button
                   type="button"
-                  className="p-2 border border-gray-200 rounded-lg bg-white shadow-sm opacity-20 cursor-not-allowed"
+                  className="p-2 border border-slate-200 rounded-lg bg-white shadow-sm opacity-20 cursor-not-allowed"
                 >
                   <ChevronLeft size={14} />
                 </button>
                 <button
                   type="button"
                   onClick={() => moveAll("remove", "deps")}
-                  className="p-2 border border-gray-200 rounded-lg bg-white shadow-sm hover:text-[#10b981] transition-all"
+                  className="p-2 border border-slate-200 rounded-lg bg-white shadow-sm hover:text-[#10b981] transition-all"
                 >
                   <ChevronsLeft size={14} />
                 </button>
               </div>
               <div className="flex-1 border-2 border-emerald-100 rounded-2xl h-full overflow-hidden flex flex-col bg-emerald-50/10 shadow-sm">
-                <div className="p-3 bg-emerald-100/50 text-[10px] font-bold text-emerald-700 border-b uppercase tracking-tighter text-left">
+                <div className="p-3 bg-emerald-100/50 text-[10px] font-bold text-emerald-700 border-b uppercase tracking-widest text-left">
                   SELECIONADOS ({selectedDeps.length})
                 </div>
-                <div className="flex-1 overflow-y-auto p-2">
+                <div className="flex-1 overflow-y-auto p-2 custom-scrollbar">
                   {selectedDeps.map((d) => (
                     <div
                       key={d}
