@@ -8,46 +8,40 @@ import { NewPlanningForm } from "./components/form/NewPlanningForm";
 import { IPlanning } from "@/types/interfaces/planning.interface";
 import { Input } from "@/components/ui/input";
 
+import { usePlanejamentos, Planejamento } from "@/hooks/usePlanejamentos";
+
 export default function Planning() {
+  // Consumindo o Hook mockado
+  const { planejamentos, isLoading, createPlanejamento, deletePlanejamento } =
+    usePlanejamentos();
+
   const [view, setView] = useState<"list" | "form">("list");
   const [searchTerm, setSearchTerm] = useState("");
 
-  const [editingPlanning, setEditingPlanning] = useState<IPlanning | null>(
+  const [editingPlanning, setEditingPlanning] = useState<Planejamento | null>(
     null,
   );
 
-  const [plannings, setPlannings] = useState<IPlanning[]>([
-    {
-      id: 1,
-      nome: "Planejamento Estratégico de Expansão Digital 2026",
-      cliente: "BC Development S/S LTDA",
-      projetos: 4,
-      status: "Ativo",
-    },
-    {
-      id: 2,
-      nome: "Planejamento Comercial Q1",
-      cliente: "Acme LTDA",
-      projetos: 2,
-      status: "Ativo",
-    },
-    {
-      id: 3,
-      nome: "Planejamento Estratégico 2023-2025",
-      cliente: "Delta LTDA",
-      projetos: 8,
-      status: "Concluído",
-    },
-  ]);
+  // 1. MAPEAMENTO SEGURO: Converte Planejamento (Hook) -> IPlanning (Tabela)
+  // Isso garante que o TypeScript valide cada campo
+  const mappedPlannings: IPlanning[] = planejamentos.map((p) => ({
+    id: p.id,
+    nome: p.nome,
+    cliente:
+      p.parceiros_nomes && p.parceiros_nomes.length > 0
+        ? p.parceiros_nomes.join(", ")
+        : "Sem parceiros vinculados",
+    projetos: 0, // Valor mockado, será substituído pelo count do Laravel
+    status: p.status,
+  }));
 
+  // 2. HANDLER DE SUBMIT TIPADO
+  // Aqui assumimos que o formulário retorna dados compatíveis com IPlanning ou Planejamento
   const handleFormSubmit = (data: IPlanning) => {
-    setPlannings((prev) => {
-      const exists = prev.find((p) => p.id === data.id);
-      if (exists) {
-        return prev.map((p) => (p.id === data.id ? data : p));
-      } else {
-        return [data, ...prev];
-      }
+    createPlanejamento({
+      nome: data.nome,
+      status: "Ativo",
+      // Aqui você pode adicionar outros campos conforme seu form crescer
     });
 
     setView("list");
@@ -55,21 +49,23 @@ export default function Planning() {
   };
 
   const handleEdit = (item: IPlanning) => {
-    setEditingPlanning(item);
+    // Busca o objeto original do hook para garantir que o formulário tenha todos os dados (como datas e descrição)
+    const fullItem = planejamentos.find((p) => p.id === item.id) || null;
+    setEditingPlanning(fullItem);
     setView("form");
   };
 
-  const handleDelete = (id: number | string) => {
+  const handleDelete = (id: string | number) => {
     if (
       window.confirm(
         "Deseja realmente excluir este planejamento? Esta ação é irreversível.",
       )
     ) {
-      setPlannings((prev) => prev.filter((p) => p.id !== id));
+      deletePlanejamento(id.toString());
     }
   };
 
-  const filteredPlannings = plannings.filter(
+  const filteredPlannings = mappedPlannings.filter(
     (p) =>
       p.nome.toLowerCase().includes(searchTerm.toLowerCase()) ||
       p.cliente.toLowerCase().includes(searchTerm.toLowerCase()),
@@ -78,7 +74,7 @@ export default function Planning() {
   if (view === "form") {
     return (
       <NewPlanningForm
-        initialData={editingPlanning}
+        initialData={editingPlanning} // Agora tipado como Planejamento | null
         onBack={() => {
           setView("list");
           setEditingPlanning(null);
@@ -102,7 +98,7 @@ export default function Planning() {
 
         <div className="flex items-center gap-2.5">
           <button className="flex items-center gap-2 px-4 py-2 bg-white border border-slate-200 rounded-lg text-sm font-semibold text-slate-700 hover:bg-slate-50 transition-colors shadow-sm">
-            <Printer size={18} className="text-slate-900" /> Relatório
+            <Printer size={18} className="text-slate-900" /> Imprimir
           </button>
 
           <button
@@ -118,7 +114,12 @@ export default function Planning() {
       </header>
 
       <div className="bg-white rounded-[32px] border border-gray-100 shadow-sm overflow-hidden min-h-[500px]">
-        {plannings.length > 0 ? (
+        {isLoading ? (
+          <div className="flex flex-col items-center justify-center h-[500px] text-slate-400 font-medium">
+            <div className="w-8 h-8 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin mb-4" />
+            Carregando planejamentos...
+          </div>
+        ) : mappedPlannings.length > 0 ? (
           <>
             <div className="p-8 border-b border-gray-50 flex justify-between items-center bg-gray-50/20">
               <h3 className="font-bold text-slate-900 text-[16px] tracking-tight">
