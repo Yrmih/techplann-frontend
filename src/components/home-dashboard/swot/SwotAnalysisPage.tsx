@@ -3,10 +3,7 @@
 import React, { useState } from "react";
 import {
   Plus,
-  Pencil,
   TrendingUp,
-  LucideIcon,
-  Calendar,
   Zap,
   ShieldCheck,
   Shield,
@@ -15,6 +12,8 @@ import {
   Swords,
   Lightbulb,
   Target,
+  Filter,
+  FileBarChart,
 } from "lucide-react";
 import { AnimatePresence, motion } from "framer-motion";
 
@@ -22,7 +21,6 @@ import { CustomSelect } from "@/components/ui/custom/CustomSelect";
 import { SwotCreateModal } from "./components/modal/SwotCreateModal";
 import { SwotItemModal } from "./components/modal/SwotItemModal";
 
-// Novos componentes separados de dashboard
 import { SwotResumo } from "./components/charts/SwotResumo";
 import { SwotRadarChart } from "./components/charts/SwotRadarChart";
 import { SwotComparativo } from "./components/charts/SwotComparativo";
@@ -30,22 +28,28 @@ import { SwotComparativo } from "./components/charts/SwotComparativo";
 import { SwotCreateValues } from "@/lib/validators/swot.schema";
 import { cn } from "@/lib/utils/utils";
 
+// 1. Definição de Tipos Estritos alinhados à lógica Lovable (Regras de Negócio)
 type SwotTipo = "Força" | "Fraqueza" | "Oportunidade" | "Ameaça";
 
-interface SwotItem {
-  label: string;
-  value: number;
+export interface SwotItem {
+  id: string;
+  swot_analysis_id: string;
+  tipo: "forca" | "fraqueza" | "oportunidade" | "ameaca";
+  titulo: string;
+  descricao?: string;
+  departamento_id?: string;
+  importancia: number; // Peso 1 a 5
+  intensidade: number; // Peso 1 a 5
+  tendencia: number; // Peso 1 a 5
+  pontuacao: number; // Cálculo GUT (Importância * Intensidade * Tendência)
 }
 
 interface SwotCardProps {
   title: string;
-  corKey: "emerald" | "rose" | "blue" | "amber";
-  icon: LucideIcon;
-  items: SwotItem[];
-  total?: number;
+  cor: "emerald" | "rose" | "blue" | "amber";
+  icon: React.ElementType;
   onAdd: () => void;
-  emptyText?: string;
-  emptyActionText?: string;
+  items: SwotItem[];
 }
 
 export const SwotAnalysisPage = () => {
@@ -56,6 +60,7 @@ export const SwotAnalysisPage = () => {
 
   const [showItemModal, setShowItemModal] = useState(false);
   const [currentTipo, setCurrentTipo] = useState<SwotTipo>("Força");
+  const [filterDept, setFilterDept] = useState("all");
 
   const selectedProject = "Planejamento Estratégico 2025";
 
@@ -70,235 +75,218 @@ export const SwotAnalysisPage = () => {
     setShowItemModal(true);
   };
 
-  // 1. Dados para o componente Radar (Escala 0-100)
-  const radarData = [
-    { subject: "FORÇAS", A: 0, fullMark: 100 },
-    { subject: "FRAQUEZAS", A: 0, fullMark: 100 },
-    { subject: "OPORTUNIDADES", A: 0, fullMark: 100 },
-    { subject: "AMEAÇAS", A: 0, fullMark: 100 },
-  ];
-
-  // 2. Dados para o componente Comparativo (Escala métrica 0-4)
-  const comparativoData = [
-    { category: "Forças", value: 0 },
-    { category: "Fraquezas", value: 0 },
-    { category: "Oportunidades", value: 0 },
-    { category: "Ameaças", value: 0 },
-  ];
-
   return (
-    <div className="space-y-10 p-10 max-w-[1600px] mx-auto min-h-screen bg-[#f8fafc]">
-      {/* 1. HEADER INTEGRADO */}
-      <div className="flex justify-between items-start px-1">
-        <div className="text-left">
-          <h1 className="text-[32px] font-black text-gray-900 tracking-tight uppercase leading-none">
+    <motion.div
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      className="space-y-8 p-8 max-w-[1600px] mx-auto font-sans"
+    >
+      {/* 1. HEADER DA PÁGINA (ESTILO LOVABLE) */}
+      <header className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6 text-left">
+        <div className="space-y-1">
+          <h1 className="text-3xl font-bold text-slate-900 tracking-tight">
             Análise SWOT
           </h1>
-          <div className="h-1 w-12 bg-[#10b981] mt-4 rounded-full" />
+          <p className="text-slate-500 font-medium text-sm">
+            Forças, Fraquezas, Oportunidades e Ameaças
+          </p>
         </div>
 
-        <div className="w-full md:w-[320px] text-left">
-          <div className="flex items-center gap-2 mb-2 ml-1">
-            <Calendar size={14} className="text-gray-400" />
-            <label className="text-[10px] font-bold text-gray-400 uppercase tracking-[1.5px]">
-              Planejamento
-            </label>
-          </div>
-          <CustomSelect
-            placeholder="Selecione o projeto..."
-            value="p1"
-            options={[{ value: "p1", label: selectedProject }]}
-            onValueChange={() => {}}
-          />
-        </div>
-      </div>
-
-      {/* 2. BARRA DE FERRAMENTAS */}
-      <div className="flex flex-col md:flex-row items-end gap-6 px-1">
-        <div className="w-full md:w-[320px] text-left relative">
-          <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-[1.5px] mb-2 ml-1">
-            Análise SWOT
-          </label>
-          <div className="relative">
+        <div className="flex items-center gap-3">
+          <div className="w-[320px]">
             <CustomSelect
-              placeholder="Selecione ou crie..."
-              value={isInitialized ? "active" : ""}
-              options={[
-                { value: "new", label: "+ Criar Nova Análise" },
-                ...(isInitialized
-                  ? [{ value: "active", label: activeSwot?.nome || "" }]
-                  : []),
-              ]}
-              onValueChange={(val) => val === "new" && setShowCreateModal(true)}
+              placeholder="Selecione o planejamento..."
+              value="p1"
+              options={[{ value: "p1", label: selectedProject }]}
+              onValueChange={() => {}}
             />
-            {isInitialized && (
-              <button
-                onClick={() => setShowCreateModal(true)}
-                className="absolute right-10 top-1/2 -translate-y-1/2 text-gray-400 hover:text-[#10b981] transition-colors"
-              >
-                <Pencil size={14} strokeWidth={2} />
-              </button>
-            )}
           </div>
         </div>
+      </header>
 
-        <div className="w-full md:w-[320px] text-left">
-          <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-[1.5px] mb-2 ml-1">
-            Departamento
-          </label>
+      {/* 2. BARRA DE FERRAMENTAS (SWOT SELECTOR + FILTRO + RELATÓRIO) */}
+      <div className="flex flex-wrap items-center gap-4">
+        <div className="w-[280px]">
           <CustomSelect
-            placeholder="Todos os setores"
+            placeholder="Selecione ou crie uma análise..."
+            value={isInitialized ? "active" : ""}
             options={[
-              { value: "comercial", label: "Comercial" },
-              { value: "ti", label: "T.I / Desenvolvimento" },
+              { value: "new", label: "+ Criar Nova Análise" },
+              ...(isInitialized
+                ? [{ value: "active", label: activeSwot?.nome || "" }]
+                : []),
             ]}
-            onValueChange={() => {}}
+            onValueChange={(val) => val === "new" && setShowCreateModal(true)}
           />
+        </div>
+
+        {/* FILTRO DE DEPARTAMENTO CONFORME O CÓDIGO DO LOVABLE */}
+        <div className="flex items-center gap-2 bg-white border border-slate-200 rounded-lg px-3 h-10 shadow-sm">
+          <Filter className="h-4 w-4 text-slate-400" />
+          <select
+            value={filterDept}
+            onChange={(e) => setFilterDept(e.target.value)}
+            className="text-sm font-medium text-slate-700 bg-transparent outline-none pr-2"
+          >
+            <option value="all">Todos os departamentos</option>
+            <option value="comercial">Comercial</option>
+            <option value="ti">T.I / Desenvolvimento</option>
+          </select>
+        </div>
+
+        {isInitialized && (
+          <button className="flex items-center gap-2 px-4 py-2 bg-white border border-slate-200 rounded-lg text-sm font-semibold text-slate-700 hover:bg-slate-50 transition-colors shadow-sm h-10">
+            <FileBarChart size={18} className="text-emerald-500" /> Relatório
+            SWOT
+          </button>
+        )}
+      </div>
+
+      {/* 3. SWITCH DE TABS (TRADICIONAL VS CRUZADA) */}
+      <div className="flex justify-start">
+        <div className="bg-slate-100/80 p-1 rounded-xl border border-slate-100 flex gap-1">
+          <button
+            onClick={() => setIsCruzada(false)}
+            className={cn(
+              "px-6 py-2 rounded-lg text-xs font-bold transition-all",
+              !isCruzada
+                ? "bg-white text-slate-900 shadow-sm"
+                : "text-slate-500 hover:text-slate-700",
+            )}
+          >
+            SWOT Tradicional
+          </button>
+          <button
+            onClick={() => setIsCruzada(true)}
+            className={cn(
+              "px-6 py-2 rounded-lg text-xs font-bold transition-all",
+              isCruzada
+                ? "bg-white text-[#10b981] shadow-sm"
+                : "text-slate-500 hover:text-slate-700",
+            )}
+          >
+            SWOT Cruzada
+          </button>
         </div>
       </div>
 
-      <AnimatePresence mode="wait">
-        {!isInitialized ? (
-          <motion.div
-            key="empty"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="h-[400px] flex items-center justify-center border-2 border-dashed border-slate-200 rounded-md bg-white/50"
-          >
-            <div className="text-center space-y-4 opacity-40">
-              <FileText size={64} className="mx-auto text-slate-400" />
-              <p className="font-black uppercase tracking-widest text-[10px] text-slate-500">
-                Crie ou selecione uma análise para começar
-              </p>
-            </div>
-          </motion.div>
-        ) : (
-          <motion.div
-            key="active"
-            initial={{ opacity: 0, y: 15 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="space-y-8 px-1"
-          >
-            {/* TABS DE SELEÇÃO */}
-            <div className="flex justify-start items-center border-b border-gray-100 pb-6 gap-6">
-              <div className="bg-gray-100 p-1 rounded-md flex gap-1 border border-gray-200">
+      {/* 4. CARD BRANCO PRINCIPAL (CONTAINER DE DADOS) */}
+      <div className="bg-white border border-gray-100 rounded-[32px] shadow-sm overflow-hidden min-h-[600px]">
+        <div className="p-8">
+          <AnimatePresence mode="wait">
+            {!isInitialized ? (
+              <motion.div
+                key="empty"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                className="py-24 flex flex-col items-center justify-center border-2 border-dashed border-slate-100 rounded-[32px] bg-slate-50/30"
+              >
+                <div className="w-16 h-16 rounded-2xl bg-emerald-50 flex items-center justify-center text-emerald-500 mb-4">
+                  <FileText size={32} strokeWidth={1.5} />
+                </div>
+                <p className="text-sm font-medium text-slate-400 mb-6 max-w-xs text-center">
+                  Crie uma nova análise SWOT para começar a identificar seus
+                  fatores críticos.
+                </p>
                 <button
-                  onClick={() => setIsCruzada(false)}
-                  className={cn(
-                    "px-6 py-2 rounded-md text-[10px] font-black transition-all",
-                    !isCruzada
-                      ? "bg-white text-[#10b981] shadow-sm"
-                      : "text-gray-400",
-                  )}
+                  onClick={() => setShowCreateModal(true)}
+                  className="text-emerald-500 font-bold text-sm hover:underline"
                 >
-                  TRADICIONAL
+                  Cadastrar Primeira Análise
                 </button>
-                <button
-                  onClick={() => setIsCruzada(true)}
-                  className={cn(
-                    "px-6 py-2 rounded-md text-[10px] font-black transition-all",
-                    isCruzada
-                      ? "bg-white text-[#10b981] shadow-sm"
-                      : "text-gray-400",
+              </motion.div>
+            ) : (
+              <motion.div
+                key="active"
+                initial={{ opacity: 0, y: 15 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="space-y-12"
+              >
+                {/* QUADRANTES */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {!isCruzada ? (
+                    <>
+                      <SwotCard
+                        title="Forças"
+                        cor="emerald"
+                        icon={Shield}
+                        onAdd={() => openAddItem("Força")}
+                        items={[]}
+                      />
+                      <SwotCard
+                        title="Fraquezas"
+                        cor="rose"
+                        icon={AlertTriangle}
+                        onAdd={() => openAddItem("Fraqueza")}
+                        items={[]}
+                      />
+                      <SwotCard
+                        title="Oportunidades"
+                        cor="blue"
+                        icon={TrendingUp}
+                        onAdd={() => openAddItem("Oportunidade")}
+                        items={[]}
+                      />
+                      <SwotCard
+                        title="Ameaças"
+                        cor="amber"
+                        icon={Zap}
+                        onAdd={() => openAddItem("Ameaça")}
+                        items={[]}
+                      />
+                    </>
+                  ) : (
+                    <>
+                      <SwotCard
+                        title="Ofensivas (FO)"
+                        cor="emerald"
+                        icon={Swords}
+                        onAdd={() => {}}
+                        items={[]}
+                      />
+                      <SwotCard
+                        title="Defensivas (FA)"
+                        cor="blue"
+                        icon={ShieldCheck}
+                        onAdd={() => {}}
+                        items={[]}
+                      />
+                      <SwotCard
+                        title="Melhoria (WO)"
+                        cor="amber"
+                        icon={Lightbulb}
+                        onAdd={() => {}}
+                        items={[]}
+                      />
+                      <SwotCard
+                        title="Sobrevivência (WT)"
+                        cor="rose"
+                        icon={Target}
+                        onAdd={() => {}}
+                        items={[]}
+                      />
+                    </>
                   )}
-                >
-                  SWOT CRUZADO
-                </button>
-              </div>
-              <h2 className="text-[10px] font-black text-gray-400 uppercase tracking-[3px]">
-                {isCruzada ? "Matriz de Estratégias" : "Matriz de Confronto"}
-              </h2>
-            </div>
+                </div>
 
-            {/* GRID DE CARDS SWOT */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-              {!isCruzada ? (
-                <>
-                  <SwotCard
-                    title="Forças"
-                    corKey="emerald"
-                    icon={Shield}
-                    items={[]}
-                    onAdd={() => openAddItem("Força")}
+                {/* GRÁFICOS (DASHBOARD) */}
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 pt-10 border-t border-slate-100">
+                  <SwotResumo
+                    data={{
+                      forcas: 0,
+                      fraquezas: 0,
+                      oportunidades: 0,
+                      ameacas: 0,
+                    }}
                   />
-                  <SwotCard
-                    title="Fraquezas"
-                    corKey="rose"
-                    icon={AlertTriangle}
-                    items={[]}
-                    onAdd={() => openAddItem("Fraqueza")}
-                  />
-                  <SwotCard
-                    title="Oportunidades"
-                    corKey="blue"
-                    icon={TrendingUp}
-                    items={[]}
-                    onAdd={() => openAddItem("Oportunidade")}
-                  />
-                  <SwotCard
-                    title="Ameaças"
-                    corKey="amber"
-                    icon={Zap}
-                    items={[]}
-                    onAdd={() => openAddItem("Ameaça")}
-                  />
-                </>
-              ) : (
-                <>
-                  <SwotCard
-                    title="FO – Ofensivas"
-                    corKey="emerald"
-                    icon={Swords}
-                    items={[]}
-                    onAdd={() => {}}
-                  />
-                  <SwotCard
-                    title="FA – Defensivas"
-                    corKey="blue"
-                    icon={ShieldCheck}
-                    items={[]}
-                    onAdd={() => {}}
-                  />
-                  <SwotCard
-                    title="WO – Melhoria"
-                    corKey="amber"
-                    icon={Lightbulb}
-                    items={[]}
-                    onAdd={() => {}}
-                  />
-                  <SwotCard
-                    title="WT – Sobrevivência"
-                    corKey="rose"
-                    icon={Target}
-                    items={[]}
-                    onAdd={() => {}}
-                  />
-                </>
-              )}
-            </div>
-
-            {/* SEÇÃO DE DASHBOARDS (COM COMPONENTES SEPARADOS) */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 pt-8 border-t border-gray-100">
-              {/* 1. RESUMO SWOT */}
-              <SwotResumo
-                data={{
-                  forcas: 0,
-                  fraquezas: 0,
-                  oportunidades: 0,
-                  ameacas: 0,
-                }}
-              />
-
-              {/* 2. GRÁFICO RADAR SWOT */}
-              <SwotRadarChart data={radarData} />
-
-              {/* 3. COMPARATIVO DE IMPACTO */}
-              <SwotComparativo data={comparativoData} />
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+                  <SwotRadarChart data={[]} />
+                  <SwotComparativo data={[]} />
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
+      </div>
 
       <SwotCreateModal
         isOpen={showCreateModal}
@@ -310,121 +298,83 @@ export const SwotAnalysisPage = () => {
         onClose={() => setShowItemModal(false)}
         tipo={currentTipo}
       />
-    </div>
+    </motion.div>
   );
 };
 
-/* COMPONENTE DE CARD SWOT */
-const SwotCard = ({
-  title,
-  corKey,
-  icon: Icon,
-  items,
-  total,
-  onAdd,
-}: SwotCardProps) => {
-  const styles = {
-    emerald: {
-      header: "bg-[#10b981]",
-      body: "bg-[#10b981]/5",
-      text: "text-emerald-600",
-      stroke: "#10b981",
-      border: "border-[#10b981]",
-    },
-    rose: {
-      header: "bg-[#f43f5e]",
-      body: "bg-[#f43f5e]/5",
-      text: "text-rose-600",
-      stroke: "#f43f5e",
-      border: "border-[#f43f5e]",
-    },
-    blue: {
-      header: "bg-[#3b82f6]",
-      body: "bg-[#3b82f6]/5",
-      text: "text-blue-600",
-      stroke: "#3b82f6",
-      border: "border-[#3b82f6]",
-    },
-    amber: {
-      header: "bg-[#f59e0b]",
-      body: "bg-[#f59e0b]/5",
-      text: "text-amber-600",
-      stroke: "#f59e0b",
-      border: "border-[#f59e0b]",
-    },
+const SwotCard = ({ title, cor, icon: Icon, onAdd, items }: SwotCardProps) => {
+  const themes = {
+    emerald: "bg-emerald-50 text-emerald-600 border-emerald-100",
+    rose: "bg-rose-50 text-rose-600 border-rose-100",
+    blue: "bg-blue-50 text-blue-600 border-blue-100",
+    amber: "bg-amber-50 text-amber-600 border-amber-100",
   };
-
-  const current = styles[corKey];
 
   return (
     <div
       className={cn(
-        "rounded-md border-2 flex flex-col h-full text-left transition-all overflow-hidden shadow-sm",
-        current.border,
-        current.body,
+        "rounded-2xl border transition-all overflow-hidden flex flex-col",
+        themes[cor],
       )}
     >
-      <div
-        className={cn(
-          "p-5 text-white flex items-center justify-between shadow-sm",
-          current.header,
-        )}
-      >
-        <span className="font-black text-[11px] tracking-[1.5px] uppercase flex items-center gap-3">
-          <Icon size={18} strokeWidth={3} /> {title}
-        </span>
+      <div className="p-5 flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <div className="p-2 rounded-lg bg-white/60 shadow-sm text-current">
+            <Icon size={20} strokeWidth={2.5} />
+          </div>
+          <h4 className="text-[13px] font-bold uppercase tracking-wider">
+            {title}
+          </h4>
+        </div>
         <button
           onClick={onAdd}
-          className="bg-white/20 hover:bg-white/30 p-2 rounded-md transition-all"
+          className="p-2 hover:bg-white/40 rounded-lg transition-colors text-current"
         >
           <Plus size={20} strokeWidth={3} />
         </button>
       </div>
 
-      <div className="p-8 space-y-5 flex-1 min-h-[220px]">
+      <div className="px-5 pb-5 flex-1 min-h-[180px]">
         {items.length === 0 ? (
-          <div className="h-full flex flex-col items-center justify-center gap-3 py-10 rounded-md bg-white/40">
-            <Icon
-              size={48}
-              strokeWidth={2}
-              stroke={current.stroke}
-              fill="none"
-              className="opacity-100"
-            />
-            <p
-              className={cn(
-                "text-[10px] font-black uppercase tracking-widest text-center",
-                current.text,
-              )}
-            >
-              NENHUM ITEM ADICIONADO
-            </p>
+          <div className="h-full flex flex-col items-center justify-center opacity-40 border border-dashed border-current/20 rounded-xl">
+            <span className="text-[10px] font-bold uppercase tracking-widest">
+              Nenhum fator listado
+            </span>
           </div>
         ) : (
-          items.map((item, i) => (
-            <div
-              key={i}
-              className="flex justify-between items-center border-b border-gray-200/50 pb-4 last:border-0 last:pb-0"
-            >
-              <span className={cn("text-sm font-black", current.text)}>
-                {item.label}
-              </span>
-              <span
-                className={cn(
-                  "px-3 py-1 rounded-md text-[10px] font-black text-white shadow-sm",
-                  current.header,
-                )}
+          <div className="space-y-2">
+            {items.map((item) => (
+              <div
+                key={item.id}
+                className="flex justify-between items-center bg-white/40 p-3 rounded-xl border border-current/5"
               >
-                {item.value}%
-              </span>
-            </div>
-          ))
+                <div className="flex flex-col">
+                  <span className="text-sm font-medium">{item.titulo}</span>
+                  {item.descricao && (
+                    <span className="text-[10px] opacity-60 truncate max-w-[200px]">
+                      {item.descricao}
+                    </span>
+                  )}
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="text-[10px] font-bold opacity-40">
+                    GUT: {item.pontuacao}
+                  </span>
+                  <span className="text-xs font-bold px-2 py-1 rounded-lg bg-white/60">
+                    {item.importancia}/5
+                  </span>
+                </div>
+              </div>
+            ))}
+          </div>
         )}
       </div>
 
-      <div className="p-5 bg-white/60 border-t border-gray-200/50 flex justify-between text-[10px] font-black uppercase text-gray-400 tracking-widest">
-        <span>Impacto Estratégico:</span>
-        <span className={cn("font-black", current.text)}>{total || 0} pts</span>
+      <div className="px-5 py-3 bg-white/30 border-t border-current/5 flex justify-between items-center">
+        <span className="text-[10px] font-medium opacity-60 uppercase tracking-widest">
+          Pontuação Total (GUT)
+        </span>
+        <span className="text-xs font-bold">0 pts</span>
       </div>
     </div>
   );
