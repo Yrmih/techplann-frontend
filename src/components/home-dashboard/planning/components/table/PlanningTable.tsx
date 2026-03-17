@@ -1,7 +1,15 @@
 "use client";
 
 import React from "react";
-import { MoreHorizontal, Pencil, Trash2, Users, Check, X } from "lucide-react";
+import {
+  MoreHorizontal,
+  Pencil,
+  Trash2,
+  Users,
+  Check,
+  X,
+  Calendar,
+} from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -26,23 +34,23 @@ export function PlanningTable({ data, onEdit, onDelete }: PlanningTableProps) {
       { container: string; icon: React.ReactNode; label: string }
     > = {
       ativo: {
-        container: "bg-emerald-50 text-emerald-600 border-emerald-100",
-        icon: <Check size={12} strokeWidth={2.5} />,
+        container: "bg-emerald-50 text-emerald-700 border-emerald-100/50",
+        icon: <Check size={12} strokeWidth={3} />,
         label: "Ativo",
       },
       concluído: {
-        container: "bg-teal-50 text-teal-600 border-teal-100",
-        icon: <Check size={12} strokeWidth={2.5} />,
+        container: "bg-blue-50 text-blue-700 border-blue-100/50",
+        icon: <Check size={12} strokeWidth={3} />,
         label: "Concluído",
       },
       cancelado: {
-        container: "bg-rose-50 text-rose-500 border-rose-100",
-        icon: <X size={12} strokeWidth={2.5} />,
+        container: "bg-rose-50 text-rose-600 border-rose-100/50",
+        icon: <X size={12} strokeWidth={3} />,
         label: "Cancelado",
       },
       pausado: {
-        container: "bg-gray-50 text-gray-500 border-gray-200",
-        icon: <X size={12} strokeWidth={2.5} />,
+        container: "bg-amber-50 text-amber-700 border-amber-100/50",
+        icon: <Calendar size={12} strokeWidth={3} />,
         label: "Pausado",
       },
     };
@@ -52,7 +60,7 @@ export function PlanningTable({ data, onEdit, onDelete }: PlanningTableProps) {
     return (
       <span
         className={cn(
-          "inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium border",
+          "inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold border uppercase tracking-wider",
           current.container,
         )}
       >
@@ -64,53 +72,53 @@ export function PlanningTable({ data, onEdit, onDelete }: PlanningTableProps) {
 
   return (
     <div className="w-full animate-in fade-in duration-500 px-8 pb-8">
-      {/* Container que forma o "Retângulo" da tabela conforme o MVP */}
-      <div className="rounded-xl border border-gray-100 bg-white overflow-hidden shadow-sm">
+      <div className="rounded-2xl border border-slate-100 bg-white overflow-hidden shadow-sm">
         <table className="w-full text-left border-collapse">
-          {/* Header com tom cinza diferente conforme a imagem */}
-          <thead className="bg-gray-50/50 border-b border-gray-100">
-            <tr>
-              <th className="py-4 px-6 text-sm font-bold text-slate-800">
-                Nome
+          <thead>
+            <tr className="bg-slate-50/50 border-b border-slate-100">
+              <th className="py-4 px-6 text-[11px] font-bold text-slate-400 uppercase tracking-widest">
+                Identificação do Planejamento
               </th>
-              <th className="py-4 px-6 text-sm font-bold text-slate-800">
-                Parceiros
+              <th className="py-4 px-6 text-[11px] font-bold text-slate-400 uppercase tracking-widest">
+                Parceiros Vinculados
               </th>
-              <th className="py-4 px-6 text-sm font-bold text-slate-800 text-right pr-12">
-                Status
+              <th className="py-4 px-6 text-[11px] font-bold text-slate-400 uppercase tracking-widest text-center">
+                Situação
               </th>
-              <th className="w-[50px]"></th>
+              <th className="w-[80px]"></th>
             </tr>
           </thead>
 
-          <tbody className="divide-y divide-gray-50">
+          <tbody className="divide-y divide-slate-50">
             {data.map((item) => (
               <tr
                 key={item.id}
-                className="hover:bg-slate-50/30 transition-colors group"
+                className="hover:bg-slate-50/40 transition-colors group cursor-default"
               >
                 <td className="py-5 px-6">
                   <div className="flex flex-col text-left">
-                    <span className="text-[14px] font-semibold text-slate-700 group-hover:text-emerald-600 transition-colors">
-                      {item.nome.toLowerCase()}
+                    <span className="text-sm font-bold text-slate-700 group-hover:text-emerald-600 transition-colors">
+                      {item.nome}
                     </span>
-                    <span className="text-[12px] text-slate-400 font-normal mt-1 max-w-[420px] truncate leading-relaxed">
-                      Gerenciamento estratégico de stakeholders e objetivos...
+                    <span className="text-xs text-slate-400 font-medium mt-1 max-w-[400px] truncate">
+                      Análise estratégica e definição de objetivos para o ciclo.
                     </span>
                   </div>
                 </td>
 
                 <td className="py-5 px-6">
-                  <div className="flex items-center gap-2.5 text-left">
-                    <Users size={16} className="text-slate-300" />
-                    <span className="text-sm font-normal text-slate-500">
+                  <div className="flex items-center gap-2">
+                    <div className="p-1.5 bg-slate-100 rounded-lg text-slate-400">
+                      <Users size={14} />
+                    </div>
+                    <span className="text-xs font-semibold text-slate-600">
                       {item.cliente}
                     </span>
                   </div>
                 </td>
 
-                <td className="py-5 px-6 text-right pr-12">
-                  <div className="flex justify-end">
+                <td className="py-5 px-6">
+                  <div className="flex justify-center">
                     {renderStatus(item.status)}
                   </div>
                 </td>
@@ -118,28 +126,28 @@ export function PlanningTable({ data, onEdit, onDelete }: PlanningTableProps) {
                 <td className="py-5 px-6 text-right">
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                      <button className="p-1.5 text-slate-300 hover:text-slate-600 hover:bg-slate-100 rounded-md transition-all outline-none border border-transparent">
-                        <MoreHorizontal size={18} />
+                      <button className="p-2 text-slate-400 hover:text-slate-900 hover:bg-slate-100 rounded-xl transition-all outline-none">
+                        <MoreHorizontal size={20} />
                       </button>
                     </DropdownMenuTrigger>
 
                     <DropdownMenuContent
                       align="end"
-                      className="w-40 bg-white rounded-xl shadow-xl border-gray-100 p-1 z-[110]"
+                      className="w-48 bg-white rounded-2xl shadow-xl border border-slate-100 p-1.5 z-[110]"
                     >
                       <DropdownMenuItem
                         onClick={() => onEdit(item)}
-                        className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-slate-700 focus:bg-slate-50 rounded-lg cursor-pointer transition-colors"
+                        className="flex items-center gap-2 px-3 py-2.5 text-xs font-bold text-slate-700 focus:bg-slate-50 focus:text-slate-900 rounded-xl cursor-pointer transition-colors"
                       >
-                        <Pencil size={14} className="text-slate-900" />
-                        Editar
+                        <Pencil size={14} className="text-slate-500" />
+                        EDITAR DADOS
                       </DropdownMenuItem>
                       <DropdownMenuItem
                         onClick={() => onDelete(item.id)}
-                        className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-rose-500 focus:bg-rose-50 focus:text-rose-600 rounded-lg cursor-pointer transition-colors"
+                        className="flex items-center gap-2 px-3 py-2.5 text-xs font-bold text-rose-500 focus:bg-rose-50 focus:text-rose-600 rounded-xl cursor-pointer transition-colors"
                       >
                         <Trash2 size={14} />
-                        Excluir
+                        EXCLUIR REGISTRO
                       </DropdownMenuItem>
                     </DropdownMenuContent>
                   </DropdownMenu>
@@ -150,10 +158,9 @@ export function PlanningTable({ data, onEdit, onDelete }: PlanningTableProps) {
         </table>
       </div>
 
-      {/* Rodapé da tabela */}
-      <div className="py-6 text-left">
-        <span className="text-[13px] font-normal text-slate-400">
-          Mostrando {data.length} de {data.length} planejamentos
+      <div className="py-6 flex items-center justify-between">
+        <span className="text-[12px] font-bold text-slate-400 uppercase tracking-tight">
+          Exibindo {data.length} registros ativos
         </span>
       </div>
     </div>
