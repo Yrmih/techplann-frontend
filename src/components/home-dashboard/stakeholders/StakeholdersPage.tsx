@@ -14,9 +14,11 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
 
+// Componentes de Formulário
 import { NewStakeholderForm } from "./components/forms/NewStakeholderForm";
 import { NewDepartmentForm } from "./components/forms/NewDepartmentForm";
 
+// Tabelas e Tipos
 import {
   StakeholderTable,
   StakeholderData,
@@ -25,6 +27,9 @@ import {
   DepartmentTable,
   DepartmentData,
 } from "./components/table/DepartmentTable";
+
+// IMPORTAÇÃO DO HOOK E INTERFACE
+import { useStakeholders } from "@/hooks/useStakeholders";
 
 interface EmptyStateProps {
   description: string;
@@ -54,13 +59,12 @@ const EmptyState = ({
 );
 
 export default function StakeholdersPage() {
+  // Chamada do Hook com a lógica centralizada
+  const { stakeholders, departamentos, isLoading, deleteStakeholder } =
+    useStakeholders();
+
   const [activeTab, setActiveTab] = useState<string>("parceiros");
   const [searchTerm, setSearchTerm] = useState<string>("");
-
-  const [stakeholdersData, setStakeholdersData] = useState<StakeholderData[]>(
-    [],
-  );
-  const [departmentsData, setDepartmentsData] = useState<DepartmentData[]>([]);
 
   const [showStakeholderForm, setShowStakeholderForm] =
     useState<boolean>(false);
@@ -71,31 +75,36 @@ export default function StakeholdersPage() {
     else if (activeTab === "departamentos") setShowDepartmentForm(true);
   };
 
-  const handleSaveNewStakeholder = () => {
-    const mockNew: StakeholderData = {
-      id: Math.random().toString(36).substr(2, 9),
-      nome: "NOVO STAKEHOLDER",
-      tipo: "Fornecedor",
-      empresaRelacionada: "Empresa Exemplo",
-      status: "Ativo",
-    };
-    setStakeholdersData((prev) => [...prev, mockNew]);
-    setShowStakeholderForm(false);
-  };
-
-  const handleSaveNewDepartment = () => {
-    const mockNew: DepartmentData = {
-      id: Math.random().toString(36).substr(2, 9),
-      nome: "Novo Departamento",
-      status: "Ativo",
-    };
-    setDepartmentsData((prev) => [...prev, mockNew]);
-    setShowDepartmentForm(false);
-  };
-
   const getTitle = () => {
     return activeTab === "parceiros" ? "Stakeholders" : "Departamentos";
   };
+
+  // Mapeamento seguro para StakeholderTable (converte Stakeholder do Hook para StakeholderData da Tabela)
+  const mappedStakeholders: StakeholderData[] = stakeholders
+    .filter(
+      (item) =>
+        item.tipo !== "Departamento" &&
+        item.tipo !== "Administrativo" &&
+        item.nome.toLowerCase().includes(searchTerm.toLowerCase()),
+    )
+    .map((item) => ({
+      id: item.id,
+      nome: item.nome,
+      tipo: item.tipo,
+      empresaRelacionada: item.empresaRelacionada || undefined,
+      status: item.status,
+    }));
+
+  // Mapeamento seguro para DepartmentTable (converte Stakeholder do Hook para DepartmentData da Tabela)
+  const mappedDepartments: DepartmentData[] = departamentos
+    .filter((item) =>
+      item.nome.toLowerCase().includes(searchTerm.toLowerCase()),
+    )
+    .map((item) => ({
+      id: item.id,
+      nome: item.nome,
+      status: item.status,
+    }));
 
   return (
     <motion.div
@@ -111,7 +120,7 @@ export default function StakeholdersPage() {
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: -20 }}
           >
-            <NewStakeholderForm onBack={handleSaveNewStakeholder} />
+            <NewStakeholderForm onBack={() => setShowStakeholderForm(false)} />
           </motion.div>
         ) : showDepartmentForm ? (
           <motion.div
@@ -120,7 +129,7 @@ export default function StakeholdersPage() {
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: -20 }}
           >
-            <NewDepartmentForm onBack={handleSaveNewDepartment} />
+            <NewDepartmentForm onBack={() => setShowDepartmentForm(false)} />
           </motion.div>
         ) : (
           <motion.div
@@ -135,7 +144,6 @@ export default function StakeholdersPage() {
               className="w-full space-y-8"
               onValueChange={(v) => setActiveTab(v)}
             >
-              {/* HEADER E TABS LIST*/}
               <div className="space-y-8">
                 <header className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6 text-left">
                   <div className="space-y-1">
@@ -163,7 +171,6 @@ export default function StakeholdersPage() {
                   </div>
                 </header>
 
-                {/* BOTÕES DE SWITCH (TABS) - AJUSTADO PARA FICAR NO CANTO ESQUERDO */}
                 <div className="flex justify-start">
                   <TabsList className="bg-slate-100/80 p-1 rounded-xl border border-slate-100 h-12 w-full md:w-auto flex justify-start">
                     <TabsTrigger
@@ -182,9 +189,7 @@ export default function StakeholdersPage() {
                 </div>
               </div>
 
-              {/* CARD BRANCO PRINCIPAL: AGORA COM RESPIRO (P-8) PARA A TABELA INTERNA */}
               <div className="bg-white border border-gray-100 rounded-[32px] shadow-sm overflow-hidden min-h-[500px]">
-                {/* ÁREA DE BUSCA E TÍTULO INTERNO DO CARD */}
                 <div className="p-8 flex flex-col md:flex-row items-center justify-between gap-4 border-b border-gray-50 bg-gray-50/10">
                   <h3 className="font-bold text-slate-900 text-[16px] tracking-tight">
                     Lista de{" "}
@@ -207,25 +212,20 @@ export default function StakeholdersPage() {
                   </div>
                 </div>
 
-                {/* CONTEÚDO COM RESPIRO (p-8) CONFORME IMAGE_9BD2DF */}
                 <div className="p-8">
                   <TabsContent
                     value="parceiros"
                     className="mt-0 focus-visible:outline-none"
                   >
-                    {stakeholdersData.length > 0 ? (
+                    {isLoading ? (
+                      <div className="py-20 text-center text-slate-400 font-medium">
+                        Carregando stakeholders...
+                      </div>
+                    ) : mappedStakeholders.length > 0 ? (
                       <StakeholderTable
-                        data={stakeholdersData.filter((item) =>
-                          item.nome
-                            .toLowerCase()
-                            .includes(searchTerm.toLowerCase()),
-                        )}
-                        onEdit={(item) => console.log(item)}
-                        onDelete={(id) =>
-                          setStakeholdersData((prev) =>
-                            prev.filter((i) => i.id !== id),
-                          )
-                        }
+                        data={mappedStakeholders}
+                        onEdit={(item) => console.log("Editar:", item)}
+                        onDelete={(id) => deleteStakeholder(id)}
                       />
                     ) : (
                       <EmptyState
@@ -241,19 +241,15 @@ export default function StakeholdersPage() {
                     value="departamentos"
                     className="mt-0 focus-visible:outline-none"
                   >
-                    {departmentsData.length > 0 ? (
+                    {isLoading ? (
+                      <div className="py-20 text-center text-slate-400 font-medium">
+                        Carregando departamentos...
+                      </div>
+                    ) : mappedDepartments.length > 0 ? (
                       <DepartmentTable
-                        data={departmentsData.filter((item) =>
-                          item.nome
-                            .toLowerCase()
-                            .includes(searchTerm.toLowerCase()),
-                        )}
-                        onEdit={(item) => console.log(item)}
-                        onDelete={(id) =>
-                          setDepartmentsData((prev) =>
-                            prev.filter((i) => i.id !== id),
-                          )
-                        }
+                        data={mappedDepartments}
+                        onEdit={(item) => console.log("Editar:", item)}
+                        onDelete={(id) => deleteStakeholder(id)}
                       />
                     ) : (
                       <EmptyState
