@@ -1,19 +1,19 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import {
   Plus,
   TrendingUp,
   Zap,
-  ShieldCheck,
   Shield,
   AlertTriangle,
   FileText,
   Swords,
+  ShieldCheck,
   Lightbulb,
   Target,
   Filter,
-  FileBarChart,
+  Loader2,
 } from "lucide-react";
 import { AnimatePresence, motion } from "framer-motion";
 
@@ -23,26 +23,25 @@ import { SwotItemModal } from "./components/modal/SwotItemModal";
 
 import { SwotResumo } from "./components/charts/SwotResumo";
 import { SwotRadarChart } from "./components/charts/SwotRadarChart";
-import { SwotComparativo } from "./components/charts/SwotComparativo";
+import {
+  SwotComparativo,
+  SwotComparativoData,
+} from "./components/charts/SwotComparativo";
+
+import {
+  useSwotItems,
+  useDepartamentos,
+  SwotItem,
+  SwotTipo,
+} from "@/hooks/useSwot";
+import {
+  useSwotAnalyses,
+  useSwotAnalysesMutations,
+} from "@/hooks/useSwotAnalyses";
+import { usePlanejamentos } from "@/hooks/usePlanejamentos";
 
 import { SwotCreateValues } from "@/lib/validators/swot.schema";
 import { cn } from "@/lib/utils/utils";
-
-// 1. Definição de Tipos Estritos alinhados à lógica Lovable (Regras de Negócio)
-type SwotTipo = "Força" | "Fraqueza" | "Oportunidade" | "Ameaça";
-
-export interface SwotItem {
-  id: string;
-  swot_analysis_id: string;
-  tipo: "forca" | "fraqueza" | "oportunidade" | "ameaca";
-  titulo: string;
-  descricao?: string;
-  departamento_id?: string;
-  importancia: number; // Peso 1 a 5
-  intensidade: number; // Peso 1 a 5
-  tendencia: number; // Peso 1 a 5
-  pontuacao: number; // Cálculo GUT (Importância * Intensidade * Tendência)
-}
 
 interface SwotCardProps {
   title: string;
@@ -53,74 +52,135 @@ interface SwotCardProps {
 }
 
 export const SwotAnalysisPage = () => {
+  const { selectedPlanId, planejamentos } = usePlanejamentos();
+
+  // Hooks de Dados - Agora lendo corretamente os estados de carregamento
+  const { data: allSwotItems, isLoading: loadingItems } =
+    useSwotItems(selectedPlanId);
+  const { data: analyses, isLoading: loadingAnalyses } =
+    useSwotAnalyses(selectedPlanId);
+  const { data: departamentos } = useDepartamentos();
+  const { createAnalysis } = useSwotAnalysesMutations();
+
+  // Controle de Estado
   const [isInitialized, setIsInitialized] = useState(false);
+  const [selectedAnalysisId, setSelectedAnalysisId] = useState<string | null>(
+    null,
+  );
+
   const [isCruzada, setIsCruzada] = useState(false);
   const [showCreateModal, setShowCreateModal] = useState(false);
-  const [activeSwot, setActiveSwot] = useState<SwotCreateValues | null>(null);
-
   const [showItemModal, setShowItemModal] = useState(false);
-  const [currentTipo, setCurrentTipo] = useState<SwotTipo>("Força");
+  const [currentTipo, setCurrentTipo] = useState<SwotTipo>("forca");
   const [filterDept, setFilterDept] = useState("all");
 
-  const selectedProject = "Planejamento Estratégico 2025";
+  // Análise selecionada derivada
+  const selectedAnalysis = useMemo(() => {
+    if (analyses.length === 0) return null;
+    return analyses.find((a) => a.id === selectedAnalysisId) || analyses[0];
+  }, [analyses, selectedAnalysisId]);
 
-  const handleInit = (data: SwotCreateValues) => {
-    setActiveSwot(data);
-    setIsInitialized(true);
-    setShowCreateModal(false);
+  // Filtro de Itens: Só exibe se isInitialized for true
+  const filteredItems = useMemo(() => {
+    if (!selectedAnalysis || !isInitialized) return [];
+    return allSwotItems.filter((item) => {
+      const matchesAnalysis = item.swot_analysis_id === selectedAnalysis.id;
+      const matchesDept =
+        filterDept === "all" ? true : item.departamento_id === filterDept;
+      return matchesAnalysis && matchesDept;
+    });
+  }, [allSwotItems, selectedAnalysis, filterDept, isInitialized]);
+
+  const grouped = {
+    forca: filteredItems.filter((i) => i.tipo === "forca"),
+    fraqueza: filteredItems.filter((i) => i.tipo === "fraqueza"),
+    oportunidade: filteredItems.filter((i) => i.tipo === "oportunidade"),
+    ameaca: filteredItems.filter((i) => i.tipo === "ameaca"),
   };
 
-  const openAddItem = (tipo: SwotTipo) => {
-    setCurrentTipo(tipo);
-    setShowItemModal(true);
+  const totals = {
+    forca: grouped.forca.reduce((sum, i) => sum + i.pontuacao, 0),
+    fraqueza: grouped.fraqueza.reduce((sum, i) => sum + i.pontuacao, 0),
+    oportunidade: grouped.oportunidade.reduce((sum, i) => sum + i.pontuacao, 0),
+    ameaca: grouped.ameaca.reduce((sum, i) => sum + i.pontuacao, 0),
+  };
+
+  const radarChartData = [
+    { subject: "Forças", A: totals.forca, fullMark: 150 },
+    { subject: "Fraquezas", A: totals.fraqueza, fullMark: 150 },
+    { subject: "Oportunidades", A: totals.oportunidade, fullMark: 150 },
+    { subject: "Ameaças", A: totals.ameaca, fullMark: 150 },
+  ];
+
+  const comparativoData: SwotComparativoData[] = [
+    { category: "Forças", value: totals.forca },
+    { category: "Fraquezas", value: totals.fraqueza },
+    { category: "Oportunidades", value: totals.oportunidade },
+    { category: "Ameaças", value: totals.ameaca },
+  ];
+
+  const handleInit = (data: SwotCreateValues) => {
+    createAnalysis.mutate(
+      {
+        planejamento_id: selectedPlanId || "",
+        nome: data.nome,
+        descricao: data.descricao,
+      },
+      {
+        onSuccess: (newAna) => {
+          setSelectedAnalysisId(newAna.id);
+          setIsInitialized(true);
+          setShowCreateModal(false);
+        },
+      },
+    );
   };
 
   return (
     <motion.div
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
-      className="space-y-8 p-8 max-w-[1600px] mx-auto font-sans"
+      className="space-y-8 p-8 max-w-[1600px] mx-auto font-sans text-left"
     >
-      {/* 1. HEADER DA PÁGINA (ESTILO LOVABLE) */}
-      <header className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6 text-left">
+      {/* HEADER */}
+      <header className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
         <div className="space-y-1">
-          <h1 className="text-3xl font-bold text-slate-900 tracking-tight">
+          <h1 className="text-3xl font-bold text-slate-900 tracking-tight text-left">
             Análise SWOT
           </h1>
-          <p className="text-slate-500 font-medium text-sm">
+          <p className="text-slate-500 font-medium text-sm text-left">
             Forças, Fraquezas, Oportunidades e Ameaças
           </p>
         </div>
 
-        <div className="flex items-center gap-3">
-          <div className="w-[320px]">
-            <CustomSelect
-              placeholder="Selecione o planejamento..."
-              value="p1"
-              options={[{ value: "p1", label: selectedProject }]}
-              onValueChange={() => {}}
-            />
-          </div>
+        <div className="w-[320px]">
+          <CustomSelect
+            placeholder="Planejamento Estratégico 2025"
+            value={selectedPlanId || ""}
+            options={planejamentos.map((p) => ({ value: p.id, label: p.nome }))}
+            onValueChange={() => {}}
+          />
         </div>
       </header>
 
-      {/* 2. BARRA DE FERRAMENTAS (SWOT SELECTOR + FILTRO + RELATÓRIO) */}
+      {/* TOOLBAR */}
       <div className="flex flex-wrap items-center gap-4">
         <div className="w-[280px]">
           <CustomSelect
-            placeholder="Selecione ou crie uma análise..."
-            value={isInitialized ? "active" : ""}
+            placeholder="Selecione a análise..."
+            value={isInitialized && selectedAnalysis ? selectedAnalysis.id : ""}
             options={[
               { value: "new", label: "+ Criar Nova Análise" },
-              ...(isInitialized
-                ? [{ value: "active", label: activeSwot?.nome || "" }]
-                : []),
+              ...analyses.map((a) => ({ value: a.id, label: a.nome })),
             ]}
-            onValueChange={(val) => val === "new" && setShowCreateModal(true)}
+            onValueChange={(val) =>
+              val === "new"
+                ? setShowCreateModal(true)
+                : setSelectedAnalysisId(val)
+            }
           />
         </div>
 
-        {/* FILTRO DE DEPARTAMENTO CONFORME O CÓDIGO DO LOVABLE */}
         <div className="flex items-center gap-2 bg-white border border-slate-200 rounded-lg px-3 h-10 shadow-sm">
           <Filter className="h-4 w-4 text-slate-400" />
           <select
@@ -129,20 +189,16 @@ export const SwotAnalysisPage = () => {
             className="text-sm font-medium text-slate-700 bg-transparent outline-none pr-2"
           >
             <option value="all">Todos os departamentos</option>
-            <option value="comercial">Comercial</option>
-            <option value="ti">T.I / Desenvolvimento</option>
+            {departamentos.map((d) => (
+              <option key={d.id} value={d.id}>
+                {d.nome}
+              </option>
+            ))}
           </select>
         </div>
-
-        {isInitialized && (
-          <button className="flex items-center gap-2 px-4 py-2 bg-white border border-slate-200 rounded-lg text-sm font-semibold text-slate-700 hover:bg-slate-50 transition-colors shadow-sm h-10">
-            <FileBarChart size={18} className="text-emerald-500" /> Relatório
-            SWOT
-          </button>
-        )}
       </div>
 
-      {/* 3. SWITCH DE TABS (TRADICIONAL VS CRUZADA) */}
+      {/* TABS */}
       <div className="flex justify-start">
         <div className="bg-slate-100/80 p-1 rounded-xl border border-slate-100 flex gap-1">
           <button
@@ -170,27 +226,39 @@ export const SwotAnalysisPage = () => {
         </div>
       </div>
 
-      {/* 4. CARD BRANCO PRINCIPAL (CONTAINER DE DADOS) */}
+      {/* CONTAINER PRINCIPAL */}
       <div className="bg-white border border-gray-100 rounded-[32px] shadow-sm overflow-hidden min-h-[600px]">
         <div className="p-8">
           <AnimatePresence mode="wait">
-            {!isInitialized ? (
+            {/* LENDO AS VARIÁVEIS DE LOADING PARA FEEDBACK VISUAL */}
+            {loadingItems || loadingAnalyses ? (
+              <div
+                key="loading"
+                className="py-24 flex flex-col items-center justify-center text-slate-400"
+              >
+                <Loader2 className="w-10 h-10 animate-spin text-[#10b981] mb-4" />
+                <p className="text-sm font-bold uppercase tracking-widest">
+                  Sincronizando Matriz...
+                </p>
+              </div>
+            ) : !isInitialized ? (
               <motion.div
                 key="empty"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
-                className="py-24 flex flex-col items-center justify-center border-2 border-dashed border-slate-100 rounded-[32px] bg-slate-50/30"
+                exit={{ opacity: 0 }}
+                className="py-24 flex flex-col items-center justify-center border-2 border-dashed border-slate-100 rounded-[32px] bg-slate-50/30 text-center"
               >
-                <div className="w-16 h-16 rounded-2xl bg-emerald-50 flex items-center justify-center text-emerald-500 mb-4">
+                <div className="w-16 h-16 rounded-2xl bg-emerald-50 flex items-center justify-center text-[#10b981] mb-4 mx-auto">
                   <FileText size={32} strokeWidth={1.5} />
                 </div>
-                <p className="text-sm font-medium text-slate-400 mb-6 max-w-xs text-center">
+                <p className="text-sm font-medium text-slate-400 mb-6 max-w-sm mx-auto">
                   Crie uma nova análise SWOT para começar a identificar seus
                   fatores críticos.
                 </p>
                 <button
                   onClick={() => setShowCreateModal(true)}
-                  className="text-emerald-500 font-bold text-sm hover:underline"
+                  className="text-[#10b981] font-bold text-sm hover:underline uppercase tracking-widest"
                 >
                   Cadastrar Primeira Análise
                 </button>
@@ -202,41 +270,52 @@ export const SwotAnalysisPage = () => {
                 animate={{ opacity: 1, y: 0 }}
                 className="space-y-12"
               >
-                {/* QUADRANTES */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-left">
                   {!isCruzada ? (
                     <>
                       <SwotCard
                         title="Forças"
                         cor="emerald"
                         icon={Shield}
-                        onAdd={() => openAddItem("Força")}
-                        items={[]}
+                        onAdd={() => {
+                          setCurrentTipo("forca");
+                          setShowItemModal(true);
+                        }}
+                        items={grouped.forca}
                       />
                       <SwotCard
                         title="Fraquezas"
                         cor="rose"
                         icon={AlertTriangle}
-                        onAdd={() => openAddItem("Fraqueza")}
-                        items={[]}
+                        onAdd={() => {
+                          setCurrentTipo("fraqueza");
+                          setShowItemModal(true);
+                        }}
+                        items={grouped.fraqueza}
                       />
                       <SwotCard
                         title="Oportunidades"
                         cor="blue"
                         icon={TrendingUp}
-                        onAdd={() => openAddItem("Oportunidade")}
-                        items={[]}
+                        onAdd={() => {
+                          setCurrentTipo("oportunidade");
+                          setShowItemModal(true);
+                        }}
+                        items={grouped.oportunidade}
                       />
                       <SwotCard
                         title="Ameaças"
                         cor="amber"
                         icon={Zap}
-                        onAdd={() => openAddItem("Ameaça")}
-                        items={[]}
+                        onAdd={() => {
+                          setCurrentTipo("ameaca");
+                          setShowItemModal(true);
+                        }}
+                        items={grouped.ameaca}
                       />
                     </>
                   ) : (
-                    <>
+                    <div className="col-span-2 grid grid-cols-1 md:grid-cols-2 gap-6">
                       <SwotCard
                         title="Ofensivas (FO)"
                         cor="emerald"
@@ -265,22 +344,21 @@ export const SwotAnalysisPage = () => {
                         onAdd={() => {}}
                         items={[]}
                       />
-                    </>
+                    </div>
                   )}
                 </div>
 
-                {/* GRÁFICOS (DASHBOARD) */}
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 pt-10 border-t border-slate-100">
                   <SwotResumo
                     data={{
-                      forcas: 0,
-                      fraquezas: 0,
-                      oportunidades: 0,
-                      ameacas: 0,
+                      forcas: totals.forca,
+                      fraquezas: totals.fraqueza,
+                      oportunidades: totals.oportunidade,
+                      ameacas: totals.ameaca,
                     }}
                   />
-                  <SwotRadarChart data={[]} />
-                  <SwotComparativo data={[]} />
+                  <SwotRadarChart data={radarChartData} />
+                  <SwotComparativo data={comparativoData} />
                 </div>
               </motion.div>
             )}
@@ -296,7 +374,15 @@ export const SwotAnalysisPage = () => {
       <SwotItemModal
         isOpen={showItemModal}
         onClose={() => setShowItemModal(false)}
-        tipo={currentTipo}
+        tipo={
+          currentTipo === "forca"
+            ? "Força"
+            : currentTipo === "fraqueza"
+              ? "Fraqueza"
+              : currentTipo === "oportunidade"
+                ? "Oportunidade"
+                : "Ameaça"
+        }
       />
     </motion.div>
   );
@@ -304,41 +390,43 @@ export const SwotAnalysisPage = () => {
 
 const SwotCard = ({ title, cor, icon: Icon, onAdd, items }: SwotCardProps) => {
   const themes = {
-    emerald: "bg-emerald-50 text-emerald-600 border-emerald-100",
-    rose: "bg-rose-50 text-rose-600 border-rose-100",
-    blue: "bg-blue-50 text-blue-600 border-blue-100",
-    amber: "bg-amber-50 text-amber-600 border-amber-100",
+    emerald: "bg-emerald-50 text-emerald-700 border-emerald-100/50",
+    rose: "bg-rose-50 text-rose-700 border-rose-100/50",
+    blue: "bg-blue-50 text-blue-700 border-blue-100/50",
+    amber: "bg-amber-50 text-amber-700 border-amber-100/50",
   };
+
+  const totalGUT = items.reduce((sum, i) => sum + i.pontuacao, 0);
 
   return (
     <div
       className={cn(
-        "rounded-2xl border transition-all overflow-hidden flex flex-col",
+        "rounded-3xl border transition-all flex flex-col shadow-sm",
         themes[cor],
       )}
     >
       <div className="p-5 flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <div className="p-2 rounded-lg bg-white/60 shadow-sm text-current">
+          <div className="p-2 rounded-xl bg-white shadow-sm text-current">
             <Icon size={20} strokeWidth={2.5} />
           </div>
-          <h4 className="text-[13px] font-bold uppercase tracking-wider">
+          <h4 className="text-[12px] font-bold uppercase tracking-widest">
             {title}
           </h4>
         </div>
         <button
           onClick={onAdd}
-          className="p-2 hover:bg-white/40 rounded-lg transition-colors text-current"
+          className="p-2 hover:bg-white/60 rounded-lg transition-colors"
         >
           <Plus size={20} strokeWidth={3} />
         </button>
       </div>
 
-      <div className="px-5 pb-5 flex-1 min-h-[180px]">
+      <div className="px-5 pb-5 flex-1 min-h-[220px]">
         {items.length === 0 ? (
-          <div className="h-full flex flex-col items-center justify-center opacity-40 border border-dashed border-current/20 rounded-xl">
+          <div className="h-full flex flex-col items-center justify-center opacity-30 border border-dashed border-current/30 rounded-2xl text-center">
             <span className="text-[10px] font-bold uppercase tracking-widest">
-              Nenhum fator listado
+              Vazio
             </span>
           </div>
         ) : (
@@ -346,22 +434,24 @@ const SwotCard = ({ title, cor, icon: Icon, onAdd, items }: SwotCardProps) => {
             {items.map((item) => (
               <div
                 key={item.id}
-                className="flex justify-between items-center bg-white/40 p-3 rounded-xl border border-current/5"
+                className="flex justify-between items-center bg-white/70 p-4 rounded-2xl border border-white/40 shadow-sm group hover:bg-white transition-all text-left"
               >
                 <div className="flex flex-col">
-                  <span className="text-sm font-medium">{item.titulo}</span>
+                  <span className="text-[13px] font-bold text-slate-800 leading-snug">
+                    {item.titulo}
+                  </span>
                   {item.descricao && (
-                    <span className="text-[10px] opacity-60 truncate max-w-[200px]">
+                    <span className="text-[10px] text-slate-500 font-medium truncate max-w-[180px] mt-0.5">
                       {item.descricao}
                     </span>
                   )}
                 </div>
-                <div className="flex items-center gap-2">
-                  <span className="text-[10px] font-bold opacity-40">
-                    GUT: {item.pontuacao}
+                <div className="text-right flex flex-col items-end">
+                  <span className="text-[9px] font-bold text-slate-400 uppercase tracking-tighter">
+                    Score
                   </span>
-                  <span className="text-xs font-bold px-2 py-1 rounded-lg bg-white/60">
-                    {item.importancia}/5
+                  <span className="text-[13px] font-black text-current">
+                    {item.pontuacao}
                   </span>
                 </div>
               </div>
@@ -370,11 +460,14 @@ const SwotCard = ({ title, cor, icon: Icon, onAdd, items }: SwotCardProps) => {
         )}
       </div>
 
-      <div className="px-5 py-3 bg-white/30 border-t border-current/5 flex justify-between items-center">
-        <span className="text-[10px] font-medium opacity-60 uppercase tracking-widest">
-          Pontuação Total (GUT)
+      <div className="px-5 py-4 bg-white/40 border-t border-white/20 flex justify-between items-center rounded-b-3xl">
+        <span className="text-[10px] font-bold opacity-60 uppercase tracking-widest text-left">
+          Soma Pontuação
         </span>
-        <span className="text-xs font-bold">0 pts</span>
+        <span className="text-[15px] font-black">
+          {totalGUT}{" "}
+          <span className="text-[10px] font-bold opacity-60">PTS</span>
+        </span>
       </div>
     </div>
   );
