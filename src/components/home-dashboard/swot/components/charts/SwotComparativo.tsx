@@ -12,7 +12,7 @@ import {
 } from "recharts";
 import { cn } from "@/lib/utils/utils";
 
-interface SwotComparativoData {
+export interface SwotComparativoData {
   category: string;
   value: number;
 }
