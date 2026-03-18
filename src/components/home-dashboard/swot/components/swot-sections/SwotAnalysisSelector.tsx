@@ -10,7 +10,8 @@ interface SwotAnalysisSelectorProps {
   onSelect: (analysis: SwotAnalysis | null) => void;
   onCreate: () => void;
   onUpdate: (id: string, data: { nome: string; descricao?: string }) => void;
-  onDelete: (id: string) => void;
+  onDelete: (params: {id:string; planejamentoId: string}) => void;
+  selectedPlanId: string;
   isCreating?: boolean;
   isUpdating?: boolean;
 }
@@ -22,6 +23,7 @@ export const SwotAnalysisSelector = ({
   onCreate,
   onUpdate,
   onDelete,
+  selectedPlanId,
 }: SwotAnalysisSelectorProps) => {
   const handleEdit = () => {
     if (!selectedAnalysis) return;
@@ -81,7 +83,10 @@ export const SwotAnalysisSelector = ({
                   "Deseja realmente excluir este diagnóstico? Todos os itens vinculados serão perdidos.",
                 )
               ) {
-                onDelete(selectedAnalysis.id);
+                onDelete({
+                  id: selectedAnalysis.id,
+                  planejamentoId: selectedPlanId
+                });
               }
             }}
             className="p-3 bg-white border border-slate-200 rounded-xl text-slate-400 hover:text-rose-600 hover:border-rose-100 hover:bg-rose-50 transition-all shadow-sm"
