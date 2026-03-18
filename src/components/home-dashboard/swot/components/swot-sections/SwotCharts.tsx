@@ -4,6 +4,7 @@ import {
   RadarChart,
   PolarGrid,
   PolarAngleAxis,
+  PolarRadiusAxis,
   Radar,
   ResponsiveContainer,
   BarChart,
@@ -40,13 +41,15 @@ const COLORS = {
 };
 
 export const SwotCharts = ({ totals }: SwotChartsProps) => {
+  // Mapeamento para o Radar
   const radarData = [
-    { subject: "Forças", value: totals.forca },
-    { subject: "Fraquezas", value: totals.fraqueza },
-    { subject: "Oportunidades", value: totals.oportunidade },
-    { subject: "Ameaças", value: totals.ameaca },
+    { subject: "Forças", A: totals.forca },
+    { subject: "Fraquezas", A: totals.fraqueza },
+    { subject: "Oportunidades", A: totals.oportunidade },
+    { subject: "Ameaças", A: totals.ameaca },
   ];
 
+  // Mapeamento para o Gráfico de Barras
   const barData = [
     { category: "Forças", value: totals.forca, color: COLORS.forca },
     { category: "Fraquezas", value: totals.fraqueza, color: COLORS.fraqueza },
@@ -63,24 +66,22 @@ export const SwotCharts = ({ totals }: SwotChartsProps) => {
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 pt-10 border-t border-slate-100">
-      {/* 1. CARD RESUMO QUANTITATIVO */}
-      <div className="bg-white border border-slate-100 rounded-[32px] p-8 shadow-sm">
-        <div className="flex items-center gap-3 mb-8 text-left">
-          <div className="p-2.5 rounded-xl bg-slate-50 text-slate-900 shadow-sm">
-            <BarChart3 size={20} strokeWidth={2.5} />
-          </div>
-          <h3 className="text-[13px] font-black uppercase tracking-widest text-slate-800">
-            Resumo Estratégico
+      {/* 1. RESUMO SWOT */}
+      <div className="bg-white border border-gray-100 rounded-xl p-8 shadow-sm text-left h-full flex flex-col">
+        <div className="flex items-center gap-2 mb-6">
+          <BarChart3 size={18} className="text-emerald-500" />
+          <h3 className="font-bold text-gray-800 uppercase text-xs tracking-wider">
+            Resumo SWOT
           </h3>
         </div>
 
-        <div className="space-y-3">
+        <div className="space-y-3 flex-1">
           {[
             {
               label: "Forças",
               val: totals.forca,
               icon: Shield,
-              bg: "bg-emerald-50",
+              bg: "bg-emerald-50/50",
               txt: "text-emerald-600",
               iconCol: "text-emerald-500",
             },
@@ -88,7 +89,7 @@ export const SwotCharts = ({ totals }: SwotChartsProps) => {
               label: "Fraquezas",
               val: totals.fraqueza,
               icon: AlertTriangle,
-              bg: "bg-rose-50",
+              bg: "bg-rose-50/50",
               txt: "text-rose-600",
               iconCol: "text-rose-500",
             },
@@ -96,7 +97,7 @@ export const SwotCharts = ({ totals }: SwotChartsProps) => {
               label: "Oportunidades",
               val: totals.oportunidade,
               icon: TrendingUp,
-              bg: "bg-blue-50",
+              bg: "bg-blue-50/50",
               txt: "text-blue-600",
               iconCol: "text-blue-500",
             },
@@ -104,7 +105,7 @@ export const SwotCharts = ({ totals }: SwotChartsProps) => {
               label: "Ameaças",
               val: totals.ameaca,
               icon: Target,
-              bg: "bg-amber-50",
+              bg: "bg-amber-50/50",
               txt: "text-amber-600",
               iconCol: "text-amber-500",
             },
@@ -112,103 +113,110 @@ export const SwotCharts = ({ totals }: SwotChartsProps) => {
             <div
               key={item.label}
               className={cn(
-                "flex items-center justify-between p-4 rounded-2xl transition-all border border-transparent hover:border-white shadow-sm",
+                "flex items-center justify-between p-4 rounded-xl border border-transparent transition-all",
                 item.bg,
               )}
             >
               <div className="flex items-center gap-3">
                 <item.icon size={18} className={item.iconCol} />
-                <span className="text-[12px] font-bold text-slate-700 uppercase tracking-tight">
+                <span className="text-[13px] font-semibold text-gray-700">
                   {item.label}
                 </span>
               </div>
-              <span className={cn("text-xl font-black", item.txt)}>
+              <span className={cn("text-lg font-bold", item.txt)}>
                 {item.val}
               </span>
             </div>
           ))}
         </div>
 
-        <div className="mt-8 pt-6 border-t border-slate-50 flex items-center justify-between">
-          <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
-            Total Acumulado:
+        <div className="mt-6 pt-4 border-t border-gray-50 flex items-center justify-between text-gray-400">
+          <span className="text-[11px] font-medium uppercase tracking-wider">
+            Total Geral:
           </span>
-          <span className="text-2xl font-black text-slate-900">
-            {totalGeral} <span className="text-[10px] text-slate-400">PTS</span>
+          <span className="text-xl font-bold text-emerald-500">
+            {totalGeral}
           </span>
         </div>
       </div>
 
-      {/* 2. CARD GRÁFICO RADAR */}
-      <div className="bg-white border border-slate-100 rounded-[32px] p-8 shadow-sm">
-        <div className="flex items-center gap-3 mb-8 text-left">
-          <div className="p-2.5 rounded-xl bg-slate-50 text-slate-900 shadow-sm">
-            <Target size={20} strokeWidth={2.5} />
-          </div>
-          <h3 className="text-[13px] font-black uppercase tracking-widest text-slate-800">
-            Equilíbrio da Matriz
-          </h3>
-        </div>
-
-        <div className="h-[300px] w-full">
+      {/* 2. GRÁFICO RADAR */}
+      <div className="bg-white border border-gray-100 rounded-xl p-8 shadow-sm text-left h-full flex flex-col">
+        <h3 className="font-bold text-gray-800 mb-6 uppercase text-xs tracking-wider">
+          Gráfico Radar
+        </h3>
+        <div className="flex-1 min-h-[280px] w-full">
           <ResponsiveContainer width="100%" height="100%">
-            <RadarChart cx="50%" cy="50%" outerRadius="80%" data={radarData}>
-              <PolarGrid stroke="#e2e8f0" />
+            <RadarChart cx="50%" cy="50%" outerRadius="70%" data={radarData}>
+              <PolarGrid stroke="#e2e8f0" strokeDasharray="4 4" />
               <PolarAngleAxis
                 dataKey="subject"
-                tick={{ fill: "#64748b", fontSize: 10, fontWeight: 800 }}
+                tick={{ fill: "#4b5563", fontSize: 11, fontWeight: 600 }}
+              />
+              <PolarRadiusAxis
+                angle={45}
+                domain={[0, "auto"]}
+                tick={{ fill: "#9ca3af", fontSize: 10 }}
+                axisLine={false}
+                tickLine={false}
               />
               <Radar
-                name="Score"
-                dataKey="value"
-                stroke="#10b981"
+                name="SWOT"
+                dataKey="A"
+                stroke="#9ca3af"
+                strokeWidth={1.5}
                 fill="#10b981"
-                fillOpacity={0.15}
-                strokeWidth={3}
+                fillOpacity={0.08}
+                dot={{ r: 4, fill: "#10b981", strokeWidth: 2, stroke: "#fff" }}
               />
             </RadarChart>
           </ResponsiveContainer>
         </div>
       </div>
 
-      {/* 3. CARD COMPARATIVO DE IMPACTO */}
-      <div className="bg-white border border-slate-100 rounded-[32px] p-8 shadow-sm">
-        <div className="flex items-center gap-3 mb-8 text-left">
-          <div className="p-2.5 rounded-xl bg-slate-50 text-slate-900 shadow-sm">
-            <TrendingUp size={20} strokeWidth={2.5} />
-          </div>
-          <h3 className="text-[13px] font-black uppercase tracking-widest text-slate-800">
-            Comparativo de Impacto
-          </h3>
-        </div>
-
-        <div className="h-[300px] w-full">
+      {/* 3. COMPARATIVO */}
+      <div className="bg-white border border-gray-100 rounded-xl p-8 shadow-sm text-left h-full flex flex-col">
+        <h3 className="font-bold text-gray-800 mb-6 uppercase text-xs tracking-wider">
+          Comparativo
+        </h3>
+        <div className="flex-1 min-h-[280px] w-full">
           <ResponsiveContainer width="100%" height="100%">
-            <BarChart data={barData} layout="vertical" margin={{ left: -20 }}>
+            <BarChart
+              data={barData}
+              layout="vertical"
+              margin={{ left: -10, right: 20 }}
+            >
               <CartesianGrid
                 strokeDasharray="3 3"
-                horizontal={false}
+                horizontal={true}
+                vertical={false}
                 stroke="#f1f5f9"
               />
               <XAxis type="number" hide />
               <YAxis
                 type="category"
                 dataKey="category"
-                tick={{ fill: "#64748b", fontSize: 10, fontWeight: 700 }}
-                width={80}
+                tick={{ fill: "#4b5563", fontSize: 11, fontWeight: 600 }}
+                width={100}
+                axisLine={false}
+                tickLine={false}
               />
               <Tooltip
                 cursor={{ fill: "#f8fafc" }}
                 contentStyle={{
-                  borderRadius: "16px",
+                  borderRadius: "12px",
                   border: "none",
-                  boxShadow: "0 10px 15px -3px rgba(0,0,0,0.1)",
-                  fontWeight: "bold",
+                  boxShadow: "0 4px 12px rgba(0,0,0,0.05)",
+                  fontSize: "12px",
                 }}
               />
-              <Bar dataKey="value" radius={[0, 8, 8, 0]} barSize={32}>
+              <Bar dataKey="value" radius={[0, 4, 4, 0]} barSize={24}>
                 {barData.map((entry, index) => (
-                  <Cell key={`cell-${index}`} fill={entry.color} />
+                  <Cell
+                    key={`cell-${index}`}
+                    fill={entry.color}
+                    fillOpacity={0.9}
+                  />
                 ))}
               </Bar>
             </BarChart>
